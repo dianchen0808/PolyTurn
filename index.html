@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>永續決策者</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden; /* 【修改】只隱藏左右溢出 */
+            overflow-y: auto; /* 【新增】允許垂直滾動 */
+        }
+
+        #startScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease-out;
+            padding: 20px;
+        }
+
+        .start-modal {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            transform-origin: center;
+            transition: transform 0.5s ease-in, opacity 0.5s ease-in;
+        }
+        
+        .start-modal.shrinking {
+            transform: translate(50vw, -50vh) scale(0);
+            opacity: 0;
+        }
+
+        .start-modal h2 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .start-modal p {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .start-modal p.highlight {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        #startGameBtn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+        
+        #startGameBtn:hover {
+            transform: scale(1.05);
+        }
+        
+        #helpIcon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 1.8em;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px 15px;
+            position: absolute;
+            z-index: 1;
+            top: 120%; 
+            right: 0;
+            transition: opacity 0.3s;
+            /* 【修改】字體大小改為 0.8rem，使其更小 */
+            font-size: 0.8rem; 
+            line-height: 1.5;
+            pointer-events: none; 
+        }
+        
+        .tooltip::after { 
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            right: 15px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #333 transparent;
+        }
+        
+        #helpIcon:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+            overflow: visible;
+        }
+
+        .side-hints {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .timer-container {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #51cf66, #37b24d);
+            border-radius: 15px;
+            transition: width 0.1s linear;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 80%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            cursor: grab;
+            transition: transform 0.1s;
+            user-select: none;
+        }
+
+        .card.dragging {
+            cursor: grabbing;
+        }
+
+        .card-question {
+            font-size: 1.5em;
+            text-align: center;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .hint {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 11;
+        }
+
+        .hint-left {
+            left: 30px;
+        }
+
+        .hint-right {
+            right: 30px;
+        }
+
+        .hint-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85em;
+            color: white;
+            text-align: center;
+        }
+
+        .hint-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+        }
+
+        .hint-left .hint-icon {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .hint-right .hint-icon {
+            background: #51cf66;
+            color: white;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            font-size: 4em;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-50%);
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .swipe-left {
+            left: 30px;
+            color: #ff6b6b;
+        }
+
+        .swipe-right {
+            right: 30px;
+            color: #51cf66;
+        }
+
+        .card.showing-left .swipe-left,
+        .card.showing-right .swipe-right {
+            opacity: 1;
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+            color: white;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .result-rank {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #fcc419;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .result-score {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ff6b6b;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: bottom 0.4s ease-out;
+            font-size: 0.9em;
+            max-width: 90%;
+            text-align: center;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            bottom: 30px;
+        }
+        
+        .toast.correct {
+            background-color: #51cf66;
+        }
+
+        .knowledge-base {
+            margin-top: 40px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: left;
+        }
+        
+        .knowledge-base h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .knowledge-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 15px;
+        }
+        
+        .knowledge-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .knowledge-question {
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+        
+        .knowledge-answer {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fcc419;
+        }
+    </style>
+</head>
+<body>
+    <div id="helpIcon">
+        ❓
+        <span class="tooltip">
+            <b>玩法提示：</b><br>
+            向右滑 (✓) 代表「是」<br>
+            向左滑 (✕) 代表「否」<br>
+            注意每題 5 秒倒數！
+        </span>
+    </div>
+
+    <div id="startScreen">
+        <div class="start-modal" id="startModal">
+            <h2>遊戲說明</h2>
+            <p>你是一位「永續決策者」！<br>請閱讀卡片上的敘述，判斷是否正確。</p>
+            <p class="highlight">
+                向右滑 (✓) 代表「正確」<br>
+                向左滑 (✕) 代表「錯誤」
+            </p>
+            <p>注意！每題只有 5 秒鐘！<br>答對可收集 10g rPET！</p>
+            <button id="startGameBtn">開始挑戰</button>
+        </div>
+    </div>
+
+    <div class="side-hints">
+        <div class="hint hint-left">
+            <div class="hint-item">
+                <div class="hint-icon">✕</div>
+                <span>錯誤</span>
+            </div>
+        </div>
+        <div class="hint hint-right">
+            <div class="hint-item">
+                <div class="hint-icon">✓</div>
+                <span>正確</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>永續決策者</h1>
+            <div class="score">rPET 收集: <span id="score">0</span>g / <span id="total">100</span>g</div>
+            <div class="timer-container">
+                <div class="timer-bar" id="timerBar"></div>
+                <div class="timer-text" id="timerText">5秒</div>
+            </div>
+        </div>
+
+        <div class="card-container" id="cardContainer"></div>
+
+        <div class="result" id="result">
+            <h2>遊戲結束！</h2>
+            <div class="result-rank" id="finalRank"></div>
+            <div class="result-score">
+                你總共收集了：<span id="finalScore"></span>
+            </div>
+            <button class="restart-btn" onclick="restartGame()">重新開始</button>
+            <div class="knowledge-base" id="knowledgeBase"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const questions = [
+            { question: "我喝完的寶特瓶，裡面還有剩一些飲料，可以直接丟進回收桶。", answer: false, feedback: "殘留的液體會汙染整批回收物！" },
+            { question: "回收寶特瓶時，最重要的步驟是『清空、沖洗』，避免液體殘留。", answer: true, feedback: "乾淨的回收物是 rPET 的第一步！" },
+            { question: "『生物可分解塑膠 (PLA)』看起來很環保，所以用完後，應該丟進 PET 寶特瓶回收桶。", answer: false, feedback: "PLA 會汙染 PET 回收流，讓 rPET 報廢！" },
+            { question: "寶特瓶 (PET) 回收後，只能降級做成衣服，不能再做回食品級的瓶子。", answer: false, feedback: "「瓶到瓶」技術 (rPET) 能讓它重生！" },
+            { question: "使用 rPET (再生塑膠) 製成的瓶子，衛生和安全標準比較低。", answer: false, feedback: "食品級 rPET 的安全標準與新料相同！" },
+            { question: "玻璃瓶比寶特瓶重。運輸 100 瓶玻璃瓶，會比運輸 100 瓶寶特瓶產生更多碳排放。", answer: true, feedback: "「輕量化」是減少運輸碳排的關鍵！" },
+            { question: "包裝『輕量化』（例如用更薄的瓶身、更小的瓶蓋）是一種永續行為。", answer: true, feedback: "使用更少的原料 = 更少的碳排。" },
+            { question: "在飲料工廠隔壁直接生產空瓶（駐廠生產），會比從外地用卡車運送空瓶更浪費能源。", answer: false, feedback: "「駐廠生產」能省下所有運輸碳排！" },
+            { question: "回收時，瓶蓋和瓶身應該要分開丟棄。", answer: false, feedback: "環保署建議「鎖上瓶蓋」一起回收！" },
+            { question: "只要是塑膠，都可以混在一起回收。", answer: false, feedback: "不同材質的塑膠必須分開，才能進入各自的循環。" }
+        ];
+
+        const GAME_DURATION_PER_QUESTION = 5;
+        const RPET_PER_QUESTION = 10;
+        let currentIndex = 0, score = 0, startX = 0, currentX = 0;
+        let isDragging = false, currentCard = null, timeRemaining = GAME_DURATION_PER_QUESTION;
+        let timerInterval = null, toastTimer = null;
+
+        function init() {
+            currentIndex = 0;
+            score = 0;
+            updateScore();
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('cardContainer').style.display = 'block';
+            document.getElementById('knowledgeBase').innerHTML = '';
+            
+            document.getElementById('helpIcon').style.display = 'none'; 
+            const startScreen = document.getElementById('startScreen');
+            const modal = document.getElementById('startModal');
+            startScreen.style.display = 'flex'; 
+            startScreen.style.opacity = '1';
+            modal.classList.remove('shrinking'); 
+            modal.style.opacity = '1';
+
+            document.getElementById('cardContainer').innerHTML = ''; 
+            stopTimer(); 
+        }
+
+        function startGame() {
+            const startScreen = document.getElementById('startScreen');
+            const modal = document.getElementById('startModal');
+
+            modal.classList.add('shrinking');
+            startScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                startScreen.style.display = 'none'; 
+                document.getElementById('helpIcon').style.display = 'flex'; 
+                
+                createCard(); 
+            }, 500); 
+        }
+
+        function createCard() {
+            if (currentIndex >= questions.length) {
+                showResult();
+                return;
+            }
+
+            const container = document.getElementById('cardContainer');
+            container.innerHTML = '';
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-number">${currentIndex + 1} / ${questions.length}</div>
+                <div class="card-question">${questions[currentIndex].question}</div>
+                <div class="swipe-indicator swipe-left">✕</div>
+                <div class="swipe-indicator swipe-right">✓</div>
+            `;
+
+            container.appendChild(card);
+            currentCard = card;
+
+            timeRemaining = GAME_DURATION_PER_QUESTION;
+            updateTimer();
+            startTimer(); 
+
+            card.addEventListener('mousedown', handleStart);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+            card.addEventListener('touchstart', handleStart);
+            document.addEventListener('touchmove', handleMove);
+            document.addEventListener('touchend', handleEnd);
+        }
+
+        function handleStart(e) {
+            if (!currentCard) return;
+            isDragging = true;
+            currentCard.classList.add('dragging');
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        }
+
+        function handleMove(e) {
+            if (!isDragging || !currentCard) return;
+            
+            e.preventDefault();
+            currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const deltaX = currentX - startX;
+            const rotation = deltaX * 0.1;
+
+            currentCard.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+
+            if (deltaX < -50) {
+                currentCard.classList.add('showing-left');
+                currentCard.classList.remove('showing-right');
+            } else if (deltaX > 50) {
+                currentCard.classList.add('showing-right');
+                currentCard.classList.remove('showing-left');
+            } else {
+                currentCard.classList.remove('showing-left', 'showing-right');
+            }
+        }
+
+        function handleEnd(e) {
+            if (!isDragging || !currentCard) return;
+            
+            isDragging = false;
+            currentCard.classList.remove('dragging');
+            
+            const deltaX = currentX - startX;
+            const threshold = 100;
+
+            if (Math.abs(deltaX) > threshold) {
+                stopTimer();
+
+                const userAnswer = deltaX > 0;
+                const correctAnswer = questions[currentIndex].answer;
+                const feedback = questions[currentIndex].feedback;
+                let toastMessage = ""; // 【修改】宣告一個變數來組合訊息
+
+                if (userAnswer === correctAnswer) {
+                    score++;
+                    // 【修改】答對了：組合 "答對了！" + 知識點
+                    toastMessage = "答對了！ " + feedback;
+                    showToast(toastMessage, true); 
+                } else {
+                    // 【修改】答錯了：組合 "答錯了！" + 知識點
+                    toastMessage = "答錯了！ " + feedback;
+                    if (feedback) {
+                        showToast(toastMessage, false);
+                    }
+                }
+                
+                updateScore();
+
+                const flyDistance = window.innerWidth;
+                currentCard.style.transition = 'transform 0.3s ease-out';
+                currentCard.style.transform = `translateX(${deltaX > 0 ? flyDistance : -flyDistance}px) rotate(${deltaX > 0 ? 30 : -30}deg)`;
+
+                setTimeout(() => {
+                    currentIndex++;
+                    createCard();
+                }, 300);
+            } else {
+                currentCard.style.transition = 'transform 0.3s ease-out';
+                currentCard.style.transform = 'translateX(0) rotate(0)';
+                currentCard.classList.remove('showing-left', 'showing-right');
+                
+                setTimeout(() => {
+                    if(currentCard) currentCard.style.transition = '';
+                }, 300);
+            }
+
+            startX = 0;
+            currentC = 0;
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `${score * RPET_PER_QUESTION}`;
+            document.getElementById('total').textContent = `${questions.length * RPET_PER_QUESTION}g`;
+        }
+
+        function showResult() {
+            stopTimer();
+            document.getElementById('cardContainer').style.display = 'none';
+            document.getElementById('helpIcon').style.display = 'none'; 
+            
+            const finalRpet = score * RPET_PER_QUESTION;
+            document.getElementById('finalScore').textContent = `${finalRpet}g`;
+            
+            let rank = "回收新手";
+            if (score >= 10) rank = "永續決策者 🌍";
+            else if (score >= 7) rank = "閉環大師 ♻️";
+            else if (score >= 4) rank = "環保公民 👍";
+            document.getElementById('finalRank').textContent = rank;
+            
+            buildKnowledgeBase();
+
+            document.getElementById('result').classList.add('show');
+        }
+
+        function buildKnowledgeBase() {
+            const container = document.getElementById('knowledgeBase');
+            container.innerHTML = '<h3>本次挑戰回顧</h3>';
+            
+            questions.forEach(q => {
+                const item = document.createElement('div');
+                item.className = 'knowledge-item';
+                
+                const questionText = document.createElement('div');
+                questionText.className = 'knowledge-question';
+                questionText.textContent = q.question;
+                
+                const answerText = document.createElement('div');
+                answerText.className = 'knowledge-answer';
+                answerText.textContent = `正確答案：${q.answer ? "是 (✓)" : "非 (✕)"}`;
+                
+                item.appendChild(questionText);
+                item.appendChild(answerText);
+                container.appendChild(item);
+            });
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeRemaining -= 0.1;
+                
+                if (timeRemaining <= 0) {
+                    timeRemaining = 0;
+                    updateTimer();
+                    stopTimer();
+                    handleTimeOut();
+                } else {
+                    updateTimer();
+                }
+            }, 100);
+        }
+
+        function handleTimeOut() {
+            if (!currentCard) return;
+
+            showToast("時間到！動作要快！", false);
+
+            currentCard.style.transition = 'transform 0.3s ease-out';
+            currentCard.style.transform = `translateX(-${window.innerWidth}px) rotate(-30deg)`;
+            currentCard = null;
+
+            setTimeout(() => {
+                currentIndex++;
+                createCard();
+            }, 300);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function updateTimer() {
+            const seconds = Math.ceil(timeRemaining);
+            const percentage = (timeRemaining / GAME_DURATION_PER_QUESTION) * 100;
+            
+            document.getElementById('timerText').textContent = `${seconds}秒`;
+            document.getElementById('timerBar').style.width = `${percentage}%`;
+            
+            const timerBar = document.getElementById('timerBar');
+            if (timeRemaining <= 3) {
+                timerBar.style.background = 'linear-gradient(90deg, #ff6b6b, #fa5252)';
+            } else {
+                timerBar.style.background = 'linear-gradient(90deg, #51cf66, #37b24d)';
+            }
+        }
+
+        function showToast(message, isCorrect) {
+            const toast = document.getElementById('toast');
+            if (!message) return;
+            toast.textContent = message;
+            
+            if (isCorrect) toast.classList.add('correct');
+            else toast.classList.remove('correct');
+            
+            toast.classList.add('show');
+
+            if (toastTimer) clearTimeout(toastTimer);
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500); 
+        }
+
+        function restartGame() {
+            init();
+        }
+
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+
+        init(); 
+    </script>
+</body>
+</html>
