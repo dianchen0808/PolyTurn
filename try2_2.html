@@ -381,6 +381,45 @@ tr{background:var(--card-2);border:1px solid var(--line);}  /* ✅ 列背景淺�
   cursor:pointer;
 }
 
+/* --- 新增的語言切換按鈕樣式 --- */
+
+/* 1. 用於「開始畫面」的按鈕 */
+.lang-switch-btn {
+  display: block; /* 讓它獨佔一行 */
+  width: -moz-fit-content; /* 舊版 Firefox */
+  width: fit-content; /* 內容自適應寬度 */
+  margin: 0 auto 16px auto; /* 水平置中、下方間距 16px */
+  background: var(--card-2);  /* 淺灰藍底 */
+  color: var(--muted);       /* 淺灰藍字 */
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background .2s;
+}
+.lang-switch-btn:hover {
+  background: var(--bg); /* 懸停時變色 */
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* 2. 用於「教學框」的按鈕 (靠左) */
+.guide-actions a.icon-btn {
+  text-decoration: none;
+  margin-right: auto; /* 關鍵：把它推到最左邊 */
+}
+
+/* 3. 用於「遊戲標頭」的按鈕 (確保 a.pill 沒底線) */
+header .meta a.pill {
+  text-decoration: none;
+}
+header .meta a.pill:hover {
+  background: var(--card);
+  text-decoration: none;
+}
+/* --- 樣式新增結束 --- */
+
 </style>
 </head>
 
@@ -388,10 +427,11 @@ tr{background:var(--card-2);border:1px solid var(--line);}  /* ✅ 列背景淺�
 <!-- ====== 開始畫面 ====== -->
 <div id="start-screen" class="overlay-start">
   <div class="start-box">
-    <h1>ESG 記憶配對遊戲</h1>
-    <p>快來挑戰！配對卡片，學習環保知識 🌱</p>
-    <button id="start-btn">開始遊戲</button>
-  </div>
+  <h1>ESG 記憶配對遊戲</h1>
+  <p>快來挑戰！配對卡片，學習環保知識 🌱</p>
+  <a href="try2_3.html" class="lang-switch-btn">Switch to English</a>
+  <button id="start-btn">開始遊戲</button>
+</div>
 </div>
 
 <!-- ====== 教學框 ====== -->
@@ -406,6 +446,8 @@ tr{background:var(--card-2);border:1px solid var(--line);}  /* ✅ 列背景淺�
       <div class="step"><b>🎯</b><strong>3）解鎖小卡</strong><br>每次配對會跳出 ESG 小知識。</div>
     </div>
     <div class="guide-actions">
+      <a href="try2_3.html" class="icon-btn">English</a>
+      
       <button class="btn" id="startBtn">挑戰開始</button>
       <button class="icon-btn" id="skipBtn">略過</button>
     </div>
@@ -462,6 +504,7 @@ tr{background:var(--card-2);border:1px solid var(--line);}  /* ✅ 列背景淺�
         <option value="2">M — 包裝階段（Material） </option>
         <option value="3">W — 倉儲與回收階段（Warehouse） </option>
       </select>
+      <a href="try2_3.html" class="pill">English</a>
       <div class="pill">時間：<b id="time">--</b></div>
       <div class="pill">步數：<b id="moves">0</b></div>
       <div class="pill">配對：<b id="matches">0</b>/<b id="pairs">--</b></div>
