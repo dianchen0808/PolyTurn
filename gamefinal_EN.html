@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plastic Quick Decider</title>
+    <style>
+        /* CSS 樣式與原版相同，此處未做修改 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('background.png'); /* 假設圖片已更名並放在同一資料夾 */
+            background-size: 100% 100%; /* 拉伸圖片以填滿 100% 寬度和 100% 高度 */
+            background-repeat: no-repeat; /* 圖片不重複 */
+            background-attachment: fixed; /* 讓背景在結算頁面滾動時固定不動 */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #startScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease-out;
+            padding: 20px;
+        }
+
+        .start-modal {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            transform-origin: center;
+            transition: transform 0.5s ease-in, opacity 0.5s ease-in;
+            position: relative; /* 【NEW】Added for button positioning */
+        }
+        
+        .start-modal.shrinking {
+            transform: translate(50vw, -50vh) scale(0);
+            opacity: 0;
+        }
+
+        .start-modal h2 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .start-modal p {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .start-modal p.highlight {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        #startGameBtn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+        
+        #startGameBtn:hover {
+            transform: scale(1.05);
+        }
+        
+        #helpIcon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 1.8em;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px 15px;
+            position: absolute;
+            z-index: 1;
+            top: 120%; 
+            right: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem; 
+            line-height: 1.5;
+            pointer-events: none; 
+        }
+        
+        .tooltip::after { 
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            right: 15px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #333 transparent;
+        }
+        
+        #helpIcon:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+            overflow: visible;
+        }
+
+        .side-hints {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: black;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 1.2em;
+            opacity: 0.9;
+            color: black;
+        }
+
+        .timer-container {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #51cf66, #37b24d);
+            border-radius: 15px;
+            transition: width 0.1s linear;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 80%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            cursor: grab;
+            transition: transform 0.1s;
+            user-select: none;
+        }
+
+        .card.dragging {
+            cursor: grabbing;
+        }
+
+        .card-question {
+            font-size: 1.5em;
+            text-align: center;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .hint {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 11;
+        }
+
+        .hint-left {
+            left: 30px;
+        }
+
+        .hint-right {
+            right: 30px;
+        }
+
+        .hint-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85em;
+            color: white;
+            text-align: center;
+        }
+
+        .hint-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+        }
+
+        .hint-left .hint-icon {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .hint-right .hint-icon {
+            background: #51cf66;
+            color: white;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            font-size: 4em;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-50%);
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .swipe-left {
+            left: 30px;
+            color: #ff6b6b;
+        }
+
+        .swipe-right {
+            right: 30px;
+            color: #51cf66;
+        }
+
+        .card.showing-left .swipe-left,
+        .card.showing-right .swipe-right {
+            opacity: 1;
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+            color: white;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: black;
+        }
+        
+        .result-rank {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #fcc419;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .result-score {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: black;
+        }
+
+        .restart-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ff6b6b;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: bottom 0.4s ease-out;
+            font-size: 0.9em;
+            max-width: 90%;
+            text-align: center;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            bottom: 30px;
+        }
+        
+        .toast.correct {
+            background-color: #51cf66;
+        }
+
+        .knowledge-base {
+            margin-top: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: left;
+        }
+        
+        .knowledge-base h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .knowledge-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 15px;
+        }
+        
+        .knowledge-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .knowledge-question {
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+        
+        .knowledge-answer {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fcc419;
+        }
+        
+        /* 【OLD】Language Switch CSS */
+
+        .lang-switch-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f0f0f0;
+            color: #555;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .lang-switch-modal:hover {
+            background: #e0e0e0;
+        }
+
+        #langSwitchIcon {
+            position: fixed;
+            top: 20px;
+            right: 70px; /* Placed left of the ❓ icon */
+            font-size: 1.2em;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* 【NEW CSS - Leaderboard】 */
+        
+        .nickname-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            max-width: 300px; /* Limit width */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #nicknameInput {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border-radius: 50px;
+            border: 2px solid #ddd;
+            font-size: 1em;
+        }
+        #saveScoreBtn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        #saveScoreBtn:hover {
+            transform: scale(1.05);
+        }
+        #saveScoreBtn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .leaderboard-container {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: left;
+            color: white;
+        }
+        .leaderboard-container h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #leaderboardList {
+            list-style-type: decimal;
+            padding-left: 30px; /* For 1. 2. 3. */
+            font-size: 1.1em;
+        }
+        #leaderboardList li {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        #leaderboardList li span:first-child {
+            font-weight: bold;
+            color: #fcc419; /* Yellow for name */
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #leaderboardList li span:last-child {
+            font-weight: bold;
+            color: white; /* White for score */
+        }
+        #leaderboardList .no-scores {
+            list-style: none;
+            text-align: center;
+            color: #ccc;
+            font-style: italic;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="helpIcon">
+        ❓
+        <span class="tooltip">
+            <b>How to Play:</b><br>
+            Swipe Right (✓) for "Correct"<br>
+            Swipe Left (✕) for "Incorrect"<br>
+            Watch the 5-sec timer!
+        </span>
+    </div>
+
+    <a href="gamefinal_CN.html" id="langSwitchIcon" title="切換至繁體中文">中</a>
+
+    <div id="startScreen">
+        <div class="start-modal" id="startModal">
+            <a href="gamefinal_CN.html" class="lang-switch-modal">繁體中文</a>
+            
+            <h2>Game Rules</h2>
+            <p>You are a "Plastic Quick Decider"!<br>Read the statement on the card and decide if it's correct or incorrect.</p>
+            <p class="highlight">
+                Swipe Right (✓) = "Correct"<br>
+                Swipe Left (✕) = "Incorrect"
+            </p>
+            <p>Warning! Only 5 seconds per question!<br>Get 10g of rPET for each correct answer!</p>
+            <button id="startGameBtn">Start Challenge</button>
+        </div>
+    </div>
+
+    <div class="side-hints">
+        <div class="hint hint-left">
+            <div class="hint-item">
+                <div class="hint-icon">✕</div>
+                <span>Incorrect</span>
+            </div>
+        </div>
+        <div class="hint hint-right">
+            <div class="hint-item">
+                <div class="hint-icon">✓</div>
+                <span>Correct</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Plastic Quick Decider</h1>
+            <div class="score">rPET Collected: <span id="score">0</span>g / <span id="total">100</span></div>
+            <div class="timer-container">
+                <div class="timer-bar" id="timerBar"></div>
+                <div class="timer-text" id="timerText">5s</div>
+            </div>
+        </div>
+
+        <div class="card-container" id="cardContainer"></div>
+
+        <div class="result" id="result">
+            <h2>Game Over!</h2>
+            <div class="result-rank" id="finalRank"></div>
+            <div class="result-score">
+                Your total collection: <span id="finalScore"></span>
+            </div>
+
+            <div class="nickname-container" id="nicknameContainer">
+                <input type="text" id="nicknameInput" placeholder="Enter nickname (max 10 chars)" maxlength="10">
+                <button id="saveScoreBtn">Save Score</button>
+            </div>
+
+            <button class="restart-btn" onclick="restartGame()">Restart</button>
+
+            <div class="leaderboard-container" id="leaderboard">
+                <h3>🏆 Leaderboard (Top 5) 🏆</h3>
+                <ol id="leaderboardList">
+                    </ol>
+            </div>
+            <div class="knowledge-base" id="knowledgeBase"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 【修改】所有題目和回饋都已翻譯
+        const questions = [
+            { question: "I can throw my finished PET bottle into the recycling bin, even if there's still some drink left inside.", answer: false, feedback: "Leftover liquid will contaminate the entire batch of recyclables!" },
+            { question: "The most important steps when recycling PET bottles are 'Empty, Rinse' to avoid liquid residue.", answer: true, feedback: "Clean recyclables are the first step to rPET!" },
+            { question: "'Biocompostable plastic (PLA)' looks eco-friendly, so it should be thrown in the PET bottle recycling bin.", answer: false, feedback: "PLA contaminates the PET recycling stream, ruining the rPET!" },
+            { question: "Recycled PET bottles can only be 'downcycled' into clothes, not made back into food-grade bottles.", answer: false, feedback: "'Bottle-to-bottle' (rPET) technology allows it to be reborn!" },
+            { question: "Bottles made from rPET (recycled plastic) have lower hygiene and safety standards.", answer: false, feedback: "Food-grade rPET has the same safety standards as new material!" },
+            { question: "Glass bottles are heavier than PET. Transporting 100 glass bottles creates more carbon emissions than 100 PET bottles.", answer: true, feedback: "'Lightweighting' is key to reducing transport emissions!" },
+            { question: "Package 'lightweighting' (e.g., thinner bottles, smaller caps) is a sustainable practice.", answer: true, feedback: "Using less raw material = less carbon emissions." },
+            { question: "Producing empty bottles right next to the beverage factory ('on-site production') wastes more energy than shipping them by truck.", answer: false, feedback: "'On-site production' saves all transport-related carbon emissions!" },
+            { question: "When recycling, the cap and bottle should be separated.", answer: false, feedback: "The EPA recommends leaving the cap on for recycling!" },
+            { question: "All plastics can be mixed together for recycling.", answer: false, feedback: "Different plastic types must be sorted to enter their own recycling loops." }
+        ];
+
+        const GAME_DURATION_PER_QUESTION = 5;
+        const RPET_PER_QUESTION = 10;
+        const LEADERBOARD_KEY = 'sustainabilityGameLeaderboard'; // 【NEW】
+        const MAX_LEADERBOARD_ENTRIES = 5; // 【NEW】
+        
+        let currentIndex = 0, score = 0, startX = 0, currentX = 0;
+        let isDragging = false, currentCard = null, timeRemaining = GAME_DURATION_PER_QUESTION;
+        let timerInterval = null, toastTimer = null;
+
+        function init() {
+            currentIndex = 0;
+            score = 0;
+            updateScore();
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('cardContainer').style.display = 'block';
+            document.getElementById('knowledgeBase').innerHTML = '';
+            
+            document.getElementById('helpIcon').style.display = 'none'; 
+            document.getElementById('langSwitchIcon').style.display = 'none'; /* 【NEW】Hide lang button */
+            const startScreen = document.getElementById('startScreen');
+            const modal = document.getElementById('startModal');
+            startScreen.style.display = 'flex'; 
+            startScreen.style.opacity = '1';
+            modal.classList.remove('shrinking'); 
+            modal.style.opacity = '1';
+
+            document.getElementById('cardContainer').innerHTML = ''; 
+            stopTimer(); 
+        }
+
+        function startGame() {
+            const startScreen = document.getElementById('startScreen');
+            const modal = document.getElementById('startModal');
+
+            modal.classList.add('shrinking');
+            startScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                startScreen.style.display = 'none'; 
+                document.getElementById('helpIcon').style.display = 'flex'; 
+                document.getElementById('langSwitchIcon').style.display = 'flex'; /* 【NEW】Show lang button */
+                
+                createCard(); 
+            }, 500); 
+        }
+
+        function createCard() {
+            if (currentIndex >= questions.length) {
+                showResult();
+                return;
+            }
+
+            const container = document.getElementById('cardContainer');
+            container.innerHTML = '';
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-number">${currentIndex + 1} / ${questions.length}</div>
+                <div class="card-question">${questions[currentIndex].question}</div>
+                <div class="swipe-indicator swipe-left">✕</div>
+                <div class="swipe-indicator swipe-right">✓</div>
+            `;
+
+            container.appendChild(card);
+            currentCard = card;
+
+            timeRemaining = GAME_DURATION_PER_QUESTION;
+            updateTimer();
+            startTimer(); 
+
+            card.addEventListener('mousedown', handleStart);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+            card.addEventListener('touchstart', handleStart);
+            document.addEventListener('touchmove', handleMove);
+            document.addEventListener('touchend', handleEnd);
+        }
+
+        function handleStart(e) {
+            if (!currentCard) return;
+            isDragging = true;
+            currentCard.classList.add('dragging');
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        }
+
+        function handleMove(e) {
+            if (!isDragging || !currentCard) return;
+            
+            e.preventDefault();
+            currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const deltaX = currentX - startX;
+            const rotation = deltaX * 0.1;
+
+            currentCard.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+
+            if (deltaX < -50) {
+                currentCard.classList.add('showing-left');
+                currentCard.classList.remove('showing-right');
+            } else if (deltaX > 50) {
+                currentCard.classList.add('showing-right');
+                currentCard.classList.remove('showing-left');
+            } else {
+                currentCard.classList.remove('showing-left', 'showing-right');
+            }
+        }
+
+        function handleEnd(e) {
+            if (!isDragging || !currentCard) return;
+            
+            isDragging = false;
+            currentCard.classList.remove('dragging');
+            
+            const deltaX = currentX - startX;
+            const threshold = 100;
+
+            if (Math.abs(deltaX) > threshold) {
+                stopTimer();
+
+                const userAnswer = deltaX > 0;
+                const correctAnswer = questions[currentIndex].answer;
+                const feedback = questions[currentIndex].feedback;
+                let toastMessage = "";
+
+                if (userAnswer === correctAnswer) {
+                    score++;
+                    // 【修改】提示訊息翻譯
+                    toastMessage = "Correct! " + feedback;
+                    showToast(toastMessage, true); 
+                } else {
+                    // 【修改】提示訊息翻譯
+                    toastMessage = "Incorrect! " + feedback;
+                    if (feedback) {
+                        showToast(toastMessage, false);
+                    }
+                }
+                
+                updateScore();
+
+                const flyDistance = window.innerWidth;
+                currentCard.style.transition = 'transform 0.3s ease-out';
+                currentCard.style.transform = `translateX(${deltaX > 0 ? flyDistance : -flyDistance}px) rotate(${deltaX > 0 ? 30 : -30}deg)`;
+
+                setTimeout(() => {
+                    currentIndex++;
+                    createCard();
+                }, 300);
+            } else {
+                currentCard.style.transition = 'transform 0.3s ease-out';
+                currentCard.style.transform = 'translateX(0) rotate(0)';
+                currentCard.classList.remove('showing-left', 'showing-right');
+                
+                setTimeout(() => {
+                    if(currentCard) currentCard.style.transition = '';
+                }, 300);
+            }
+
+            startX = 0;
+            currentC = 0;
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `${score * RPET_PER_QUESTION}`;
+            document.getElementById('total').textContent = `${questions.length * RPET_PER_QUESTION}g`;
+        }
+
+        function showResult() {
+            stopTimer();
+            document.getElementById('cardContainer').style.display = 'none';
+            document.getElementById('helpIcon').style.display = 'none'; 
+            document.getElementById('langSwitchIcon').style.display = 'none'; /* 【NEW】Hide lang button */
+            
+            const finalRpet = score * RPET_PER_QUESTION;
+            document.getElementById('finalScore').textContent = `${finalRpet}g`;
+            
+            // 【修改】等級稱號翻譯
+            let rank = "Recycling Novice";
+            if (score >= 10) rank = "Sustainability Decision Maker 🌍";
+            else if (score >= 7) rank = "Closed-Loop Master ♻️";
+            else if (score >= 4) rank = "Eco-Citizen 👍";
+            document.getElementById('finalRank').textContent = rank;
+            
+            buildKnowledgeBase();
+            loadLeaderboard(); // 【NEW】Load the leaderboard
+
+            // 【NEW】Reset nickname input
+            document.getElementById('nicknameInput').value = '';
+            document.getElementById('nicknameInput').disabled = false;
+            document.getElementById('saveScoreBtn').disabled = false;
+
+            document.getElementById('result').classList.add('show');
+        }
+
+        function buildKnowledgeBase() {
+            const container = document.getElementById('knowledgeBase');
+            // 【修改】回顧標題翻譯
+            container.innerHTML = '<h3>Challenge Review</h3>';
+            
+            questions.forEach(q => {
+                const item = document.createElement('div');
+                item.className = 'knowledge-item';
+                
+                const questionText = document.createElement('div');
+                questionText.className = 'knowledge-question';
+                questionText.textContent = q.question;
+                
+                const answerText = document.createElement('div');
+                answerText.className = 'knowledge-answer';
+                // 【修改】答案文字翻譯
+                answerText.textContent = `Correct Answer: ${q.answer ? "Correct (✓)" : "Incorrect (✕)"}`;
+                
+                item.appendChild(questionText);
+                item.appendChild(answerText);
+                container.appendChild(item);
+            });
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeRemaining -= 0.1;
+                
+                if (timeRemaining <= 0) {
+                    timeRemaining = 0;
+                    updateTimer();
+                    stopTimer();
+                    handleTimeOut();
+                } else {
+                    updateTimer();
+                }
+            }, 100);
+        }
+
+        function handleTimeOut() {
+            if (!currentCard) return;
+
+            // 【修改】時間到提示翻譯
+            showToast("Time's up! Be quicker!", false);
+
+            currentCard.style.transition = 'transform 0.3s ease-out';
+            currentCard.style.transform = `translateX(-${window.innerWidth}px) rotate(-30deg)`;
+            currentCard = null;
+
+            setTimeout(() => {
+                currentIndex++;
+                createCard();
+            }, 300);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function updateTimer() {
+            const seconds = Math.ceil(timeRemaining);
+            const percentage = (timeRemaining / GAME_DURATION_PER_QUESTION) * 100;
+            
+            // 【修改】計時器文字翻譯
+            document.getElementById('timerText').textContent = `${seconds}s`;
+            document.getElementById('timerBar').style.width = `${percentage}%`;
+            
+            const timerBar = document.getElementById('timerBar');
+            if (timeRemaining <= 3) {
+                timerBar.style.background = 'linear-gradient(90deg, #ff6b6b, #fa5252)';
+            } else {
+                timerBar.style.background = 'linear-gradient(90deg, #51cf66, #37b24d)';
+            }
+        }
+
+        function showToast(message, isCorrect) {
+            const toast = document.getElementById('toast');
+            if (!message) return;
+            toast.textContent = message;
+            
+            if (isCorrect) toast.classList.add('correct');
+            else toast.classList.remove('correct');
+            
+            toast.classList.add('show');
+
+            if (toastTimer) clearTimeout(toastTimer);
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500); 
+        }
+
+        // 【NEW JS - Leaderboard】
+        
+        function saveScore() {
+            const nicknameInput = document.getElementById('nicknameInput');
+            const name = nicknameInput.value.trim();
+            
+            if (!name) {
+                showToast("Please enter your nickname!", false); // Use existing toast
+                return;
+            }
+
+            const currentScore = score * RPET_PER_QUESTION;
+            const scores = JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || [];
+            
+            scores.push({ name: name, score: currentScore });
+            
+            // Sort and save
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(scores));
+
+            // Disable button and input
+            nicknameInput.disabled = true;
+            document.getElementById('saveScoreBtn').disabled = true;
+            
+            showToast("Score saved!", true);
+            loadLeaderboard(); // Refresh the list
+        }
+
+        function loadLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || [];
+            const listElement = document.getElementById('leaderboardList');
+            listElement.innerHTML = ''; // Clear list
+
+            const topScores = scores.slice(0, MAX_LEADERBOARD_ENTRIES);
+
+            if (topScores.length === 0) {
+                listElement.innerHTML = '<li class="no-scores">No scores yet</li>';
+            } else {
+                topScores.forEach(entry => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${entry.name}</span> <span>${entry.score}g rPET</span>`;
+                    listElement.appendChild(li);
+                });
+            }
+        }
+
+        function restartGame() {
+            init();
+        }
+
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        document.getElementById('saveScoreBtn').addEventListener('click', saveScore); // 【NEW】Bind the save button
+
+        init(); 
+    </script>
+</body>
+</html>

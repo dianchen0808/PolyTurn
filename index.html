@@ -2,800 +2,789 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>永續決策者</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>互動小遊戲</title>
+    <meta name="csrf-token" content="Os8A1KwmdwU8nkq8Csorgw39EyVtMQcUtLaLLp3q">
+    <title>互動小遊戲</title>
+<meta name="keywords" itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="互動小遊戲">
+<meta property="og:title" content="互動小遊戲" />
+<meta property="og:type" content="Website" />
+<meta property="og:url" content="https://esg.honchuan.com/tw/interaction/game" />
+<meta property="og:site_name" content="宏全國際集團" />
+<meta property="og:image" content="https://esg.honchuan.com/storage/images/category/game.jpg" />
+<meta name="twitter:image" content="https://esg.honchuan.com/storage/images/category/game.jpg">
+<meta name="author" content="StrategicSale Co.">
+<meta name="copyright" content="2025 StrategicSale Co., Ltd. 商積股份有限公司 All rights reserved.">
+<link rel="canonical" href="https://esg.honchuan.com/tw/interaction/game" />
+<link rel="alternate" href="https://esg.honchuan.com/tw/interaction/game" hreflang="zh-TW" />
+<link rel="alternate" href="https://esg.honchuan.com/en/interaction/game" hreflang="en-US" />
+    <link rel="icon" type="image/png" sizes="96x96" href="https://esg.honchuan.com/images/icon-96x96.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" integrity="sha512-rt/SrQ4UNIaGfDyEXZtNcyWvQeOq0QLygHluFQcSjaGB04IxWhal71tKuzP6K8eYXYB6vJV4pHkXcmFGGQ1/0w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://esg.honchuan.com/css/app.css">
+<link rel="preload" href="https://static.emvp.pro/web/plugin/css/jquery.fancybox-3.5.7.min.css" as="style">
+<link rel="stylesheet" href="https://static.emvp.pro/web/plugin/css/jquery.fancybox-3.5.7.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://static.emvp.pro/web/plugin/css/jquery.fancybox-3.5.7.min.css"></noscript>
+        <style>
+        .text-red{
+            color: #e31d38;
         }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+        /* --- CSS 已修改 --- */
+        .game-section{
+            position: relative;
+            min-height: 90vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden; /* 【修改】只隱藏左右溢出 */
-            overflow-y: auto; /* 【新增】允許垂直滾動 */
+            flex-direction: column;
+            justify-content: center; /* <-- 已新增這行 */
+            background-size: cover;
+            background-position: bottom right;
         }
-
-        #startScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6); 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            transition: opacity 0.5s ease-out;
-            padding: 20px;
+        @media (min-width: 768px){
+            .game-section{
+                min-height: 100vh;
+            }
         }
+        /* --- CSS 修改結束 --- */
 
-        .start-modal {
-            background: white;
-            padding: 30px 40px;
+        .start-panel,
+        .question-item,
+        .finish-panel{
+            background: #0770fb;
+            padding: 40px 20px 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-            transform-origin: center;
-            transition: transform 0.5s ease-in, opacity 0.5s ease-in;
-        }
-        
-        .start-modal.shrinking {
-            transform: translate(50vw, -50vh) scale(0);
-            opacity: 0;
-        }
-
-        .start-modal h2 {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        .start-modal p {
-            font-size: 1.1em;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .start-modal p.highlight {
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        #startGameBtn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.2em;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-            margin-top: 20px;
-        }
-        
-        #startGameBtn:hover {
-            transform: scale(1.05);
-        }
-        
-        #helpIcon {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            font-size: 1.8em;
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .tooltip {
-            visibility: hidden;
-            opacity: 0;
-            width: 200px;
-            background-color: #333;
-            color: #fff;
-            text-align: left;
-            border-radius: 6px;
-            padding: 10px 15px;
-            position: absolute;
-            z-index: 1;
-            top: 120%; 
-            right: 0;
-            transition: opacity 0.3s;
-            /* 【修改】字體大小改為 0.8rem，使其更小 */
-            font-size: 0.8rem; 
-            line-height: 1.5;
-            pointer-events: none; 
-        }
-        
-        .tooltip::after { 
-            content: "";
-            position: absolute;
-            bottom: 100%;
-            right: 15px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent transparent #333 transparent;
-        }
-        
-        #helpIcon:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .container {
-            max-width: 400px;
-            width: 100%;
-            position: relative;
-            overflow: visible;
-        }
-
-        .side-hints {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .score {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .timer-container {
-            width: 100%;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            overflow: hidden;
-            margin-top: 20px;
-            margin-bottom: 20px;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .timer-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #51cf66, #37b24d);
-            border-radius: 15px;
-            transition: width 0.1s linear;
-            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
-        }
-
-        .timer-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-weight: bold;
-            font-size: 0.9em;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-container {
-            position: relative;
-            width: 100%;
-            height: 500px;
-        }
-
-        .card {
-            position: absolute;
-            width: 100%;
-            height: 80%;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            cursor: grab;
-            transition: transform 0.1s;
-            user-select: none;
-        }
-
-        .card.dragging {
-            cursor: grabbing;
-        }
-
-        .card-question {
-            font-size: 1.5em;
-            text-align: center;
-            color: #333;
-            line-height: 1.5;
-        }
-
-        .card-number {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 0.9em;
-            color: #999;
-        }
-
-        .hint {
-            position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            z-index: 11;
-        }
-
-        .hint-left {
-            left: 30px;
-        }
-
-        .hint-right {
-            right: 30px;
-        }
-
-        .hint-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85em;
-            color: white;
-            text-align: center;
-        }
-
-        .hint-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            font-weight: bold;
-        }
-
-        .hint-left .hint-icon {
-            background: #ff6b6b;
-            color: white;
-        }
-
-        .hint-right .hint-icon {
-            background: #51cf66;
-            color: white;
-        }
-
-        .swipe-indicator {
-            position: absolute;
-            top: 50%;
-            font-size: 4em;
-            font-weight: bold;
-            opacity: 0;
-            transform: translateY(-50%);
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
-        .swipe-left {
-            left: 30px;
-            color: #ff6b6b;
-        }
-
-        .swipe-right {
-            right: 30px;
-            color: #51cf66;
-        }
-
-        .card.showing-left .swipe-left,
-        .card.showing-right .swipe-right {
-            opacity: 1;
-        }
-
-        .result {
             display: none;
-            text-align: center;
-            color: white;
-        }
-
-        .result.show {
-            display: block;
-        }
-
-        .result h2 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-        
-        .result-rank {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #fcc419;
-            margin-bottom: 15px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .result-score {
-            font-size: 1.5em;
-            margin-bottom: 30px;
-        }
-
-        .restart-btn {
-            background: white;
-            color: #667eea;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.2em;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-            margin-top: 20px;
-        }
-
-        .restart-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .restart-btn:active {
-            transform: scale(0.95);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #ff6b6b;
-            color: white;
-            padding: 16px 24px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            transition: bottom 0.4s ease-out;
-            font-size: 0.9em;
+            width: 600px;
             max-width: 90%;
-            text-align: center;
-            font-weight: bold;
-            pointer-events: none;
+            height: fit-content;
+            position: relative;
+        }
+        .start-btn,
+        .finish-btn{
+            background: #fff;
+        }
+        .question-item:has(.correct-panel.active){
+            background: #f9e36b;
+        }
+        .question-item:has(.wrong-panel.active){
+            background: #fcb0b0;
+        }
+        .question-item .answer,
+        .question-item .game-btn{
+            background: #fff;
+            color: #212529;
+        }
+        .flag-group{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            flex-wrap: nowrap;
+            padding-top: 80px;
+            position: absolute;
+        }
+        .flag-item{
+            aspect-ratio: 1;
+            width: 50px;
+            height: auto;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: #f5f5f5;
+            box-shadow: 0px 0px 4px 4px rgba(176, 176, 176, 0.5);
+        }
+        .flag-item.active{
+            background: #3d8af8;
+            border: 2px solid #f8f4bd;
+        }
+        .flag-item+.flag-item{
+            margin-left: 10px;
+        }
+        .question-section{
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding-top: 140px;
+            position: relative;
+        }
+        @media(min-width: 768px){
+            .question-section{
+                flex-grow: 1;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                padding-top: 250px;
+                position: relative;
+            }
         }
 
-        .toast.show {
-            bottom: 30px;
-        }
-        
-        .toast.correct {
-            background-color: #51cf66;
+        @media(min-width: 1200px){
+            .flag-group{
+                top: 10%;
+                right: 50%;
+                position: absolute;
+                width: max-content;
+            }
+            .start-panel,
+            .question-item,
+            .finish-panel{
+                position: absolute;
+                top: 30%;
+                left: 50%;
+                transform: translateX(-50%);
+            }
         }
 
-        .knowledge-base {
-            margin-top: 40px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: left;
+        @media (min-width: 1600px){
+            .flag-group{
+                right: initial;
+                left: 3%;
+                top: 30px;
+                padding: 58px;
+            }
         }
-        
-        .knowledge-base h3 {
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            text-align: center;
+        .btn-group{
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 15px;
         }
-        
-        .knowledge-item {
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 15px;
+        .answer,
+        .game-btn,
+        .finish-btn{
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 2px rgb(123, 123, 123);
+            width: fit-content;
+            transition-duration: 400ms;
         }
-        
-        .knowledge-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+        .answer:hover,
+        .game-btn:hover,
+        .finish-btn:hover{
+            transform: translateY(-5px);
         }
-        
-        .knowledge-question {
-            font-size: 1em;
-            margin-bottom: 8px;
+        .game-btn{
+            margin-top: 30px;
         }
-        
-        .knowledge-answer {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #fcc419;
+        .answer,
+        .finish-btn{
+            margin: 10px;
         }
+        .finish-btn a{
+            color: inherit;
+            text-decoration: none;
+        }
+        .finish-btn a:hover{
+            color: inherit;
+        }
+        .question-panel,
+        .correct-panel,
+        .wrong-panel{
+            display: none;
+        }
+        .question-item.active,
+        .correct-panel.active,
+        .wrong-panel.active{
+            display: block;
+            animation-name: appear;
+            animation-duration: 1400ms;
+            animation-fill-mode: forwards;
+        }
+        .start-panel.active,
+        .question-panel.active,
+        .finish-panel.active{
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation-name: appear;
+            animation-duration: 1400ms;
+            animation-fill-mode: forwards;
+        }
+        @keyframes  appear{
+            0%{
+                opacity: 0;
+            }
+            100%{
+                opacity: 1;
+            }
+        }
+
+        /* icon */
+
+
+        .finish-firework{
+            position: absolute;
+            bottom: -20px;
+            left: -50px;
+            width: 170px;
+            animation-duration: 2s;
+        }
+        .right-firework-1{
+            position: absolute;
+            right: -20px;
+            top: -50px;
+            width: 180px;
+            animation-duration: 1.8s;
+        }
+        .right-firework-2{
+            position: absolute;
+            bottom: -50px;
+            left: -20px;
+            width: 120px;
+            animation-duration: 2.3s;
+        }
+        .finish-firework,
+        .right-firework-1,
+        .right-firework-2{
+            transform-origin: 50% 50%;
+            animation-name: firework;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+        @keyframes  firework{
+            0%{
+                transform: scale(0.1);
+            }
+            100%{
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width:1199px){
+            .bottles,
+            .ques-icon,
+            .finish-icon:not(.finish-firework){
+                display: none;
+            }
+            .child{
+                position: absolute;
+                width: 120px;
+                top:0;
+                right: 20px;
+                transform: translateY(-85%);
+            }
+        }
+
+
+        @media (min-width:768px){
+            .child{
+                position: absolute;
+                width: 160px;
+                top:0;
+                right: 20px;
+                transform: translateY(-85%);
+            }
+            .bottles{
+                position: absolute;
+                width: 100px;
+                bottom:10px;
+                right:10px;
+            }
+            .start-content{
+                width: 80%;
+            }
+            .ques-icon{
+                width: 230px;
+                position: absolute;
+                right: 0;
+                top: 0;
+                transform: translateY(-60%);
+            }
+            .finish-child{
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translate(-50%, -90%);
+                width: 200px;
+            }
+            .finish-windmill{
+                position: absolute;
+                top: 0;
+                right: 0;
+                transform: translateY(-80%);
+                width: 200px;
+            }
+        }
+
+        /* --- 這是修改的 CSS 程式碼 --- */
+        .game-image-wrapper {
+            width: 100%;
+            /* aspect-ratio: 1 / 1;  <-- 已移除 */
+            overflow: hidden;
+            border-radius: 12px;
+            /* background: #f0f0f0; <-- 已移除 */
+        }
+
+        .game-image-wrapper img {
+            width: 100%;
+            height: auto; /* <-- 確保高度自動 */
+            display: block; /* <-- 確保圓角裁切正確 */
+            /* object-fit: cover; <-- 已移除 */
+        }
+        /* --- 修改結束 --- */
+
+        /* --- 這是【新增】的 CSS 程式碼 --- */
+        .game-title-bg {
+            background-color: white;
+            padding: 5px 12px; /* 上下 5px, 左右 12px 的內邊距 */
+            border-radius: 50px; /* 膠囊形狀的圓角 */
+            
+            /* 以下兩行確保文字如果換行，背景也能正確包覆 */
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
+        /* --- 新增結束 --- */
+
     </style>
-</head>
-<body>
-    <div id="helpIcon">
-        ❓
-        <span class="tooltip">
-            <b>玩法提示：</b><br>
-            向右滑 (✓) 代表「是」<br>
-            向左滑 (✕) 代表「否」<br>
-            注意每題 5 秒倒數！
-        </span>
-    </div>
+    <link href="https://www.googletagmanager.com/gtag/js?id=GTM-MSHSFDP2" rel="preload" as="script">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com/">
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MSHSFDP2');</script>
+    </head>
+<body >
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSHSFDP2"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <header>
+    <div class="rd-navbar-wrap bg-transparent rd-navbar-wrap-mod-1" id="topSection">
+        <nav data-layout="rd-navbar-fixed" data-sm-layout="rd-navbar-static" data-md-device-layout="rd-navbar-fixed" data-lg-layout="rd-navbar-static" data-lg-device-layout="rd-navbar-static" data-sm-stick-up-offset="50px" data-lg-stick-up-offset="150px" class="rd-navbar">
+            <div class="rd-navbar-outer">
+                <div class="rd-navbar-inner">
+                    <div class="rd-navbar-panel-canvas"></div>
+                    <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button>
 
-    <div id="startScreen">
-        <div class="start-modal" id="startModal">
-            <h2>遊戲說明</h2>
-            <p>你是一位「永續決策者」！<br>請閱讀卡片上的敘述，判斷是否正確。</p>
-            <p class="highlight">
-                向右滑 (✓) 代表「正確」<br>
-                向左滑 (✕) 代表「錯誤」
-            </p>
-            <p>注意！每題只有 5 秒鐘！<br>答對可收集 10g rPET！</p>
-            <button id="startGameBtn">開始挑戰</button>
-        </div>
-    </div>
+                    <div class="rd-navbar-brand">
+                        <a href="https://www.honchuan.com/tw" target="_blank"><img src="https://esg.honchuan.com/images/logo.svg" title="logo" alt="logo"></a>
+                        <a href="https://esg.honchuan.com/tw"><img class="ml-1 ml-md-3 ml-lg-2 ml-xl-3 esg-logo" src="https://esg.honchuan.com/images/esg-logo.svg" title="logo" alt="logo"></a>
+                    </div>
 
-    <div class="side-hints">
-        <div class="hint hint-left">
-            <div class="hint-item">
-                <div class="hint-icon">✕</div>
-                <span>錯誤</span>
+                    <div class="rd-navbar-subpanel">
+                        <div class="rd-navbar-nav-wrap">
+                            <ul class="rd-navbar-nav">
+                                <li>
+                                    <a href="https://esg.honchuan.com/tw/sustainable-performance">永續經營</a>
+                                    <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/operator-speaking">經營者的話</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/strategic-blueprint">永續發展策略藍圖</a>
+        <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/strategic-blueprint/sustainable-policy">永續發展政策</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/strategic-blueprint/sustainable-development-committee">永續暨風險管理委員會</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/strategic-blueprint/sdgs">聯合國永續發展目標</a>
+            </li>
+    </ul>
+    </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/stakeholder-issue">利害關係人議題</a>
+        <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/stakeholder-issue/important-issue">重大主題鑑別</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/stakeholder-issue/stakeholder">利害關係人議合</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-performance/stakeholder-issue/questionnaire">利害關係人問卷</a>
+            </li>
+    </ul>
+    </li>
+    </ul>
+                                </li>
+                                <li>
+                                    <a href="https://esg.honchuan.com/tw/corporate-governance">公司治理</a>
+                                    <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/corporate-governance/integrity-management">誠信經營</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/corporate-governance/risk-management">風險管理</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/corporate-governance/internal-audit">內部稽核</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/corporate-governance/information-security">資訊安全</a>
+            </li>
+    </ul>
+                                </li>
+                                <li>
+                                    <a href="https://esg.honchuan.com/tw/products">產品服務</a>
+                                    <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/products/food-safety">食品安全</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/products/customer-service">客戶服務</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/products/supply-chain">供應鏈管理</a>
+            </li>
+    </ul>
+                                </li>
+                                <li>
+                                    <a href="https://esg.honchuan.com/tw/workplace">友善職場</a>
+                                    <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/training">人才培育</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/best-company">幸福企業</a>
+        <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/best-company/take-care">員工照顧</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/best-company/human-right">勞動人權</a>
+            </li>
+    </ul>
+    </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/diversity">多元融合</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/healthy-and-safety">健康與安全</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/welfare-club">職工福利會</a>
+        <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/welfare-club/subsidy">員工補助</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/welfare-club/travel">旅遊</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/welfare-club/appointed-shops">特約商店</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/workplace/welfare-club/welfare-club-introduction">福利會介紹</a>
+            </li>
+    </ul>
+    </li>
+    </ul>
+                                </li>
+                                <li>
+                                    <a href="https://esg.honchuan.com/tw/sustainable-environment">永續環境</a>
+                                    <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/climate-change">氣候變遷</a>
+        <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/climate-change/energy-and-air-control">能源管理與溫室氣體排放</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/climate-change/finance-about-climate">氣候相關財務揭露</a>
+            </li>
+    </ul>
+    </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/green-cycle">綠色循環</a>
+        <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/green-cycle/air-pollution-control">空氣污染防制</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/green-cycle/water-control">水資源與廢污水管理</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/green-cycle/litter-control">廢棄物管理</a>
+            </li>
+    </ul>
+    </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/sustainable-environment/sustainable-products">永續產品</a>
+            </li>
+    </ul>
+                                </li>
+                                <li>
+                                    <a href="https://esg.honchuan.com/tw/social-participation">社會參與</a>
+                                    <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/social-participation/environmental-conservation">環境保育</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/social-participation/public-welfare-care">公益關懷</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/social-participation/education">教育支持</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/social-participation/museum">文創博物館</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/social-participation/certificate">我們的榮譽</a>
+            </li>
+    </ul>
+                                </li>
+                                <li>
+                                    <a href="https://esg.honchuan.com/tw/interaction">互動專區</a>
+                                    <ul class="rd-navbar-dropdown">
+        <li>
+        <a href="https://esg.honchuan.com/tw/interaction/download/esg-report">ESG報告書</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/interaction/download/quality-certification">廠區驗証證書</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/interaction/news">最新消息</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/interaction/game">互動小遊戲</a>
+            </li>
+        <li>
+        <a href="https://esg.honchuan.com/tw/interaction/newsletter">訂閱電子報</a>
+            </li>
+    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="rd-navbar-collapse-wrap ml-3">
+                            <button class="rd-navbar-collapse-toggle" data-rd-navbar-toggle=".rd-navbar-collapse"></button>
+                            <ul class="rd-navbar-collapse">
+                                                                                                <li>
+                                    <a href="/tw/interaction/game">繁中</a>
+                                </li>
+                                                                <li>
+                                    <a href="/en/interaction/game">EN</a>
+                                </li>
+                                                            </ul>
+                        </div>
+                        <div class="rd-navbar-search-wrap">
+                            <button class="rd-navbar-search-toggle" data-rd-navbar-toggle=".rd-navbar-search"></button>
+                            <div class="rd-navbar-search">
+                                <form action="https://esg.honchuan.com/tw/search" method="get">
+                                    <div class="form-group">
+                                        <input id="rd-navbar-search-input" type="text" name="keywords" autocomplete="off" placeholder="搜尋">
+                                    </div>
+                                    <button type="submit" class="fa fa-search"></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="hint hint-right">
-            <div class="hint-item">
-                <div class="hint-icon">✓</div>
-                <span>正確</span>
-            </div>
-        </div>
+        </nav>
     </div>
 
+    <div class="float-panel">
+        <div class="download-button"><a href="https://esg.honchuan.com/tw/interaction/download/esg-report">永續報告書下載<i class="ml-2 py-2 py-md-0 fa-solid fa-download"></i></a></div>
+        
+    </div>
+    </header> 
+       
+<section class="game-section lazyload" data-bg="https://esg.honchuan.com/images/game/game-bg.svg">
     <div class="container">
-        <div class="header">
-            <h1>永續決策者</h1>
-            <div class="score">rPET 收集: <span id="score">0</span>g / <span id="total">100</span>g</div>
-            <div class="timer-container">
-                <div class="timer-bar" id="timerBar"></div>
-                <div class="timer-text" id="timerText">5秒</div>
+        
+        <h1 class="text-center text-white mb-4">互動小遊戲</h1> 
+
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="row">
+
+                    <div class="col-6 col-md-6">
+                        <a href="card/try2_2.html">
+                            <div class="game-image-wrapper">
+                                <img src="268924_0.jpg" alt="宏全「鍊」金術" />
+                            </div>
+                        </a>
+                        <div class="text-center text-dark mt-2 mb-3" style="font-weight: 700;"><span class="game-title-bg">宏全「鍊」金術</span></div>
+                    </div>
+
+                    <div class="col-6 col-md-6">
+                        <a href="gamefinal_CN.html">
+                            <div class="game-image-wrapper">
+                                <img src="268925_0.jpg" alt="塑戰速決" />
+                            </div>
+                        </a>
+                        <div class="text-center text-dark mt-2 mb-3" style="font-weight: 700;"><span class="game-title-bg">塑戰速決</span></div>
+                    </div>
+
+                    <div class="col-6 col-md-6">
+                        <a href="/game-link3">
+                            <div class="game-image-wrapper">
+                                <img src="268926_0.jpg" alt="宏全策略分類家" />
+                            </div>
+                        </a>
+                        <div class="text-center text-dark mt-2 mb-3" style="font-weight: 700;"><span class="game-title-bg">宏全策略分類家</span></div>
+                    </div>
+
+                    <div class="col-6 col-md-6">
+                        <a href="/game-link4">
+                            <div class="game-image-wrapper">
+                                <img src="268927_0.jpg" alt="碳權大富翁：永續行動力" />
+                            </div>
+                        </a>
+                        <div class="text-center text-dark mt-2 mb-3" style="font-weight: 700;"><span class="game-title-bg">碳權大富翁：永續行動力</span></div>
+                    </div>
+
+                </div>
             </div>
         </div>
-
-        <div class="card-container" id="cardContainer"></div>
-
-        <div class="result" id="result">
-            <h2>遊戲結束！</h2>
-            <div class="result-rank" id="finalRank"></div>
-            <div class="result-score">
-                你總共收集了：<span id="finalScore"></span>
+    </div>
+</section>
+<footer class="page-footer footer-hover text-md-left pt-4 pb-5 pb-md-0">
+    <div class="container-fluid">
+        <div class="row py-3 d-flex">
+            <div class="col-md-3 col-xl-3 mb-4 mb-md-0">
+                <a href="https://www.honchuan.com/tw" target="_blank"><img class="mx-auto ml-lg-0 footer-logo d-block" src="https://esg.honchuan.com/images/logo-white.svg" /></a>
             </div>
-            <button class="restart-btn" onclick="restartGame()">重新開始</button>
-            <div class="knowledge-base" id="knowledgeBase"></div>
+            <div class="col-md-9 col-xl-9">
+                <ul class="footer-guide-line">
+                    <li><a href="https://esg.honchuan.com/tw/sitemap">網站地圖</a></li>
+                    <li><a href="https://esg.honchuan.com/tw/sustainable-performance">永續經營</a></li>
+                    <li><a href="https://esg.honchuan.com/tw/corporate-governance">公司治理</a></li>
+                    <li><a href="https://esg.honchuan.com/tw/products">產品服務</a></li>
+                    <li><a href="https://esg.honchuan.com/tw/workplace">友善職場</a></li>
+                    <li><a href="https://esg.honchuan.com/tw/sustainable-environment">永續環境</a></li>
+                    <li><a href="https://esg.honchuan.com/tw/social-participation">社會參與</a></li>
+                    <li><a href="https://esg.honchuan.com/tw/interaction">互動專區</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row py-3 mt-md-4 d-flex">
+            <div class="col-md-9 col-lg-10 mb-3 mb-md-0">
+                                <p class="footer-info-content text-white mb-0"><i class="fa-solid fa-house mr-2"></i>台灣台中市西屯區工業區二路6號</p>
+                                                <p class="footer-info-content text-white mb-0"><i class="fa-solid fa-envelope mr-2"></i><a href="mailto:ESG@mail.honchuan.com.tw">ESG@mail.honchuan.com.tw</a></p>
+                                                <p class="footer-info-content text-white mb-0"><i class="fa-solid fa-phone mr-2"></i><a href="tel:+886-4-2359-0088">+886-4-2359-0088</a></D>
+                            </div>
+            <div class="col-md-3 col-lg-2 d-flex justify-content-center justify-content-md-end align-items-center">
+                                <a href="https://www.facebook.com/TaiwanHonChuan/?locale=zh_TW" class="footer-sns-icon fb-btn" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                                                <a href="https://www.instagram.com/taiwanhonchuan/" class="footer-sns-icon ig-btn" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                                                <a href="https://www.linkedin.com/company/taiwanhonchuan" class="footer-sns-icon linked-in-btn" target="_blank"><i class="fa-brands fa-linkedin-in"></i></a>
+                            </div>
+        </div>
+        <hr class="border-white my-2">
+        <div class="row text-center text-md-left">
+            <div class="col-md-4">
+                <a href="https://esg.honchuan.com/tw/terms">使用者條款</a> <span class="text-white">｜</span> <a href="https://esg.honchuan.com/tw/privacy">隱私權政策</a>
+            </div>
+            <div class="col-md-8">
+                <p class="text-white text-md-right">&copy; 2025 <a href="https://www.honchuan.com" target="_blank">宏全國際集團 </a><br class="d-md-none">Designed by <a href="https://www.strategicsale.com/" target="_blank">商積全網行銷</a></p>
+            </div>
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div id="gotop" class="gotop bg-blue">
+        <a href=""><i class="fa-solid fa-chevron-up"></i></a>
+    </div>
+</footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.min.js" integrity="sha512-7rusk8kGPFynZWu26OKbTeI+QPoYchtxsmPeBqkHIEXJxeun4yJ4ISYe7C6sz9wdxeE1Gk3VxsIWgCZTc+vX3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" integrity="sha512-q583ppKrCRc7N5O0n2nzUiJ+suUv7Et1JGels4bXOaMFQcamPk9HjdUknZuuFjBNs7tsMuadge5k9RzdmO+1GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" src="https://static.emvp.pro/web/template/common/js/ss-plugin-1.1.0.min.js"></script>
+<script defer src="https://static.emvp.pro/web/plugin/js/four-video-fancybox-config-1.0.2.js"></script>
+<script>
+    /** fix lazybeforeunveil not fire when object already in viewport **/
+    (function () {
+        var bgAttrs = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+            ? {webp: 'data-bg-webp-mobile', legacy: 'data-bg-mobile'}
+            : {webp: 'data-bg-webp', legacy: 'data-bg'};
+        var bgAttr = Modernizr.webp ? bgAttrs['webp'] : bgAttrs['legacy'];
 
-    <script>
-        const questions = [
-            { question: "我喝完的寶特瓶，裡面還有剩一些飲料，可以直接丟進回收桶。", answer: false, feedback: "殘留的液體會汙染整批回收物！" },
-            { question: "回收寶特瓶時，最重要的步驟是『清空、沖洗』，避免液體殘留。", answer: true, feedback: "乾淨的回收物是 rPET 的第一步！" },
-            { question: "『生物可分解塑膠 (PLA)』看起來很環保，所以用完後，應該丟進 PET 寶特瓶回收桶。", answer: false, feedback: "PLA 會汙染 PET 回收流，讓 rPET 報廢！" },
-            { question: "寶特瓶 (PET) 回收後，只能降級做成衣服，不能再做回食品級的瓶子。", answer: false, feedback: "「瓶到瓶」技術 (rPET) 能讓它重生！" },
-            { question: "使用 rPET (再生塑膠) 製成的瓶子，衛生和安全標準比較低。", answer: false, feedback: "食品級 rPET 的安全標準與新料相同！" },
-            { question: "玻璃瓶比寶特瓶重。運輸 100 瓶玻璃瓶，會比運輸 100 瓶寶特瓶產生更多碳排放。", answer: true, feedback: "「輕量化」是減少運輸碳排的關鍵！" },
-            { question: "包裝『輕量化』（例如用更薄的瓶身、更小的瓶蓋）是一種永續行為。", answer: true, feedback: "使用更少的原料 = 更少的碳排。" },
-            { question: "在飲料工廠隔壁直接生產空瓶（駐廠生產），會比從外地用卡車運送空瓶更浪費能源。", answer: false, feedback: "「駐廠生產」能省下所有運輸碳排！" },
-            { question: "回收時，瓶蓋和瓶身應該要分開丟棄。", answer: false, feedback: "環保署建議「鎖上瓶蓋」一起回收！" },
-            { question: "只要是塑膠，都可以混在一起回收。", answer: false, feedback: "不同材質的塑膠必須分開，才能進入各自的循環。" }
-        ];
+        document.querySelectorAll('.lazyloaded:not(img)').forEach(function (node) {
+            if (node.style.backgroundImage) return;
+            var bg = node.getAttribute(bgAttr) || node.getAttribute('data-bg');
+            bg && (node.style.backgroundImage = 'url(' + bg + ')');
+        });
+    })();
 
-        const GAME_DURATION_PER_QUESTION = 5;
-        const RPET_PER_QUESTION = 10;
-        let currentIndex = 0, score = 0, startX = 0, currentX = 0;
-        let isDragging = false, currentCard = null, timeRemaining = GAME_DURATION_PER_QUESTION;
-        let timerInterval = null, toastTimer = null;
-
-        function init() {
-            currentIndex = 0;
-            score = 0;
-            updateScore();
-            document.getElementById('result').classList.remove('show');
-            document.getElementById('cardContainer').style.display = 'block';
-            document.getElementById('knowledgeBase').innerHTML = '';
-            
-            document.getElementById('helpIcon').style.display = 'none'; 
-            const startScreen = document.getElementById('startScreen');
-            const modal = document.getElementById('startModal');
-            startScreen.style.display = 'flex'; 
-            startScreen.style.opacity = '1';
-            modal.classList.remove('shrinking'); 
-            modal.style.opacity = '1';
-
-            document.getElementById('cardContainer').innerHTML = ''; 
-            stopTimer(); 
-        }
-
-        function startGame() {
-            const startScreen = document.getElementById('startScreen');
-            const modal = document.getElementById('startModal');
-
-            modal.classList.add('shrinking');
-            startScreen.style.opacity = '0';
-            
-            setTimeout(() => {
-                startScreen.style.display = 'none'; 
-                document.getElementById('helpIcon').style.display = 'flex'; 
-                
-                createCard(); 
-            }, 500); 
-        }
-
-        function createCard() {
-            if (currentIndex >= questions.length) {
-                showResult();
-                return;
-            }
-
-            const container = document.getElementById('cardContainer');
-            container.innerHTML = '';
-
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="card-number">${currentIndex + 1} / ${questions.length}</div>
-                <div class="card-question">${questions[currentIndex].question}</div>
-                <div class="swipe-indicator swipe-left">✕</div>
-                <div class="swipe-indicator swipe-right">✓</div>
-            `;
-
-            container.appendChild(card);
-            currentCard = card;
-
-            timeRemaining = GAME_DURATION_PER_QUESTION;
-            updateTimer();
-            startTimer(); 
-
-            card.addEventListener('mousedown', handleStart);
-            document.addEventListener('mousemove', handleMove);
-            document.addEventListener('mouseup', handleEnd);
-            card.addEventListener('touchstart', handleStart);
-            document.addEventListener('touchmove', handleMove);
-            document.addEventListener('touchend', handleEnd);
-        }
-
-        function handleStart(e) {
-            if (!currentCard) return;
-            isDragging = true;
-            currentCard.classList.add('dragging');
-            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-        }
-
-        function handleMove(e) {
-            if (!isDragging || !currentCard) return;
-            
-            e.preventDefault();
-            currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-            const deltaX = currentX - startX;
-            const rotation = deltaX * 0.1;
-
-            currentCard.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
-
-            if (deltaX < -50) {
-                currentCard.classList.add('showing-left');
-                currentCard.classList.remove('showing-right');
-            } else if (deltaX > 50) {
-                currentCard.classList.add('showing-right');
-                currentCard.classList.remove('showing-left');
-            } else {
-                currentCard.classList.remove('showing-left', 'showing-right');
-            }
-        }
-
-        function handleEnd(e) {
-            if (!isDragging || !currentCard) return;
-            
-            isDragging = false;
-            currentCard.classList.remove('dragging');
-            
-            const deltaX = currentX - startX;
-            const threshold = 100;
-
-            if (Math.abs(deltaX) > threshold) {
-                stopTimer();
-
-                const userAnswer = deltaX > 0;
-                const correctAnswer = questions[currentIndex].answer;
-                const feedback = questions[currentIndex].feedback;
-                let toastMessage = ""; // 【修改】宣告一個變數來組合訊息
-
-                if (userAnswer === correctAnswer) {
-                    score++;
-                    // 【修改】答對了：組合 "答對了！" + 知識點
-                    toastMessage = "答對了！ " + feedback;
-                    showToast(toastMessage, true); 
-                } else {
-                    // 【修改】答錯了：組合 "答錯了！" + 知識點
-                    toastMessage = "答錯了！ " + feedback;
-                    if (feedback) {
-                        showToast(toastMessage, false);
-                    }
-                }
-                
-                updateScore();
-
-                const flyDistance = window.innerWidth;
-                currentCard.style.transition = 'transform 0.3s ease-out';
-                currentCard.style.transform = `translateX(${deltaX > 0 ? flyDistance : -flyDistance}px) rotate(${deltaX > 0 ? 30 : -30}deg)`;
-
-                setTimeout(() => {
-                    currentIndex++;
-                    createCard();
-                }, 300);
-            } else {
-                currentCard.style.transition = 'transform 0.3s ease-out';
-                currentCard.style.transform = 'translateX(0) rotate(0)';
-                currentCard.classList.remove('showing-left', 'showing-right');
-                
-                setTimeout(() => {
-                    if(currentCard) currentCard.style.transition = '';
-                }, 300);
-            }
-
-            startX = 0;
-            currentC = 0;
-        }
-
-        function updateScore() {
-            document.getElementById('score').textContent = `${score * RPET_PER_QUESTION}`;
-            document.getElementById('total').textContent = `${questions.length * RPET_PER_QUESTION}g`;
-        }
-
-        function showResult() {
-            stopTimer();
-            document.getElementById('cardContainer').style.display = 'none';
-            document.getElementById('helpIcon').style.display = 'none'; 
-            
-            const finalRpet = score * RPET_PER_QUESTION;
-            document.getElementById('finalScore').textContent = `${finalRpet}g`;
-            
-            let rank = "回收新手";
-            if (score >= 10) rank = "永續決策者 🌍";
-            else if (score >= 7) rank = "閉環大師 ♻️";
-            else if (score >= 4) rank = "環保公民 👍";
-            document.getElementById('finalRank').textContent = rank;
-            
-            buildKnowledgeBase();
-
-            document.getElementById('result').classList.add('show');
-        }
-
-        function buildKnowledgeBase() {
-            const container = document.getElementById('knowledgeBase');
-            container.innerHTML = '<h3>本次挑戰回顧</h3>';
-            
-            questions.forEach(q => {
-                const item = document.createElement('div');
-                item.className = 'knowledge-item';
-                
-                const questionText = document.createElement('div');
-                questionText.className = 'knowledge-question';
-                questionText.textContent = q.question;
-                
-                const answerText = document.createElement('div');
-                answerText.className = 'knowledge-answer';
-                answerText.textContent = `正確答案：${q.answer ? "是 (✓)" : "非 (✕)"}`;
-                
-                item.appendChild(questionText);
-                item.appendChild(answerText);
-                container.appendChild(item);
+    $(document).ready(function () {
+        var o = $('.rd-navbar');
+        if (o.length > 0) {
+            $(document).ready(function () {
+                o.RDNavbar({
+                    stickUpClone: false,
+                    stickUpOffset: 1
+                });
             });
         }
-
-        function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-
-            timerInterval = setInterval(() => {
-                timeRemaining -= 0.1;
-                
-                if (timeRemaining <= 0) {
-                    timeRemaining = 0;
-                    updateTimer();
-                    stopTimer();
-                    handleTimeOut();
-                } else {
-                    updateTimer();
-                }
-            }, 100);
-        }
-
-        function handleTimeOut() {
-            if (!currentCard) return;
-
-            showToast("時間到！動作要快！", false);
-
-            currentCard.style.transition = 'transform 0.3s ease-out';
-            currentCard.style.transform = `translateX(-${window.innerWidth}px) rotate(-30deg)`;
-            currentCard = null;
-
-            setTimeout(() => {
-                currentIndex++;
-                createCard();
-            }, 300);
-        }
-
-        function stopTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = null;
-        }
-
-        function updateTimer() {
-            const seconds = Math.ceil(timeRemaining);
-            const percentage = (timeRemaining / GAME_DURATION_PER_QUESTION) * 100;
-            
-            document.getElementById('timerText').textContent = `${seconds}秒`;
-            document.getElementById('timerBar').style.width = `${percentage}%`;
-            
-            const timerBar = document.getElementById('timerBar');
-            if (timeRemaining <= 3) {
-                timerBar.style.background = 'linear-gradient(90deg, #ff6b6b, #fa5252)';
-            } else {
-                timerBar.style.background = 'linear-gradient(90deg, #51cf66, #37b24d)';
+    });
+    let gotop = $('#gotop');
+    $(window).on('scroll', function () {
+        let showGotop = $(window).scrollTop() > 800;
+        gotop.toggleClass('active', showGotop);
+    })
+    gotop.click(function(e){
+        e.preventDefault();
+        window.scrollTo({'behavior': 'smooth', 'top': 0})
+    })
+    let strToTwoArray = function(data){
+        data = data.split(';');
+        let data2 = new Array(data.length);
+        for(var i=0;i<data.length;i++){
+            let temp = new Array(2);
+            temp = data[i].split(',');
+            data2[i] = new Array(temp.length);
+            for(var j=0;j<temp.length;j++){
+                data2[i][j] = temp[j];
             }
         }
+        return data2;
+    }
+</script>        <script>
+        $('.start-btn').click(function(){
+            gameStart();
+            $('.start-panel').removeClass('active');
+        })
+        let gameStart = function(){
+            let question_now = 1;
+            let question_number = document.querySelectorAll('.question-item').length;
 
-        function showToast(message, isCorrect) {
-            const toast = document.getElementById('toast');
-            if (!message) return;
-            toast.textContent = message;
-            
-            if (isCorrect) toast.classList.add('correct');
-            else toast.classList.remove('correct');
-            
-            toast.classList.add('show');
+            for(var i=0;i<question_number;i++){
+                let tag = document.createElement('img');
+                let div = document.createElement('div');
+                $(tag).addClass('reward-icon').addClass('w-100').attr('src','https://esg.honchuan.com/images/game/reward-icon.svg');
+                $(div).addClass('flag-item');
 
-            if (toastTimer) clearTimeout(toastTimer);
+                $(div).append(tag);
+                $('.flag-group').append(div);
+            }
 
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500); 
+            let init_question = function(){
+                $('.question-item').removeClass('active');
+                $('.correct-panel').removeClass('active');
+                $('.wrong-panel').removeClass('active');
+                $('.question-item[data-ques-num=' + question_now + ']').addClass('active');
+                $('.question-item[data-ques-num=' + question_now + ']').find('.question-panel').addClass('active');
+            }
+            $('.answer[data-answer=correct]').click(function(){
+                $('.question-panel').removeClass('active');
+                $(this).parents('.question-item').find('.correct-panel').addClass('active');
+                $('.flag-item:nth-child(' + question_now + ')').addClass('active');
+                question_now++;
+            })
+            $('.answer[data-answer=wrong]').click(function(){
+                $('.question-panel').removeClass('active');
+                $(this).parents('.question-item').find('.wrong-panel').addClass('active');
+            })
+            $('.game-btn').click(function(){
+                if(question_now<=question_number){
+                    init_question();
+                }
+                else{
+                    $('.question-item').removeClass('active');
+                    $('.finish-panel').addClass('active');
+                }
+            })
+            $('#finish-btn').click(function(){
+                location.reload();
+            })
+            init_question();
         }
-
-        function restartGame() {
-            init();
-        }
-
-        document.getElementById('startGameBtn').addEventListener('click', startGame);
-
-        init(); 
     </script>
 </body>
 </html>
