@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sustainable Memory Card: Hon Chuan Supply Chain Match</title>
+<style>
+  /* ====== 色票 ====== */
+:root{
+  --ink:#1f2937;          /* 深灰墨色：一般文字顏色 */
+  --muted:#64748b;        /* 淺灰藍字：提示文字 */
+  --line:rgba(0,0,0,.12); /* 線條：分隔、邊框 */
+
+  --brand:#0E63E6;        /* 宏全主藍：主要按鈕/強調 */
+  --brand-dark:#0A47A1;   /* 深藍：hover 或次要強調 */
+  --ok:#20B386;           /* 綠色 (ok/正向強調) */
+  --bad:#ef4444;          /* 錯誤紅 */
+
+  --card:#ffffff;         /* 卡片白底 */
+  --card-2:#f8fafc;       /* 淺灰藍卡片背景 */
+  --bg:#f1f5f9;           /* 頁面整體背景淺灰藍 */
+
+  --aurora-1:#0E63E6;     /* 藍光（對應主藍） */
+  --aurora-2:#38bdf8;     /* 淺藍光 */
+  --aurora-3:#20B386;     /* 綠光 */
+  --aurora-4:#94a3b8;     /* 灰光 */
+}
+
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,"Noto Sans TC","Segoe UI",Roboto,Arial,sans-serif;}
+  a{color:#7eead3;text-decoration:none} a:hover{text-decoration:underline}
+
+  /* ====== 背景層 ====== */
+  .bg-img{
+    position:fixed; inset:0; z-index:0;
+    background:url('background1.1.png') center/cover no-repeat;
+    /*看還是要這行? background:url('ChatGPT Image 2025年9月30日 下午01_28_08.jpg') center/cover no-repeat;*/
+    opacity:.35; filter:blur(2px);
+  }
+  .stage{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+  }
+
+  /* ✅ 雲朵 1 */
+  .cloud{
+  position:absolute;
+  top:10%;
+  left:-200px;                         /* ✅ 初始位置在螢幕外 */
+  width:180px;                         /* ✅ 保持原本大小 */
+  animation:moveCloud 40s linear infinite;
+  }
+
+  /* ✅ 雲朵 2 */
+  .cloud2{
+  position:absolute;
+  top:20%;
+  left:-200px;                         /* ✅ 初始位置在螢幕外 */
+  width:140px;                         /* ✅ 保持原本大小 */
+  animation:moveCloud 60s linear infinite reverse;
+  }
+  
+  /* ✅ 跑動動畫（不用改） */
+  @keyframes moveCloud{from{left:-200px}to{left:100%}}
+  .windmill{position:absolute;left:6%;bottom:10%;width:160px;}
+  .blade{animation:spin 8s linear infinite;transform-origin:50% 60%;}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .trees{position:absolute;right:6%;bottom:8%;width:200px;}
+  .bg{position:fixed; inset:0; z-index:1; pointer-events:none;}
+  .blob{position:absolute; filter:blur(70px); opacity:.35; mix-blend-mode:screen;
+    transform-origin:center center; animation:float 16s ease-in-out infinite alternate;}
+  .b1{ width:55vw; height:55vw; left:-10vw; top:-12vh;
+    background:radial-gradient(circle at 30% 30%, var(--aurora-1), transparent 55%); animation-duration:18s;}
+  .b2{ width:60vw; height:60vw; right:-15vw; top:-6vh;
+    background:radial-gradient(circle at 70% 20%, var(--aurora-2), transparent 55%); animation-duration:22s;}
+  .b3{ width:50vw; height:50vw; left:10vw; bottom:-25vh;
+    background:radial-gradient(circle at 40% 70%, var(--aurora-3), transparent 60%); animation-duration:20s;}
+  .b4{ width:45vw; height:45vw; right:5vw; bottom:-20vh;
+    background:radial-gradient(circle at 60% 60%, var(--aurora-4), transparent 60%); animation-duration:19s;}
+  @keyframes float{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(2vw,-1.5vh,0) scale(1.05)}}
+  #bg-canvas{position:fixed; inset:0; z-index:5; pointer-events:none;}
+
+  /* ====== 遊戲機台 ====== */
+  .wrap{max-width:1100px;margin:20px auto;padding:0 16px;position:relative;z-index:2}
+  header{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-bottom:12px}
+  h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.2px}
+  .meta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+.pill{
+  background:var(--card-2);           /* 淺灰藍底 */
+  border:1px solid var(--line);
+  border-radius:999px;                /* 保持膠囊形狀 */
+  padding:6px 12px;
+  font-size:14px;
+  color:var(--ink);                   /* 深灰字 */
+}
+
+ .select{
+  appearance:none;
+  background:var(--card-2);            /* ✅ 背景改卡片淺灰藍 */
+  color:var(--ink);                    /* ✅ 文字用深灰墨色 */
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:14px;
+}
+
+.btn{
+  background:linear-gradient(135deg,var(--brand),var(--brand-dark));  /* ✅ 改成主藍+深藍 */
+  color:#fff;                               /* ✅ 按鈕文字改白 */
+  border:none;
+  border-radius:10px;
+  padding:10px 14px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 6px 22px rgba(14,99,230,.25); /* ✅ 改成主藍陰影 */
+}
+
+  .btn:hover{filter:brightness(1.05)}
+  .bar{
+  height:10px;
+  background:var(--card-2);                 /* ✅ 背景淺灰藍 */
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--line);
+}
+.bar>span{
+  display:block;height:100%;width:100%;
+  background:linear-gradient(90deg,var(--ok),#38bdf8);  /* ✅ 綠色到淺藍色 */
+}
+
+  .panel{display:grid;grid-template-columns:1fr 320px;gap:16px}
+  @media (max-width:1024px){.panel{grid-template-columns:1fr}}
+  .grid{display:grid;gap:10px;margin-top:14px}
+  .side{
+  background:var(--card-2);                 /* ✅ 側邊欄背景改淺灰藍 */
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  backdrop-filter:blur(8px);
+}
+.side h3{color:var(--brand);}              /* ✅ 標題文字用主藍 */
+.tip{font-size:13px;color:var(--muted);}   /* ✅ 已用 muted 淺灰藍，不需額外改 */
+.kv{font-size:13px;color:var(--muted);}
+
+
+  /* ====== 卡片 ====== */
+  .card{position:relative;aspect-ratio:1/1;perspective:1200px;cursor:pointer;user-select:none}
+  .inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .28s ease}
+  .card.flipped .inner,.card.matched .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;
+    justify-content:center;backface-visibility:hidden;overflow:hidden}
+  .front{
+  background:var(--card-2);                 /* ✅ 背景淺灰藍 */
+  border:1px solid var(--line);
+}
+.back{
+  transform:rotateY(180deg);
+  background:var(--card);                   /* ✅ 背景白底 */
+  border:1px solid var(--line);
+}
+.emoji{font-size:38px;line-height:1}
+.label{
+  position:absolute;bottom:10px;left:0;right:0;
+  text-align:center;font-size:12px;
+  color:var(--muted);                       /* ✅ 文字顏色改成 muted 灰藍 */
+}
+
+
+  /* ====== 其他 UI ====== */
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+  background:rgba(14,99,230,.14);           /* ✅ 改成藍色透明底 */
+  border:1px solid rgba(14,99,230,.35);     /* ✅ 藍色邊框 */
+  color:var(--brand-dark);                  /* ✅ 文字顏色用深藍 */
+  font-size:12px;border-radius:999px;padding:4px 8px
+}
+
+.toast{
+  position:fixed;              /* ✅ 固定定位 */
+  left:50%;                    /* ✅ 水平置中 */
+  bottom:24px;                 /* ✅ 底部位置 */
+  transform:translateX(-50%);  /* ✅ 保持正中 */
+  background:var(--card);      /* ✅ 白底 */
+  color:var(--ink);            /* ✅ 深灰字 */
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 14px;
+  font-size:14px;
+  opacity:0;
+  transition:opacity .2s,transform .2s;
+  z-index:5;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);  /* ✅ 和 .know 一致的浮出感 */
+}
+
+
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+  .overlay{position:fixed;inset:0;background:rgba(2,8,14,.7);display:none;
+    align-items:center;justify-content:center;padding:16px;z-index:10;backdrop-filter:blur(4px)}
+  .dialog{
+  background:var(--card);                   /* ✅ 對話框白底 */
+  color:var(--ink);                         /* ✅ 文字深灰墨色 */
+  border-radius:16px;
+  max-width:560px;width:100%;padding:20px;
+  text-align:center;
+  border:1px solid var(--line);
+}
+
+  .dialog h2{margin:0 0 8px}
+  .row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .input{
+  width:240px;
+  background:var(--card-2);                 /* ✅ 淺灰藍底 */
+  color:var(--ink);                         /* ✅ 深灰字 */
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:9px 10px;
+}
+
+  table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 6px;
+  font-size:13px;
+  color:var(--ink);                         /* ✅ 表格字顏色深灰 */
+}
+tr{background:var(--card-2);border:1px solid var(--line);}  /* ✅ 列背景淺灰藍 */
+
+.know{
+  position:fixed;                /* ✅ 固定定位 */
+  left:50%;                      /* ✅ 水平置中 */
+  bottom:88px;                   /* ✅ 底部浮出位置 */
+  transform:translateX(-50%);    /* ✅ 向左移半寬保持正中 */
+  background:var(--card);        /* ✅ 淺色白底 */
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px 14px;
+  display:none;
+  max-width:560px;
+  width:calc(100% - 32px);
+  z-index:9;                     /* ✅ 浮在最上層 */
+  color:var(--ink);              /* ✅ 主文字深灰 */
+  box-shadow:0 4px 12px rgba(0,0,0,.1);  /* ✅ 淺色底需要陰影來凸顯 */
+}
+.know strong{
+  color:var(--brand);            /* ✅ 強調字改成主藍 */
+}
+
+#helpBtn{
+  background:none;
+  border:none;
+  font-size:18px;
+  cursor:pointer;
+  color:var(--brand);         /* ✅ 主藍色 */
+}
+#helpBtn:hover{color:var(--brand-dark);}
+
+
+/* ====== 教學引導框 ====== */
+.guide{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);       /* 半透明黑背景 */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:20;
+}
+.guide-card{
+  background:var(--card);          /* 白底（用你的色票） */
+  color:var(--ink);
+  border-radius:16px;
+  padding:20px;
+  max-width:420px;
+  width:calc(100% - 40px);
+  box-shadow:0 8px 24px rgba(0,0,0,.15);
+  text-align:left;
+}
+.guide-card h2{color:var(--brand);}
+.steps{margin:14px 0;display:grid;gap:10px;font-size:14px;color:var(--ink);}
+.step b{font-size:18px;margin-right:6px;}
+.guide-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.icon-btn{
+  background:none;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:14px;
+}
+
+
+/* ====== 開始畫面 ====== */
+
+.overlay-start{
+  position:fixed;
+  inset:0;
+  /*background:var(--bg);*/
+  background:url('home.jpg') center/cover no-repeat; 
+  background-color:#0E63E6; 
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:50; /* ✅ 保證最上層 */
+}
+.start-box{
+  background:var(--card);
+  padding:30px 40px;
+  border-radius:16px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.2);
+
+  /* ✅ 先做淡入，再接彈跳 */
+  animation: fadeIn 0.8s ease-out, bounce 1.6s 0.8s infinite;
+  transform-origin: center bottom;
+}
+
+/* ✅ 淡入動畫 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ✅ 跳動動畫 */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-18px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+
+.start-box h1{margin:0 0 16px;color:var(--brand);}
+.start-box p{margin:0 0 20px;color:var(--muted);}
+.start-box button{
+  background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:12px 20px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}  
+
+/* ====== 教學框 ====== */
+.overlay-tutorial{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none; /* ✅ 預設隱藏 */
+  align-items:center;
+  justify-content:center;
+  z-index:40;
+}
+.tutorial-box{
+  background:var(--card);
+  padding:24px 28px;
+  border-radius:16px;
+  text-align:center;
+  max-width:420px;
+  color:var(--ink);
+  box-shadow:0 6px 20px rgba(0,0,0,.25);
+}
+.tutorial-box h2{margin:0 0 12px;color:var(--brand);}
+.tutorial-box p{margin:0 0 20px;}
+.tutorial-box button{
+  background:var(--brand);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:10px 16px;
+  font-size:14px;
+  cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+<!-- ====== 開始畫面 ====== -->
+<div id="start-screen" class="overlay-start">
+  <div class="start-box">
+    <h1>ESG Memory Matching Game</h1>
+    <p>Come challenge yourself! Match the cards and learn about environmental knowledge 🌱</p>
+    <button id="start-btn">Start Game</button>
+  </div>
+</div>
+
+<!-- ====== 教學框 ====== -->
+<!-- 教學引導（首次顯示，也可點❓再開） -->
+<div class="guide" id="guide">
+  <div class="guide-card">
+    <h2 style="margin:0 0 6px">How to Play</h2>
+    <div class="tip" style="color:#246084">3 steps to get started quickly</div>
+    <div class="steps">
+      <div class="step"><b>🖱️</b><strong>1）Click two cards</strong><br>If the icons match, the pair is successful.</div>
+      <div class="step"><b>⏱️</b><strong>2）Keep track of time</strong><br>Finish all matches within the time limit.</div>
+      <div class="step"><b>🎯</b><strong>3）Unlock Knowledge</strong><br>Each successful pair unlocks ESG knowledge.</div>
+    </div>
+    <div class="guide-actions">
+      <button class="btn" id="startBtn">Start Challenge</button>
+      <button class="icon-btn" id="skipBtn">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- 背景 -->
+<div class="bg-img"></div>
+<div class="stage">
+    <img src="img/cloud.png" class="cloud">
+    <img src="img/cloud1.png" class="cloud2">
+<!-- ✅ 風車 -->
+    <svg class="windmill" viewBox="0 0 200 200">
+      <!-- ✅ 漸層定義 -->
+      <defs>
+        <linearGradient id="bladeGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7FC0FF"/>
+          <stop offset="100%" stop-color="#0E63E6"/>
+        </linearGradient>
+      </defs>
+
+      <!-- ✅ 中心圓 -->
+      <circle cx="100" cy="120" r="14" fill="#fff" stroke="#555" stroke-width="3"/>
+
+      <!-- ✅ 葉片（加了圓角 rx/ry） -->
+      <g class="blade">
+        <rect x="92" y="10" width="16" height="100" rx="6" ry="6" fill="url(#bladeGradient)"/>
+        <rect x="92" y="120" width="16" height="70" rx="6" ry="6" fill="url(#bladeGradient)"/>
+        <rect x="30" y="112" width="70" height="16" rx="6" ry="6" fill="url(#bladeGradient)"/>
+        <rect x="100" y="112" width="70" height="16" rx="6" ry="6" fill="url(#bladeGradient)"/>
+      </g>
+    </svg>
+  <svg class="trees" viewBox="0 0 200 200">
+    <circle cx="60" cy="140" r="40" fill="#C9F0DD" stroke="#6aa787" stroke-width="4"/>
+    <circle cx="140" cy="160" r="30" fill="#D6F6E6" stroke="#6aa787" stroke-width="4"/>
+  </svg>
+</div>
+<div class="bg">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
+  <canvas id="bg-canvas"></canvas>
+
+<!-- 遊戲機台 -->
+<div class="wrap">
+  <header>
+    <h1>HQC Sustainable Match-Up</h1>
+    <div class="meta">
+      <select id="levelSel" class="select">
+        <option value="0">S — Supply Stage (Raw Materials) </option>
+        <option value="1">P — Production Stage </option>
+        <option value="2">M — Material Stage (Packaging) </option>
+        <option value="3">W — Warehouse & Recycling Stage </option>
+      </select>
+      <div class="pill">Time:<b id="time">--</b></div>
+      <div class="pill">Moves:<b id="moves">0</b></div>
+      <div class="pill">Matches:<b id="matches">0</b>/<b id="pairs">--</b></div>
+      <button class="btn" id="restartBtn">Restart</button>
+      <button class="icon-btn" id="helpBtn">❓</button>
+    </div>
+  </header>
+  <div class="bar"><span id="timebar"></span></div>
+  <div class="panel">
+    <div><div id="grid" class="grid"></div><div id="know" class="know"></div></div>
+    <aside class="side">
+      <h3>Mission / Progress</h3>
+      <div id="mission" class="tip"></div>
+      <div class="chips" id="progressChips"></div>
+      <div class="tip">Unlocked Facts:<b id="unlocked">0</b>/<b id="need">--</b></div>
+      <hr>
+      <h3>Supply Chain Stage Progress</h3>
+      <div class="tip">Current Stage:<b id="stageNow">--</b></div>
+      <hr><h3>Local Leaderboard</h3>
+      <table id="rank"><thead><tr><th>#</th><th>Nickname</th><th>Stage</th><th>Time</th><th>Moves</th><th>Date</th></tr></thead><tbody></tbody></table>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay">
+  <div class="dialog">
+    <h2 id="resultTitle">Time's Up!</h2>
+    <p id="resultText"></p>
+    <div class="row"><input id="nick" class="input" placeholder="Nickname"><button class="btn" id="saveScoreBtn">Save Score</button></div>
+    <div class="row"><input id="shareUrl" class="input" readonly><button class="btn" id="copyBtn">Copy Link</button></div>
+    <div class="row"><button class="btn" id="playAgainBtn">Play Again</button></div>
+  </div>
+</div>
+
+<script>
+/* === JS 遊戲邏輯 (略，跟之前相同，保留完整) === */
+/* ... 你可以貼上第 4 部分的 JS 遊戲邏輯 ... */
+
+/* ====== 首頁開始畫面 + 教學引導 ====== */ 
+const startScreen = document.getElementById("start-screen");
+const guide = document.getElementById("guide");
+const startBtn = document.getElementById("startBtn");
+const skipBtn = document.getElementById("skipBtn");
+
+// 點「首頁開始」 → 顯示教學引導
+document.getElementById("start-btn").addEventListener("click", ()=>{
+  startScreen.style.display = "none";
+  guide.style.display = "flex";
+});
+
+// 點「開始遊戲」
+startBtn.addEventListener("click", ()=>{
+  guide.style.display = "none";
+  startGame(); // ✅ 呼叫遊戲開始
+});
+
+// 點「略過」
+skipBtn.addEventListener("click", ()=>{
+  guide.style.display = "none";
+  startGame();
+});
+
+// 點 ❓ → 再打開教學引導
+document.getElementById("helpBtn").addEventListener("click", ()=>{
+  guide.style.display = "flex";
+});
+
+
+</script>
+
+<script>
+/*=== 背景粒子特效 (第 5 部分) === 
+(function(){
+  const canvas = document.getElementById('bg-canvas'); if(!canvas) return;
+  const ctx = canvas.getContext('2d', { alpha:true });
+  let W=0, H=0, DPR=Math.min(2, window.devicePixelRatio||1);
+  const styles=getComputedStyle(document.documentElement);
+  const C1=(styles.getPropertyValue('--aurora-1')||'#00ffa3').trim();
+  const C2=(styles.getPropertyValue('--aurora-2')||'#00d4ff').trim();
+  const SYMBOLS = ['·','·','·','✧','✦']; const COUNT=50; const SPEED=0.15; const ALPHA=0.1;
+  const items=[];
+  function rand(a,b){return a+Math.random()*(b-a)}; function pick(a){return a[Math.floor(Math.random()*a.length)]}
+  function resize(){W=canvas.width=innerWidth*DPR;H=canvas.height=innerHeight*DPR;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px'}
+  function spawn(i){const sym=pick(SYMBOLS),isDot=(sym==='·');items[i]={sym,x:rand(0,W),y:rand(0,H),vx:rand(-SPEED,SPEED)*DPR,vy:rand(-SPEED,SPEED)*DPR,size:isDot?rand(1.5,2.5)*DPR:rand(12,18)*DPR,rot:rand(0,Math.PI*2),spin:rand(-0.002,0.002),alpha:ALPHA,color:Math.random()<0.5?C1:C2};}
+  function wrap(o){if(o.x<-40)o.x=W+40;if(o.x>W+40)o.x=-40;if(o.y<-40)o.y=H+40;if(o.y>H+40)o.y=-40;}
+  function step(){ctx.clearRect(0,0,W,H);items.forEach(o=>{o.x+=o.vx;o.y+=o.vy;o.rot+=o.spin;wrap(o);ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.rot);ctx.globalAlpha=o.alpha;if(o.sym==='·'){ctx.fillStyle=o.color;ctx.beginPath();ctx.arc(0,0,o.size,0,Math.PI*2);ctx.fill()}else{ctx.font=`${o.size}px system-ui,Apple Color Emoji`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=o.color;ctx.fillText(o.sym,0,0)}ctx.restore()});requestAnimationFrame(step);}
+  resize();for(let i=0;i<COUNT;i++)spawn(i);requestAnimationFrame(step);addEventListener('resize',resize,{passive:true});
+})();*/
+</script>
+
+<script>
+/* ================== 關卡設定（SPMW 一站式供應鏈主線） ================== */
+const LEVELS = [
+  { name: 'S — Supply Stage (Raw Materials)',  size:4, time:60, targetMoves:40, desc:'Master material substitution and carbon accounting to start decarbonizing at the source.' },
+  { name: 'P — Production Stage', size:4, time:60, targetMoves:40, desc:'Adopt green power and energy-saving equipment to optimize process efficiency.' },
+  { name: 'M — Material Stage (Packaging)', size:4, time:60, targetMoves:40, desc:'Design lightweight caps and easy-tear packaging to enhance recyclability.' },
+  { name: 'W — Warehouse & Recycling Stage', size:4, time:60, targetMoves:40, desc:'Integrate logistics and regenerative recycling to build a closed-loop economy.' }
+];
+
+let LV = 0;
+
+
+/* ================== 卡庫 ================== */
+/* ================== 宏全供應鏈卡牌庫 ================== */
+const ESG_ICONS = [
+  /* ---- S：原料階段（Supply） ---- */
+  {emoji:'🧪', label:'Carbon Footprint Analysis', tip:'Establish upstream raw material carbon accounting to track emission sources.'},
+  {emoji:'🔁', label:'Recycled Content Integration', tip:'Introduce rPET to replace virgin materials, lowering the carbon footprint.'},
+  {emoji:'🧰', label:'Quality Control (QC)', tip:'Strict inspection reduces defective products and waste.'},
+  {emoji:'🧴', label:'Preform Manufacturing', tip:'Optimize preform weight to save plastic and energy consumption.'},
+  {emoji:'🌱', label:'Green Procurement', tip:'Prioritize low-carbon and eco-certified raw materials.'},
+  {emoji:'🧮', label:'Supplier Evaluation', tip:'Assess supplier sustainability performance using ESG criteria.'},
+  {emoji:'📊', label:'Life Cycle Assessment (LCA)', tip:'Analyze the environmental impact from manufacturing to disposal.'},
+  {emoji:'⚗️', label:'Material R&D', tip:'Develop new eco-friendly plastics and biodegradable materials.'},
+
+  /* ---- P：製程階段（Production） ---- */
+  {emoji:'🌞', label:'Green Energy Adoption', tip:'Utilize solar and wind power to reduce carbon emissions during production.'},
+  {emoji:'⚙️', label:'Energy-Efficient Processes', tip:'Use high-efficiency motors and waste-heat recovery technology.'},
+  {emoji:'🏭', label:'Aseptic Filling', tip:'Energy-saving and high-yield green production technology.'},
+  {emoji:'💧', label:'Water Recycling', tip:'Process water recovery systems reduce intake and discharge.'},
+  {emoji:'🧊', label:'Cooling Optimization', tip:'Implement cooling towers and VFD systems for energy savings.'},
+  {emoji:'🌡️', label:'Temperature Management', tip:'Dynamically adjust process temperatures to lower energy usage.'},
+  {emoji:'🧯', label:'Zero Incident Management', tip:'Ensure process safety and equipment maintenance.'},
+  {emoji:'🪫', label:'Waste Heat Recovery', tip:'Reuse residual heat generated during the production process.'},
+
+  /* ---- M：包裝階段（Material） ---- */
+  {emoji:'🍶', label:'PET Bottle Lightweighting', tip:'Reducing bottle weight by 1–2g significantly lowers transport carbon emissions.'},
+  {emoji:'🏷️', label:'Label Reduction', tip:'Easy-tear labels facilitate recycling separation.'},
+  {emoji:'🔩', label:'Cap Lightweighting', tip:'Reduces material usage and enhances recyclability.'},
+  {emoji:'📦', label:'Packaging Reduction', tip:'Eliminate unnecessary packaging structures to minimize material waste.'},
+  {emoji:'📐', label:'Mold Optimization', tip:'Design molds that save material and boost production efficiency.'},
+  {emoji:'🧷', label:'Adhesive Improvement', tip:'Use separable eco-friendly glue to enhance recycling purity.'},
+  {emoji:'🎨', label:'Ink Reduction', tip:'Use eco-friendly inks to minimize printing pollution.'},
+  {emoji:'🪶', label:'Packaging Innovation', tip:'Research and develop paper-based and biodegradable packaging alternatives.'},
+
+  /* ---- W：倉儲與回收階段（Warehouse） ---- */
+  {emoji:'🚚', label:'Logistics Optimization', tip:'Optimize routes and loading capacity to reduce carbon emissions.'},
+  {emoji:'🏬', label:'Smart Warehousing', tip:'Centralized distribution reduces empty vehicle runs and energy waste.'},
+  {emoji:'♻️', label:'Recycling and Regeneration', tip:'Achieve bottle-to-bottle closed-loop recycling.'},
+  {emoji:'🌬️', label:'Energy Recovery in Warehousing', tip:'Introduce solar and wind energy for on-site use.'},
+  {emoji:'📦', label:'Packaging Material Take-back', tip:'Establish a return system for packaging waste.'},
+  {emoji:'🚴', label:'Low-Carbon Delivery', tip:'Adopt electric vehicles and green logistics.'},
+  {emoji:'🔋', label:'Energy Storage Management', tip:'Integrate batteries with solar panels for improved energy efficiency.'},
+  {emoji:'🛰️', label:'Smart Monitoring', tip:'Use IoT to monitor temperature, humidity, and energy consumption.'}
+];
+
+/* ================== DOM ================== */
+const gridEl   = document.getElementById('grid');
+const timeEl   = document.getElementById('time');
+const timebar  = document.getElementById('timebar');
+const movesEl  = document.getElementById('moves');
+const matchEl  = document.getElementById('matches');
+const pairsEl  = document.getElementById('pairs');
+const toastEl  = document.getElementById('toast');
+const overlay  = document.getElementById('overlay');
+const resultTitle  = document.getElementById('resultTitle');
+const resultText   = document.getElementById('resultText');
+const playAgainBtn = document.getElementById('playAgainBtn');
+const restartBtn   = document.getElementById('restartBtn');
+const levelSel     = document.getElementById('levelSel');
+const missionEl    = document.getElementById('mission');
+const chipsEl      = document.getElementById('progressChips');
+const unlockedEl   = document.getElementById('unlocked');
+const needEl       = document.getElementById('need');
+const knowEl       = document.getElementById('know');
+const rankTable    = document.getElementById('rank').querySelector('tbody');
+const nickInput    = document.getElementById('nick');
+const saveBtn      = document.getElementById('saveScoreBtn');
+const shareInput   = document.getElementById('shareUrl');
+const copyBtn      = document.getElementById('copyBtn');
+
+/* ================== 狀態 ================== */
+let GRID_SIZE = LEVELS[LV].size;
+let TIME_LIMIT = LEVELS[LV].time;
+const FLIP_DELAY = 600;
+
+let deck = [];
+let first = null, second = null, lock = false;
+let moves = 0, matched = 0, timer = null, timeLeft = TIME_LIMIT;
+let discovered = new Set();
+
+/* ================== 工具 ================== */
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } return arr; }
+function format(sec){ const m=Math.floor(sec/60).toString().padStart(2,'0'); const s=(sec%60).toString().padStart(2,'0'); return `${m}:${s}` }
+function showToast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'),1200); }
+function showKnow(label){
+  const icon = ESG_ICONS.find(x=>x.label===label);
+  if(!icon) return;
+  knowEl.innerHTML = `<strong>${icon.emoji} ${label}</strong>：${icon.tip}`;
+  knowEl.style.display='block';
+  setTimeout(()=>{ knowEl.style.display='none' }, 2600);
+}
+
+/* ================== 牌組 & 版面 ================== */
+function makeDeck(){
+  const pairs = (GRID_SIZE * GRID_SIZE) / 2;
+  
+  // 🧩 依關卡選取該階段的 8 張卡
+  const start = LV * 8;            // 每階段 8 張卡
+  const end   = start + 8;
+  const stageCards = ESG_ICONS.slice(start, end);
+
+  // 從該階段 8 張卡中再抽出需要的配對數量
+  const base = shuffle([...stageCards]).slice(0, pairs);
+
+  // 雙份化配對並打亂
+  const doubled = base.flatMap((it, idx) => [
+    { ...it, id: idx + 'A' },
+    { ...it, id: idx + 'B' }
+  ]);
+
+  return shuffle(doubled);
+}
+
+function renderGrid(){
+  gridEl.innerHTML='';
+  gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE},1fr)`;
+  deck.forEach(card=>{
+    const cell = document.createElement('div');
+    cell.className='card';
+    cell.dataset.key = card.id;
+    cell.dataset.label = card.label;
+    cell.innerHTML = `
+      <div class="inner">
+        <div class="face front" aria-hidden="true"></div>
+        <div class="face back" role="img" aria-label="${card.label}">
+          <div class="emoji">${card.emoji}</div>
+          <div class="label">${card.label}</div>
+        </div>
+      </div>`;
+    cell.addEventListener('click', onFlip);
+    gridEl.appendChild(cell);
+  });
+}
+
+/* ================== 互動 ================== */
+function onFlip(e){
+  const el = e.currentTarget;
+  if(lock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  el.classList.add('flipped');
+
+  if(!first){ first = el; return; }
+  second = el; lock = true; moves++; movesEl.textContent = moves;
+
+  const same = first.dataset.label === second.dataset.label;
+  if(same){
+    setTimeout(()=>{
+      first.classList.add('matched');
+      second.classList.add('matched');
+      matched++; matchEl.textContent = matched;
+
+      const lab = first.dataset.label;
+      discovered.add(lab); renderChips(); showToast(`Match Found：${lab}`); showKnow(lab);
+
+      resetPick();
+      if(matched === deck.length/2) endGame(true);
+    }, 140);
+  }else{
+    setTimeout(()=>{ first.classList.remove('flipped'); second.classList.remove('flipped'); resetPick(); }, FLIP_DELAY);
+  }
+}
+function resetPick(){ first=null; second=null; lock=false; }
+
+/* ================== 計時 ================== */
+function startTimer(){
+  timeLeft = TIME_LIMIT;
+  timeEl.textContent = format(timeLeft);
+  timebar.style.width = '100%';
+  if(timer) clearInterval(timer);
+  timer = setInterval(()=>{
+    timeLeft--;
+    timeEl.textContent = format(timeLeft);
+    timebar.style.width = Math.max(0,(timeLeft/TIME_LIMIT)*100)+'%';
+    if(timeLeft<=0){ clearInterval(timer); endGame(false); }
+  },1000);
+}
+
+/* ================== 任務 / 小卡進度 ================== */
+function renderMission(){ 
+  const lv = LEVELS[LV];
+  missionEl.textContent = `${lv.name}：${lv.desc}（Finish all pairs within the ${lv.time} s time limit; achieve a target score with ${lv.targetMoves} moves or less)`;
+}
+
+function updateStage(){
+  const stageEl = document.getElementById('stageNow');
+  if(stageEl) stageEl.textContent = LEVELS[LV].name;
+}
+
+function renderChips(){
+  chipsEl.innerHTML = '';
+  [...discovered].forEach(lab=>{
+    const chip = document.createElement('span');
+    chip.className='chip';
+    const em = ESG_ICONS.find(x=>x.label===lab)?.emoji || '♻️';
+    chip.textContent = `${em} ${lab}`; chipsEl.appendChild(chip);
+  });
+  unlockedEl.textContent = discovered.size; needEl.textContent = (GRID_SIZE*GRID_SIZE)/2;
+}
+
+/* ================== 開局 / 結束 ================== */
+function startGame(){
+  // ✅ 每次開始新關卡都隱藏分享與暱稱區
+  document.querySelectorAll('.row').forEach(r => r.style.display = 'none');
+  overlay.style.display='none';
+  updateStage();
+  const lv = LEVELS[LV]; GRID_SIZE=lv.size; TIME_LIMIT=lv.time;
+
+  deck = makeDeck(); first=second=null; lock=false; moves=0; matched=0; discovered=new Set();
+  movesEl.textContent='0'; matchEl.textContent='0'; pairsEl.textContent=(deck.length/2);
+  renderGrid(); renderMission(); renderChips();
+
+  document.querySelectorAll('.card').forEach(el=>el.classList.add('flipped'));
+  setTimeout(()=>document.querySelectorAll('.card').forEach(el=>el.classList.remove('flipped')),700);
+  startTimer();
+}
+
+/* ================== 進入下一階段 ================== */
+function nextStage(){
+  LV++;
+  if(LV >= LEVELS.length){
+    showToast('🎉 You have completed the SPMW One-Stop Supply Chain mission!');
+    overlay.style.display = 'flex';
+    resultTitle.textContent = 'All Stages Completed 🎯';
+    resultText.innerHTML = 'Congratulations! You have mastered the entire ESG One-Stop Process from Raw Materials → Production → Packaging → Recycling.';
+    return;
+  }
+  showToast(`🌍 Entering Next Stage:${LEVELS[LV].name}`);
+  setTimeout(()=>startGame(), 1000);
+}
+
+function endGame(win){
+  lock = true;
+  const timeUsed = TIME_LIMIT - timeLeft;
+  const lv = LEVELS[LV];
+  const pass = win && (moves <= lv.targetMoves);
+
+  const resultTxt = win
+    ? `<b>${LEVELS[LV].name}</b> complete!<br>${LEVELS[LV].desc}<br><br>You finished all matches in <b>${moves}</b> moves, taking <b>${format(timeUsed)}</b>。`
+    : `You matched <b>${matched}</b> pairs; keep practicing!`;
+
+  resultTitle.textContent = win ? 'Stage Complete 🎉' : "Time's Up!";
+  resultText.innerHTML = resultTxt;
+
+  /* ✅ 若非最後一關，出現「開始下一關」 */
+  if (win && LV < LEVELS.length - 1) {
+    resultText.innerHTML += `<br><br><button id="nextBtn" class="btn">Start Next Stage</button>`;
+    setTimeout(() => {
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        overlay.style.display = "none";
+        nextStage(); // ✅ 手動進入下一關
+      });
+    }, 200);
+  }
+
+  /* ✅ 若是最後一關，才顯示分享連結與暱稱輸入 */
+  else if (win && LV === LEVELS.length - 1) {
+    resultTitle.textContent = "Challenge Mastered 🎯";
+    resultText.innerHTML += `
+      <br><br>You have successfully completed all four stage missions!
+      <br><br>Enter your name and share your achievement link below 👇`;
+    // ✅ 顯示 overlay 中的暱稱與分享列
+    document.querySelectorAll('.row').forEach(r => r.style.display = 'flex');
+  } 
+  else {
+    // 若失敗隱藏暱稱、分享區
+    document.querySelectorAll('.row').forEach(r => r.style.display = 'none');
+  }
+
+  // ✅ 更新分享連結
+  const url = new URL(window.location.href);
+  url.searchParams.set("lv", String(LV));
+  url.searchParams.set("size", String(GRID_SIZE));
+  url.searchParams.set("moves", String(moves));
+  url.searchParams.set("time", String(timeUsed));
+  url.searchParams.set("ts", String(Date.now()));
+  shareInput.value = url.toString();
+
+  overlay.style.display = "flex";
+}
+
+
+
+/* ================== 排行榜（本機） ================== */
+const STORE_KEY = 'esg_memory_leaderboard_v2';
+function loadLB(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]') }catch{ return [] } }
+function saveLB(list){ localStorage.setItem(STORE_KEY, JSON.stringify(list)) }
+function pushScore(nick, lvIdx, size, timeUsed, moves){
+  const list = loadLB();
+  list.push({nick:nick||'—', level:LEVELS[lvIdx].name, size, timeUsed, moves, date:new Date().toLocaleDateString()});
+  list.sort((a,b)=> a.timeUsed-b.timeUsed || a.moves-b.moves);
+  saveLB(list.slice(0,10)); renderLB();
+}
+function renderLB(){
+  const list = loadLB();
+  rankTable.innerHTML = list.map((r,i)=>(
+    `<tr><td>${i+1}</td><td>${escapeHtml(r.nick)}</td><td>${r.level}</td><td>${format(r.timeUsed)}</td><td>${r.moves}</td><td>${r.date}</td></tr>`
+  )).join('');
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,(m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])) }
+
+/* ================== 事件 ================== */
+playAgainBtn.addEventListener('click', startGame);
+restartBtn.addEventListener('click', startGame);
+levelSel.addEventListener('change', ()=>{ LV = Number(levelSel.value); startGame(); });
+document.getElementById('saveScoreBtn').addEventListener('click', ()=>{
+  const timeUsed = TIME_LIMIT - timeLeft;
+  pushScore(nickInput.value.trim(), LV, GRID_SIZE, timeUsed>0?timeUsed:TIME_LIMIT, moves);
+  showToast('Score successfully saved to Leaderboard!');
+});
+document.getElementById('copyBtn').addEventListener('click', async ()=>{
+  try{ await navigator.clipboard.writeText(shareInput.value); showToast('Share link successfully copied!'); }
+  catch{ shareInput.select(); document.execCommand('copy'); showToast('Copied to clipboard (Fallback)'); }
+});
+
+/* ================== 啟動 ================== */
+renderLB(); LV = 0; // ✅ 確保從第一關開始 
+startGame();
+(function readShare(){
+  const u = new URL(window.location.href);
+  const qMoves = u.searchParams.get('moves');
+  const qTime  = u.searchParams.get('time');
+  const qLv    = u.searchParams.get('lv');
+  if(qMoves && qTime){ showToast(`Shared Result:${LEVELS[Number(qLv)||0].name} Score ${format(Number(qTime))}／${qMoves} moves`) }
+})();
+</script>
+<!-- ================== 背景粒子 ================== -->
+<script>
+(function(){
+  const canvas = document.getElementById('bg-canvas'); 
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d', { alpha:true });
+  let W=0, H=0, DPR=Math.min(2, window.devicePixelRatio||1);
+
+  /* 調色（跟 Aurora 色系一致） */
+  const styles=getComputedStyle(document.documentElement);
+  const C1=(styles.getPropertyValue('--aurora-1')||'#00ffa3').trim();
+  const C2=(styles.getPropertyValue('--aurora-2')||'#00d4ff').trim();
+
+  /* 粒子設定 */
+  const SYMBOLS = ['·','·','·','✧','✦']; // 以小點＋星光為主
+  const COUNT = Math.max(40, Math.min(90, Math.round((innerWidth*innerHeight)/28000)));
+  const SPEED = 0.40;
+  const ALPHA = 0.35;
+
+  const items = [];
+  function rand(a,b){ return a + Math.random()*(b-a) }
+  function pick(a){ return a[Math.floor(Math.random()*a.length)] }
+
+  function resize(){
+    W = canvas.width  = Math.floor(innerWidth * DPR);
+    H = canvas.height = Math.floor(innerHeight* DPR);
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height= innerHeight+ 'px';
+  }
+
+  function spawn(i=0){
+    const sym = pick(SYMBOLS);
+    const isDot = (sym==='·');
+    items[i] = {
+      sym, x: rand(0,W), y: rand(0,H),
+      vx: rand(-SPEED,SPEED)*DPR, vy: rand(-SPEED*0.6,SPEED)*DPR,
+      size: isDot ? rand(1.2,2.4)*DPR : rand(10,20)*DPR,
+      rot: rand(0,Math.PI*2), spin: rand(-0.002,0.002),
+      alpha: ALPHA, color: Math.random()<0.5?C1:C2
+    };
+  }
+
+  function glow(hex, a){
+    const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if(!m) return `rgba(255,255,255,${a})`;
+    const r=parseInt(m[1],16), g=parseInt(m[2],16), b=parseInt(m[3],16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  function wrap(o){ 
+    if(o.x<-40)o.x=W+40; if(o.x>W+40)o.x=-40; 
+    if(o.y<-40)o.y=H+40; if(o.y>H+40)o.y=-40; 
+  }
+
+  function step(){
+    ctx.clearRect(0,0,W,H);
+
+    // 柔光暈（Aurora Glow）
+    const g = ctx.createRadialGradient(W*0.25,H*0.25,0, W*0.25,H*0.25, Math.max(W,H)*0.6);
+    g.addColorStop(0, glow(C2, .10)); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    items.forEach(o=>{
+      o.x+=o.vx; o.y+=o.vy; o.rot+=o.spin; wrap(o);
+      ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(o.rot); ctx.globalAlpha=o.alpha;
+      if(o.sym==='·'){ // dot
+        ctx.fillStyle=o.color; ctx.beginPath(); ctx.arc(0,0,o.size,0,Math.PI*2); ctx.fill();
+      }else{ // star
+        ctx.font=`${o.size}px system-ui,Apple Color Emoji,Segoe UI Symbol`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle=o.color; ctx.fillText(o.sym,0,0);
+      }
+      ctx.restore();
+    });
+
+    requestAnimationFrame(step);
+  }
+
+  resize(); for(let i=0;i<COUNT;i++) spawn(i); requestAnimationFrame(step);
+  addEventListener('resize', resize, {passive:true});
+})();
+</script>
+
+</body>
+</html>
