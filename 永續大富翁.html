@@ -1,0 +1,2698 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content-width=device-width, initial-scale=1.0">
+    <title>碳權大富翁：永續行動力</title>
+    <style>
+        /* [ ... CSS 樣式與 v1.7 完全相同 ... ] */
+        :root {
+            --player1-color: #1976d2;
+            --player2-color: #d32f2f;
+            --color-pollution: #8d6e63;
+            --color-green: #4caf50;
+            --color-public: #b0bec5;
+            --color-nature: #aed581;
+            --color-special: #fff176;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            background-color: #f0f7f0;
+            gap: 30px;
+        }
+        #game-container { display: flex; flex-direction: column; }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(10, 70px);
+            grid-template-rows: repeat(10, 70px);
+            border: 2px solid #333;
+            position: relative;
+            width: 700px;
+            height: 700px;
+        }
+        .cell {
+            width: 70px;
+            height: 70px;
+            border: 1px solid #999;
+            box-sizing: border-box;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 10px;
+            text-align: center;
+            position: relative;
+        }
+        .cell-header {
+            padding: 5px 2px;
+            font-weight: bold;
+            font-size: 12px;
+            color: #000;
+            border-bottom: 1px solid #999;
+        }
+        .cell-footer { 
+            padding: 5px 0;
+            font-size: 13px;
+            font-weight: bold; 
+        }
+        .cell-header.group-pollution { background-color: var(--color-pollution); color: #fff; }
+        .cell-header.group-green { background-color: var(--color-green); color: #fff; }
+        .cell-header.group-public { background-color: var(--color-public); }
+        .cell-header.group-nature { background-color: var(--color-nature); }
+        .cell-header.group-special { background-color: var(--color-special); }
+        .cell-header.type-go, .cell-header.type-jail, .cell-header.type-free, .cell-header.type-goToJail {
+            background-color: var(--color-special);
+            padding: 10px 2px;
+        }
+        .cell.owner-0 { box-shadow: inset 0 0 0 5px var(--player1-color); }
+        .cell.owner-1 { box-shadow: inset 0 0 0 5px var(--player2-color); }
+        /* 棋盤中央的大方塊：覆蓋內圈 8×8 格 */
+        /* 棋盤中央容器：用來疊圖＋文字 */
+        .center-cell {
+          position: absolute;      /* 已經在 board 中心的那一格位置 */
+          top: 70px;               /* 你原來用的內圈起點，如果已有就保留原數值 */
+          left: 70px;
+          width: 560px;
+          height: 560px;
+
+          /* 關鍵：變成疊層容器，而不是 flex/column 並排 */
+          display: block;
+          pointer-events: none;    /* 中央區不擋住四周格子的點擊 */
+        }
+
+        /* 背景圖：鋪滿中央區塊，在底層 */
+        .center-logo {
+          position: absolute;
+          inset: 0;                /* 等同 top:0; right:0; bottom:0; left:0; */
+          margin: auto;
+          max-width: 90%;
+          max-height: 90%;
+          object-fit: contain;
+          z-index: 0;              /* 在底層 */
+          opacity: 0.95;           /* 想要字更明顯可以再調低一點 */
+        }
+
+        /* 中央標題：疊在圖片上方，置中 */
+        .center-title {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);  /* 完全置中 */
+          z-index: 1;                        /* 高於圖片 */
+
+          text-align: center;
+          font-size: 26px;
+          font-weight: 700;
+          color: #222;
+          text-shadow:
+            0 0 4px rgba(255,255,255,0.9),
+            0 0 8px rgba(255,255,255,0.7);   /* 加一點白色光暈，避免文字被圖吃掉 */
+          white-space: pre-line;    /* 這行讓 \n 變成換行 */
+          pointer-events: none;              /* 滑鼠事件不會被文字吃掉 */
+        }
+
+
+        .player {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.5s ease-in-out;
+            z-index: 10;
+        }
+        #ui-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .ui-widget {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 15px;
+        }
+        #turn-indicator {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+        #player-stats h3 {
+            margin: 0 0 10px 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+        .stat {
+            font-size: 20px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+        }
+        .stat span { margin-left: 8px; font-weight: bold; }
+        #money-display { color: #2e7d32; }
+        #carbon-display { color: #d32f2f; }
+        #carbon-bar-container {
+            width: 100%;
+            height: 25px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+        }
+        #carbon-bar-fill {
+            width: 0%;
+            height: 100%;
+            background-color: #d32f2f;
+            transition: width 0.5s;
+        }
+        #player-summary h4 { margin: 0 0 10px 0; }
+        .summary-item { font-size: 14px; margin-bottom: 5px; }
+        .summary-item .player-color-box {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+            border: 1px solid #555;
+            vertical-align: middle;
+        }
+        #controls { text-align: center; }
+        #roll-button {
+            width: 100%;
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #roll-button:hover { background-color: #45a049; }
+        #roll-button:disabled { background-color: #9e9e9e; cursor: not-allowed; }
+        #dice-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 15px;
+            height: 30px;
+        }
+        #info-box {
+            height: 180px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow-y: auto;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+        #modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 101;
+            overflow: hidden;
+        }
+        .modal-content {
+            padding: 25px;
+            text-align: center;
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #2e7d32;
+            font-size: 24px;
+        }
+        #modal-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+            min-height: 40px;
+            line-height: 1.6;
+        }
+        #modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .modal-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .modal-btn:hover {
+            background-color: #e0e0e0;
+            border-color: #bbb;
+        }
+        .modal-btn.primary {
+            background-color: var(--color-green);
+            color: white;
+            border-color: var(--color-green);
+        }
+        .modal-btn.primary:hover {
+            background-color: #388e3c;
+            border-color: #388e3c;
+        }
+        .modal-hidden {
+            display: none;
+        }
+        .lang-toggle {
+          position: fixed;
+          top: 10px;
+          left: 10px;
+          padding: 4px 10px;
+          font-size: 12px;
+          border-radius: 4px;
+          border: 1px solid #555;
+          background-color: #ffffffcc;
+          cursor: pointer;
+          z-index: 1000;
+        }
+        /* 右上角說明按鈕 */
+        .help-button {
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          border: 1px solid #555;
+          background-color: #ffffffcc;
+          color: #333;
+          font-weight: bold;
+          font-size: 16px;
+          line-height: 26px;
+          text-align: center;
+          cursor: pointer;
+          z-index: 1000;
+          padding: 0;
+        }
+
+        /* 說明 tooltip 的外觀 */
+        .help-button-tooltip {
+          position: fixed;
+          max-width: 400px;
+          top: 45px;          /* 在按鈕下方 */
+          right: 10px;
+          background-color: #333;
+          color: #fff;
+          padding: 8px 10px;
+          border-radius: 6px;
+          font-size: 20px;
+          line-height: 1.4;
+          z-index: 1000;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          display: none;      /* 預設隱藏 */
+          white-space: pre-line;   /* 這行很重要：讓 \n 變成換行 */
+        }
+
+        .help-button-tooltip.show {
+          display: block;
+        }
+        /* 右下角「重新開始」按鈕 */
+        .restart-button {
+          position: fixed;
+          bottom: 10px;
+          right: 10px;
+          padding: 6px 14px;
+          font-size: 12px;
+          border-radius: 4px;
+          border: 1px solid #555;
+          background-color: #ffffffdd;
+          color: #333;
+          cursor: pointer;
+          z-index: 1000;
+        }
+
+        .restart-button:hover {
+          background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左上角語言切換 -->
+    <button id="lang-toggle" class="lang-toggle">EN</button>
+
+    <!-- 右上角說明按鈕 -->
+    <button id="help-button" class="help-button">?</button>
+    <!-- 新增：右下角重新開始 -->
+    <button id="restart-button" class="restart-button">重新開始</button>
+    <div id="game-container">
+        <div id="board">
+            <div class="center-cell">
+                <img src="環保永續2D平面透明背景設計.png" alt="永續大富翁" class="center-logo">
+                <div id="center-title" class="center-title">
+                  碳權大富翁：永續行動力
+                </div>
+            </div>
+            <div class="cell" id="cell-0" style="grid-row: 10; grid-column: 1;"><div class="cell-header type-go">環評審查</div><div class="cell-footer">(監獄)</div></div>
+            <div class="cell" id="cell-1" style="grid-row: 10; grid-column: 2;"><div class="cell-header group-pollution">掩埋場</div><div class="cell-footer">$60</div></div>
+            <div class="cell" id="cell-2" style="grid-row: 10; grid-column: 3;"><div class="cell-header group-special">機會</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-3" style="grid-row: 10; grid-column: 4;"><div class="cell-header group-pollution">水泥廠</div><div class="cell-footer">$80</div></div>
+            <div class="cell" id="cell-4" style="grid-row: 10; grid-column: 5;"><div class="cell-header group-special">碳稅</div><div class="cell-footer">-$100</div></div>
+            <div class="cell" id="cell-5" style="grid-row: 10; grid-column: 6;"><div class="cell-header group-public">回收中心</div><div class="cell-footer">$150</div></div>
+            <div class="cell" id="cell-6" style="grid-row: 10; grid-column: 7;"><div class="cell-header group-nature">社區公園</div><div class="cell-footer">$100</div></div>
+            <div class="cell" id="cell-7" style="grid-row: 10; grid-column: 8;"><div class="cell-header group-special">命運</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-8" style="grid-row: 10; grid-column: 9;"><div class="cell-header group-nature">人造林</div><div class="cell-footer">$120</div></div>
+            <div class="cell" id="cell-9" style="grid-row: 10; grid-column: 10;"><div class="cell-header type-jail">起點</div><div class="cell-footer"></div></div>
+            <div class="cell" id="cell-35" style="grid-row: 9; grid-column: 1;"><div class="cell-header group-green">太陽能板</div><div class="cell-footer">$140</div></div>
+            <div class="cell" id="cell-34" style="grid-row: 8; grid-column: 1;"><div class="cell-header group-special">機會</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-33" style="grid-row: 7; grid-column: 1;"><div class="cell-header group-green">電動車廠</div><div class="cell-footer">$160</div></div>
+            <div class="cell" id="cell-32" style="grid-row: 6; grid-column: 1;"><div class="cell-header group-public">大眾運輸</div><div class="cell-footer">$200</div></div>
+            <div class="cell" id="cell-31" style="grid-row: 5; grid-column: 1;"><div class="cell-header group-pollution">石化工業</div><div class="cell-footer">$180</div></div>
+            <div class="cell" id="cell-30" style="grid-row: 4; grid-column: 1;"><div class="cell-header group-special">命運</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-29" style="grid-row: 3; grid-column: 1;"><div class="cell-header group-pollution">火力發電</div><div class="cell-footer">$200</div></div>
+            <div class="cell" id="cell-28" style="grid-row: 2; grid-column: 1;"><div class="cell-header group-public">水力公司</div><div class="cell-footer">$150</div></div>
+            <div class="cell" id="cell-27" style="grid-row: 1; grid-column: 1;"><div class="cell-header type-goToJail">碳匯中心</div><div class="cell-footer">(免費休息)</div></div>
+            <div class="cell" id="cell-26" style="grid-row: 1; grid-column: 2;"><div class="cell-header group-pollution">鋼鐵廠</div><div class="cell-footer">$220</div></div>
+            <div class="cell" id="cell-25" style="grid-row: 1; grid-column: 3;"><div class="cell-header group-special">機會</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-24" style="grid-row: 1; grid-column: 4;"><div class="cell-header group-pollution">塑膠工廠</div><div class="cell-footer">$240</div></div>
+            <div class="cell"id="cell-23" style="grid-row: 1; grid-column: 5;"><div class="cell-header group-public">高鐵</div><div class="cell-footer">$200</div></div>
+            <div class="cell" id="cell-22" style="grid-row: 1; grid-column: 6;"><div class="cell-header group-green">風力發電</div><div class="cell-footer">$260</div></div>
+            <div class="cell" id="cell-21" style="grid-row: 1; grid-column: 7;"><div class="cell-header group-special">命運</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-20" style="grid-row: 1; grid-column: 8;"><div class="cell-header group-green">研發中心</div><div class="cell-footer">$280</div></div>
+            <div class="cell" id="cell-19" style="grid-row: 1; grid-column: 9;"><div class="cell-header group-public">電力公司</div><div class="cell-footer">$150</div></div>
+            <div class="cell" id="cell-18" style="grid-row: 1; grid-column: 10;"><div class="cell-header type-free">重大污染</div><div class="cell-footer">(前往環評)</div></div>
+            <div class="cell" id="cell-17" style="grid-row: 2; grid-column: 10;"><div class="cell-header group-nature">濕地公園</div><div class="cell-footer">$300</div></div>
+            <div class="cell" id="cell-16" style="grid-row: 3; grid-column: 10;"><div class="cell-header group-special">機會</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-15" style="grid-row: 4; grid-column: 10;"><div class="cell-header group-nature">國家公園</div><div class="cell-footer">$320</div></div>
+            <div class="cell" id="cell-14" style="grid-row: 5; grid-column: 10;"><div class="cell-header group-public">捷運</div><div class="cell-footer">$200</div></div>
+            <div class="cell" id="cell-13" style="grid-row: 6; grid-column: 10;"><div class="cell-header group-green">地熱發電</div><div class="cell-footer">$350</div></div>
+            <div class="cell" id="cell-12" style="grid-row: 7; grid-column: 10;"><div class="cell-header group-special">命運</div><div class="cell-footer">?</div></div>
+            <div class="cell" id="cell-11" style="grid-row: 8; grid-column: 10;"><div class="cell-header group-special">奢侈稅</div><div class="cell-footer">-$150</div></div>
+            <div class="cell" id="cell-10" style="grid-row: 9; grid-column: 10;"><div class="cell-header group-green">碳捕捉廠</div><div class="cell-footer">$400</div></div>
+        </div>
+    </div>
+
+    <div id="ui-panel">
+    <div class="ui-widget" id="turn-widget">
+        <div id="turn-indicator">輪到 玩家 1</div>
+    </div>
+
+    <div class="ui-widget" id="player-stats">
+        <!-- 狀態標題：加 id -->
+        <h3 id="status-title">當前玩家狀態</h3>
+
+        <!-- 金錢標籤：加 id -->
+        <div class="stat" id="money-label">
+            💰 金錢: <span id="money-display">$1500</span>
+        </div>
+
+        <!-- 碳排標籤：加 id -->
+        <div class="stat" id="carbon-label">
+            🏭 碳排: <span id="carbon-display">0 / 500 CO₂</span>
+        </div>
+
+        <div id="carbon-bar-container">
+            <div id="carbon-bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="ui-widget" id="controls">
+        <button id="roll-button">擲骰子</button>
+        <div id="dice-display"></div>
+    </div>
+
+    <div class="ui-widget" id="log-widget">
+        <!-- 歡迎文字：加 id -->
+        <div id="info-box" aria-live="polite" id="welcome-text">
+            歡迎來到永續大富翁！
+        </div>
+    </div>
+
+    <div class="ui-widget" id="player-summary">
+        <h4>所有玩家</h4>
+    </div>
+</div>
+
+    </div>
+
+    <div id="modal-overlay" class="modal-hidden"></div>
+    <div id="modal" class="modal-hidden">
+        <div class="modal-content">
+            <h3 id="modal-title">彈窗標題</h3>
+            <p id="modal-message">彈窗訊息...</p>
+            <div id="modal-buttons">
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+    const GAME_TITLE_ZH = "碳權大富翁\n永續行動力";
+    const GAME_TITLE_EN = "Carbon Tycoon\n The Sustainability Drive";
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- 1. 遊戲設定與資料 ---
+
+      // (擴充版) 環保／永續知識題庫，100 題
+      const questionBank = [
+      // 1
+      {
+        question: "以下哪種能源是「再生能源」？",
+        questionEn: "Which of the following is a renewable energy source?",
+        options: ["煤炭", "天然氣", "太陽能", "石油"],
+        optionsEn: ["Coal", "Natural gas", "Solar energy", "Oil"],
+        correctIndex: 2
+      },
+      // 2
+      {
+        question: "「3R」原則中的三個 R，正確組合為何？",
+        questionEn: "In the 3R principle, which combination is correct?",
+        options: ["Reduce、Reuse、Recycle", "Reduce、Replace、Recycle", "Reuse、Repair、Recycle", "Reduce、Reuse、Replace"],
+        optionsEn: [
+          "Reduce, Reuse, Recycle",
+          "Reduce, Replace, Recycle",
+          "Reuse, Repair, Recycle",
+          "Reduce, Reuse, Replace"
+        ],
+        correctIndex: 0
+      },
+      // 3
+      {
+        question: "「碳足跡」主要是指什麼？",
+        questionEn: "What does “carbon footprint” mainly refer to?",
+        options: ["森林吸收的二氧化碳量", "個人或活動產生的溫室氣體總量", "工廠產能的多寡", "城市人口密度"],
+        optionsEn: [
+          "The amount of CO₂ absorbed by forests",
+          "The total greenhouse gases produced by a person or activity",
+          "The production capacity of a factory",
+          "The population density of a city"
+        ],
+        correctIndex: 1
+      },
+      // 4
+      {
+        question: "下列哪一個行為最能減少日常生活中的碳排放？",
+        questionEn: "Which behavior best reduces daily carbon emissions?",
+        options: ["每天搭電梯一層樓", "短程改用步行或騎腳踏車", "夏天把冷氣開到18度", "使用一次性塑膠袋"],
+        optionsEn: [
+          "Taking the elevator for just one floor every day",
+          "Walking or cycling for short trips",
+          "Setting the AC to 18°C in summer",
+          "Using disposable plastic bags"
+        ],
+        correctIndex: 1
+      },
+      // 5
+      {
+        question: "下列哪一項不是再生能源？",
+        questionEn: "Which of the following is NOT a renewable energy source?",
+        options: ["太陽能", "風力發電", "地熱能", "石油"],
+        optionsEn: ["Solar energy", "Wind power", "Geothermal energy", "Oil"],
+        correctIndex: 3
+      },
+      // 6
+      {
+        question: "「SDGs」永續發展目標共有幾項？",
+        questionEn: "How many goals are in the UN SDGs (Sustainable Development Goals)?",
+        options: ["7 項", "12 項", "17 項", "21 項"],
+        optionsEn: ["7 goals", "12 goals", "17 goals", "21 goals"],
+        correctIndex: 2
+      },
+      // 7
+      {
+        question: "日常生活中，下列哪一項屬於「源頭減量」？",
+        questionEn: "Which of the following is an example of source reduction in daily life?",
+        options: ["購物自備環保袋", "全部垃圾一起丟", "餐餐使用免洗筷", "每天買瓶裝水"],
+        optionsEn: [
+          "Bringing your own reusable shopping bag",
+          "Throwing all trash together",
+          "Using disposable chopsticks for every meal",
+          "Buying bottled water every day"
+        ],
+        correctIndex: 0
+      },
+      // 8
+      {
+        question: "垃圾分類時，下列哪一項通常屬於「資源回收」？",
+        questionEn: "When sorting waste, which item usually goes to recycling?",
+        options: ["廚餘", "沾滿油的紙巾", "乾淨的寶特瓶", "用過的衛生紙"],
+        optionsEn: [
+          "Food scraps",
+          "Oily paper towels",
+          "Clean plastic bottles",
+          "Used tissue paper"
+        ],
+        correctIndex: 2
+      },
+      // 9
+      {
+        question: "下列哪種建築設計最符合「節能減碳」的精神？",
+        questionEn: "Which building design best reflects energy saving and carbon reduction?",
+        options: ["大面積玻璃但長期開冷氣", "善用自然採光與通風", "全天候開燈且拉上窗簾", "完全依賴電暖器取暖"],
+        optionsEn: [
+          "Large glass walls but AC always on",
+          "Making good use of natural light and ventilation",
+          "Keeping curtains closed and lights on all day",
+          "Relying only on electric heaters for warmth"
+        ],
+        correctIndex: 1
+      },
+      // 10
+      {
+        question: "關於空氣污染，下列哪一項敘述較正確？",
+        questionEn: "Which statement about air pollution is more accurate?",
+        options: ["只會發生在工業區", "與交通工具使用無關", "會影響人體呼吸與健康", "只影響戶外不影響室內"],
+        optionsEn: [
+          "It only happens in industrial zones",
+          "It has nothing to do with transportation",
+          "It affects human breathing and health",
+          "It only affects outdoors, not indoors"
+        ],
+        correctIndex: 2
+      },
+      // 11
+      {
+        question: "下列哪種購物方式較符合環保精神？",
+        questionEn: "Which shopping habit is more environmentally friendly?",
+        options: ["大量購買一次性商品", "選擇耐用且可維修的產品", "只看價格最便宜的產品", "完全不看產品標示"],
+        optionsEn: [
+          "Buying lots of single-use products",
+          "Choosing durable and repairable products",
+          "Only looking at the cheapest price",
+          "Ignoring all product labels"
+        ],
+        correctIndex: 1
+      },
+      // 12
+      {
+        question: "下列哪一種行為最符合「Reuse 重複使用」？",
+        questionEn: "Which behavior best matches “Reuse (reusing)”?",
+        options: ["玻璃瓶重複裝飲料使用", "直接把玻璃瓶丟棄", "把玻璃瓶打碎當垃圾處理", "多買幾個新玻璃杯"],
+        optionsEn: [
+          "Refilling a glass bottle and using it again",
+          "Throwing the glass bottle away",
+          "Smashing the glass bottle as trash",
+          "Buying several new glass cups"
+        ],
+        correctIndex: 0
+      },
+      // 13
+      {
+        question: "「永續發展」強調什麼？",
+        questionEn: "What does “sustainable development” emphasize?",
+        options: ["只重視經濟成長", "只重視環境保護", "兼顧環境、社會與經濟", "只重視科技創新"],
+        optionsEn: [
+          "Focusing only on economic growth",
+          "Focusing only on environmental protection",
+          "Balancing environment, society, and economy",
+          "Focusing only on technological innovation"
+        ],
+        correctIndex: 2
+      },
+      // 14
+      {
+        question: "下列哪一項是使用「節能標章」產品的好處？",
+        questionEn: "What is an advantage of using products with an energy-saving label?",
+        options: ["一定比較便宜", "完全沒有碳排放", "在相同功能下耗能較少", "需要特別維修"],
+        optionsEn: [
+          "They are always cheaper",
+          "They produce zero emissions",
+          "They use less energy for the same function",
+          "They require special maintenance"
+        ],
+        correctIndex: 2
+      },
+      // 15
+      {
+        question: "關於塑膠垃圾，下列哪一項敘述較正確？",
+        questionEn: "Which statement about plastic waste is more accurate?",
+        options: ["很快在自然環境中分解", "可能分解成微塑膠進入食物鏈", "對環境完全無害", "只會污染土壤不會進入海洋"],
+        optionsEn: [
+          "It decomposes quickly in nature",
+          "It may break down into microplastics and enter the food chain",
+          "It is completely harmless to the environment",
+          "It only pollutes soil and never enters the ocean"
+        ],
+        correctIndex: 1
+      },
+      // 16
+      {
+        question: "下列哪種購物行為最能減少包裝浪費？",
+        questionEn: "Which shopping behavior best reduces packaging waste?",
+        options: ["選擇大包裝家庭號產品", "選擇多層豪華包裝產品", "每樣東西都要有獨立塑膠袋", "堅持只買一次用完的小包裝"],
+        optionsEn: [
+          "Choosing large family-size packages",
+          "Choosing multi-layer luxury packaging",
+          "Demanding a separate plastic bag for everything",
+          "Insisting on only buying single-use mini packs"
+        ],
+        correctIndex: 0
+      },
+      // 17
+      {
+        question: "在學校推動「無紙化」的主要目的為何？",
+        questionEn: "What is the main purpose of promoting “paperless” measures at school?",
+        options: ["讓學生多用手機", "節省老師批改時間", "降低紙張使用與樹木砍伐", "讓作業更難繳交"],
+        optionsEn: [
+          "To make students use their phones more",
+          "To save teachers’ grading time",
+          "To reduce paper use and tree cutting",
+          "To make homework harder to submit"
+        ],
+        correctIndex: 2
+      },
+      // 18
+      {
+        question: "下列哪一種交通選擇，整體碳排放通常最低？",
+        questionEn: "Which mode of transport usually has the lowest overall carbon emissions?",
+        options: ["一人開一台汽車上學", "多人共乘大眾運輸工具", "每天叫計程車", "短程也搭飛機"],
+        optionsEn: [
+          "Each person driving their own car to school",
+          "Many people sharing public transport",
+          "Taking a taxi every day",
+          "Taking a plane even for short trips"
+        ],
+        correctIndex: 1
+      },
+      // 19
+      {
+        question: "下列哪一個是「碳匯」(Carbon Sink) 的例子？",
+        questionEn: "Which of the following is an example of a carbon sink?",
+        options: ["燃煤電廠", "大型停車場", "森林與海洋", "垃圾掩埋場"],
+        optionsEn: [
+          "Coal-fired power plant",
+          "Large parking lot",
+          "Forests and oceans",
+          "Landfill"
+        ],
+        correctIndex: 2
+      },
+      // 20
+      {
+        question: "關於「溫室氣體」的敘述，下列何者正確？",
+        questionEn: "Which statement about greenhouse gases is correct?",
+        options: ["完全是有害物質，應該歸零", "幫助地球維持溫度，但過多會導致暖化", "只存在工廠煙囪中", "與人類活動無關"],
+        optionsEn: [
+          "They are completely harmful and should be reduced to zero",
+          "They help keep Earth warm, but too much causes global warming",
+          "They only exist in factory chimneys",
+          "They have nothing to do with human activity"
+        ],
+        correctIndex: 1
+      },
+      // 21
+      {
+        question: "下列哪一項是「水資源保育」的好習慣？",
+        questionEn: "Which of the following is a good habit for conserving water?",
+        options: ["刷牙時一直開著水龍頭", "縮短洗澡時間並關小水量", "洗車時大量沖水", "用水時完全不檢查漏水"],
+        optionsEn: [
+          "Leaving the tap running while brushing teeth",
+          "Taking shorter showers and turning down the water flow",
+          "Using large amounts of water to wash the car",
+          "Never checking for leaks when using water"
+        ],
+        correctIndex: 1
+      },
+      // 22
+      {
+        question: "關於「一次性餐具」，哪一項敘述較恰當？",
+        questionEn: "Which statement about disposable tableware is more appropriate?",
+        options: ["使用方便，而且完全環保", "可大量重複使用而不會壞", "會增加垃圾量與資源消耗", "對資源消耗沒有影響"],
+        optionsEn: [
+          "It is convenient and completely eco‑friendly",
+          "It can be reused many times without damage",
+          "It increases waste and resource consumption",
+          "It has no impact on resource use"
+        ],
+        correctIndex: 2
+      },
+      // 23
+      {
+        question: "下列哪一個是「環保飲食」的做法？",
+        questionEn: "Which is an example of an eco‑friendly diet?",
+        options: ["三餐都叫外送、使用大量一次性包裝", "多選擇當季、在地食材", "每天吃大量加工食品", "只看價格不看食材來源"],
+        optionsEn: [
+          "Ordering delivery every meal with lots of disposable packaging",
+          "Choosing seasonal, locally produced ingredients",
+          "Eating lots of processed foods every day",
+          "Only looking at price, ignoring where food comes from"
+        ],
+        correctIndex: 1
+      },
+      // 24
+      {
+        question: "下列哪一種照明方式最節能？",
+        questionEn: "Which type of lighting is the most energy‑efficient?",
+        options: ["白熾燈泡", "鹵素燈泡", "日光燈管", "LED 燈具"],
+        optionsEn: ["Incandescent bulb", "Halogen bulb", "Fluorescent tube", "LED lamp"],
+        correctIndex: 3
+      },
+      // 25
+      {
+        question: "關於森林，下列哪一項是森林對環境的重要功能？",
+        questionEn: "Which is an important environmental function of forests?",
+        options: ["只提供木材與紙漿", "吸收二氧化碳並提供棲地", "增加城市溫度", "製造大量垃圾"],
+        optionsEn: [
+          "Only providing timber and pulp",
+          "Absorbing CO₂ and providing habitats",
+          "Increasing urban temperatures",
+          "Producing large amounts of trash"
+        ],
+        correctIndex: 1
+      },
+      // 26
+      {
+        question: "若想減少垃圾量，下列哪一項做法較好？",
+        questionEn: "To reduce the amount of waste, which practice is better?",
+        options: ["多買免洗餐具備用", "購物自備容器與環保杯", "所有東西都用宅配寄送", "用完就丟不再分類"],
+        optionsEn: [
+          "Buying more disposable tableware as backup",
+          "Bringing your own containers and reusable cup when shopping",
+          "Using home delivery for everything",
+          "Throwing everything away without sorting"
+        ],
+        correctIndex: 1
+      },
+      // 27
+      {
+        question: "「環境教育」的主要目的是什麼？",
+        questionEn: "What is the main purpose of environmental education?",
+        options: ["背誦環保法律條文", "幫助理解環境議題並改變行為", "增加考試題目數量", "只在地球日宣傳一次"],
+        optionsEn: [
+          "To memorize environmental laws",
+          "To help people understand environmental issues and change behavior",
+          "To increase the number of exam questions",
+          "To promote only on Earth Day"
+        ],
+        correctIndex: 1
+      },
+      // 28
+      {
+        question: "在家中使用冷氣時，哪一項作法較為節能？",
+        questionEn: "Which way of using air conditioning at home is more energy‑saving?",
+        options: ["門窗全開讓空氣流通", "設定適當溫度並搭配電扇", "持續開到最低溫", "頻繁開關冷氣"],
+        optionsEn: [
+          "Keeping doors and windows fully open while AC is on",
+          "Setting a reasonable temperature and using fans together",
+          "Keeping AC at the lowest temperature constantly",
+          "Turning the AC on and off frequently"
+        ],
+        correctIndex: 1
+      },
+      // 29
+      {
+        question: "下列哪項屬於「環境友善產品」的特色？",
+        questionEn: "Which feature best describes an eco‑friendly product?",
+        options: ["壽命短但便宜", "高耗能但外觀漂亮", "耐用、可維修、對環境負擔較小", "包裝誇張突出即可"],
+        optionsEn: [
+          "Short lifespan but cheap",
+          "High energy use but good‑looking",
+          "Durable, repairable, and with lower environmental impact",
+          "Overly fancy packaging is enough"
+        ],
+        correctIndex: 2
+      },
+      // 30
+      {
+        question: "關於海洋塑膠垃圾，下列何者正確？",
+        questionEn: "Which statement about marine plastic waste is correct?",
+        options: ["不會影響海洋生物", "可能被海洋生物誤食導致傷害", "進入海中後很快消失", "只會停留在岸邊不會飄散"],
+        optionsEn: [
+          "It does not affect marine life",
+          "It may be mistaken as food and harm marine life",
+          "It disappears quickly once in the sea",
+          "It only stays on the shore and never drifts away"
+        ],
+        correctIndex: 1
+      },
+      // 31
+      {
+        question: "下列哪一項行為最符合「節水」概念？",
+        questionEn: "Which behavior best fits the idea of saving water?",
+        options: ["洗車用水管大水沖", "洗手時關掉水龍頭搓肥皂", "每天泡很久的澡", "讓水龍頭持續小流出水"],
+        optionsEn: [
+          "Using a hose to spray lots of water when washing the car",
+          "Turning off the tap while rubbing hands with soap",
+          "Taking long baths every day",
+          "Letting the tap run at a small flow continuously"
+        ],
+        correctIndex: 1
+      },
+      // 32
+      {
+        question: "「環境足跡」的概念主要在說明什麼？",
+        questionEn: "What does the concept of “environmental footprint” mainly describe?",
+        options: ["一個人走路的步數", "人類活動對自然資源的總體需求", "城市道路長度", "森林面積大小"],
+        optionsEn: [
+          "A person’s number of steps",
+          "The total demand human activities place on natural resources",
+          "The total length of city roads",
+          "The area of forest"
+        ],
+        correctIndex: 1
+      },
+      // 33
+      {
+        question: "下列哪一種能源的碳排放量相對較低？",
+        questionEn: "Which energy source generally has lower carbon emissions?",
+        options: ["燃煤", "天然氣", "風力發電", "柴油"],
+        optionsEn: ["Coal", "Natural gas", "Wind power", "Diesel"],
+        correctIndex: 2
+      },
+      // 34
+      {
+        question: "關於「空汙紅害」警示，下列何者較適當？",
+        questionEn: "Which statement about the “red alert” for air pollution is more appropriate?",
+        options: ["代表空氣品質很好", "表示空氣品質不良，應減少戶外劇烈活動", "只在冬天出現", "與人體健康無關"],
+        optionsEn: [
+          "It means the air quality is very good",
+          "It means poor air quality, and outdoor intense activity should be reduced",
+          "It only appears in winter",
+          "It has nothing to do with human health"
+        ],
+        correctIndex: 1
+      },
+      // 35
+      {
+        question: "下列哪一項不是有效的節能行為？",
+        questionEn: "Which of the following is NOT an effective energy‑saving behavior?",
+        options: ["長時間待機不關電器", "離開房間就關燈", "不用電器時拔除插頭", "選購高能效產品"],
+        optionsEn: [
+          "Leaving appliances on standby for a long time",
+          "Turning off lights when leaving a room",
+          "Unplugging appliances when not in use",
+          "Choosing high‑efficiency products"
+        ],
+        correctIndex: 0
+      },
+      // 36
+      {
+        question: "在學校推行「自備餐具」的好處為何？",
+        questionEn: "What is a benefit of promoting “bring your own tableware” at school?",
+        options: ["增加書包重量", "減少一次性餐具垃圾", "無法保持衛生", "讓午餐時間變長"],
+        optionsEn: [
+          "It makes school bags heavier",
+          "It reduces single‑use tableware waste",
+          "It cannot maintain hygiene",
+          "It makes lunchtime longer"
+        ],
+        correctIndex: 1
+      },
+      // 37
+      {
+        question: "「循環經濟」與傳統「線性經濟」最大的差異是什麼？",
+        questionEn: "What is the biggest difference between a circular economy and a linear economy?",
+        options: ["不需要資源", "將資源視為可重複利用的循環，而非用完即丟", "完全不考慮成本", "只追求產量最大化"],
+        optionsEn: [
+          "It needs no resources",
+          "It treats resources as part of a reuse cycle instead of “take‑make‑dispose”",
+          "It ignores all costs",
+          "It only pursues maximum output"
+        ],
+        correctIndex: 1
+      },
+      // 38
+      {
+        question: "下列哪一項屬於「環境友善交通」？",
+        questionEn: "Which of the following is an example of environmentally friendly transportation?",
+        options: ["城市短程大量使用汽車", "鼓勵步行與騎腳踏車", "增加私人停車位", "所有道路拓寬給汽車使用"],
+        optionsEn: [
+          "Using cars extensively for short urban trips",
+          "Encouraging walking and cycling",
+          "Increasing private parking spaces",
+          "Widening all roads mainly for cars"
+        ],
+        correctIndex: 1
+      },
+      // 39
+      {
+        question: "購買電器時，哪一項資訊最有助於評估其節能表現？",
+        questionEn: "When buying appliances, which information best helps evaluate energy performance?",
+        options: ["產品顏色", "品牌名稱", "能源效率等級標示", "產地"],
+        optionsEn: [
+          "Product color",
+          "Brand name",
+          "Energy efficiency rating label",
+          "Country of origin"
+        ],
+        correctIndex: 2
+      },
+      // 40
+      {
+        question: "為了保護生物多樣性，下列哪一種作法最適合？",
+        questionEn: "Which action is most suitable for protecting biodiversity?",
+        options: ["過度開發自然棲地", "建立保護區並管制開發", "大量引進外來物種", "只保護外表可愛的動物"],
+        optionsEn: [
+          "Over‑developing natural habitats",
+          "Creating protected areas and regulating development",
+          "Introducing many alien species",
+          "Only protecting animals that look cute"
+        ],
+        correctIndex: 1
+      },
+      // 41
+      {
+        question: "下列哪一種垃圾處理方式對環境最友善？",
+        questionEn: "Which waste treatment method is most environmentally friendly?",
+        options: ["全部掩埋", "全部焚化", "減量、再利用與資源回收並行", "任意棄置在戶外"],
+        optionsEn: [
+          "Burying everything in landfills",
+          "Incinerating everything",
+          "Reducing, reusing, and recycling together",
+          "Dumping waste outdoors at will"
+        ],
+        correctIndex: 2
+      },
+      // 42
+      {
+        question: "「熱島效應」主要是指什麼？",
+        questionEn: "What does the “urban heat island effect” mainly refer to?",
+        options: ["高山地區溫度較低", "都市地區比郊區更炎熱的現象", "海邊氣溫上升", "只有在夏天出現的颱風"],
+        optionsEn: [
+          "Lower temperatures in mountainous areas",
+          "Cities being hotter than surrounding rural areas",
+          "Rising temperatures near the sea",
+          "Typhoons that occur only in summer"
+        ],
+        correctIndex: 1
+      },
+      // 43
+      {
+        question: "下列哪一項是節能空調的好習慣？",
+        questionEn: "Which is a good habit for energy‑saving air conditioning?",
+        options: ["經常開關冷氣", "設定適當溫度並定期清洗濾網", "把窗戶打開吹冷氣", "冷氣與電暖器同時開啟"],
+        optionsEn: [
+          "Turning the AC on and off constantly",
+          "Setting a proper temperature and cleaning filters regularly",
+          "Opening windows while AC is on",
+          "Running AC and electric heater at the same time"
+        ],
+        correctIndex: 1
+      },
+      // 44
+      {
+        question: "若要支持減碳，下列哪一項消費行為較佳？",
+        questionEn: "Which consumer behavior better supports carbon reduction?",
+        options: ["每天網購少量商品單獨寄送", "選擇在地與當季食材", "刻意購買進口空運產品", "偏好過度包裝商品"],
+        optionsEn: [
+          "Ordering small items online every day with separate shipping",
+          "Choosing local and seasonal ingredients",
+          "Deliberately buying imported air‑freighted products",
+          "Preferring heavily over‑packaged goods"
+        ],
+        correctIndex: 1
+      },
+      // 45
+      {
+        question: "「環境荷爾蒙」主要指什麼？",
+        questionEn: "What do “endocrine disrupting chemicals” (environmental hormones) mainly refer to?",
+        options: ["人體自然分泌的荷爾蒙", "會干擾生物內分泌系統的化學物質", "增加肌肉的營養品", "純天然物質"],
+        optionsEn: [
+          "Hormones naturally produced by the human body",
+          "Chemicals that interfere with the endocrine system of organisms",
+          "Nutritional supplements that increase muscle",
+          "Purely natural substances"
+        ],
+        correctIndex: 1
+      },
+      // 46
+      {
+        question: "下列哪一項是「綠色消費」的例子？",
+        questionEn: "Which of the following is an example of green consumption?",
+        options: ["購買標示不清的產品", "選擇具有環保標章的商品", "只看促銷價錢就購買", "刻意追求一次性用品"],
+        optionsEn: [
+          "Buying products with unclear labeling",
+          "Choosing products with eco‑labels",
+          "Buying only based on promotional prices",
+          "Deliberately seeking single‑use items"
+        ],
+        correctIndex: 1
+      },
+      // 47
+      {
+        question: "面對氣候變遷，下列哪一種說法較合理？",
+        questionEn: "Which statement about climate change is more reasonable?",
+        options: ["完全與人類活動無關", "只會影響極地不影響台灣", "需要透過減碳與調適雙管齊下", "只要多開冷氣就能解決"],
+        optionsEn: [
+          "It has nothing to do with human activity",
+          "It only affects the poles and not Taiwan",
+          "We need both mitigation (reducing emissions) and adaptation",
+          "Just using more air‑conditioning can solve it"
+        ],
+        correctIndex: 2
+      },
+      // 48
+      {
+        question: "「環保署」(或環境部) 的主要工作為何？",
+        questionEn: "What is the main job of the Environmental Protection Agency (or Environment Ministry)?",
+        options: ["負責所有教育政策", "負責所有交通建設", "制定與執行環境保護相關政策", "管理金融市場"],
+        optionsEn: [
+          "Handling all education policies",
+          "Handling all transportation construction",
+          "Formulating and enforcing environmental protection policies",
+          "Managing financial markets"
+        ],
+        correctIndex: 2
+      },
+      // 49
+      {
+        question: "下列哪一種包裝材質一般較容易回收？",
+        questionEn: "Which type of packaging material is generally easier to recycle?",
+        options: ["混合多種材質且難分離", "乾淨的紙類與紙盒", "髒污且油膩的紙容器", "沾滿食物殘渣的塑膠袋"],
+        optionsEn: [
+          "Mixed materials that are hard to separate",
+          "Clean paper and cardboard",
+          "Dirty and greasy paper containers",
+          "Plastic bags covered with food scraps"
+        ],
+        correctIndex: 1
+      },
+      // 50
+      {
+        question: "在辦理活動時，下列哪一項作法較符合「環保活動」？",
+        questionEn: "When organizing an event, which practice is more eco‑friendly?",
+        options: ["大量印製一次性海報", "提供一次性瓶裝水", "採用電子海報與自備水壺", "全部用免洗餐具"],
+        optionsEn: [
+          "Printing many disposable posters",
+          "Providing disposable bottled water",
+          "Using electronic posters and encouraging reusable bottles",
+          "Using only disposable tableware"
+        ],
+        correctIndex: 2
+      },
+      // 51
+      {
+        question: "「環境正義」主要關心什麼議題？",
+        questionEn: "What does “environmental justice” mainly focus on?",
+        options: ["只關心富人權益", "污染負擔是否不成比例地落在弱勢族群", "只看經濟成長數字", "只關注野生動物"],
+        optionsEn: [
+          "Only the rights of the rich",
+          "Whether pollution burdens fall disproportionately on vulnerable groups",
+          "Only economic growth figures",
+          "Only wild animals"
+        ],
+        correctIndex: 1
+      },
+      // 52
+      {
+        question: "下列哪一項不是節電的好方法？",
+        questionEn: "Which of the following is NOT a good way to save electricity?",
+        options: ["使用節能家電", "不使用電器時拔插頭", "離開房間就關燈", "所有燈具整晚開著不關"],
+        optionsEn: [
+          "Using energy‑saving appliances",
+          "Unplugging appliances when not in use",
+          "Turning off lights when leaving a room",
+          "Leaving all lights on all night"
+        ],
+        correctIndex: 3
+      },
+      // 53
+      {
+        question: "低碳飲食的概念，下列何者較符合？",
+        questionEn: "Which choice best fits the idea of a low‑carbon diet?",
+        options: ["大量食用高加工、高里程食物", "多選擇在地、當季、少加工食物", "每天外送速食", "只考慮價錢不管來源"],
+        optionsEn: [
+          "Eating a lot of highly processed, long‑distance foods",
+          "Choosing more local, seasonal, minimally processed foods",
+          "Ordering fast food delivery every day",
+          "Only caring about price, not origin"
+        ],
+        correctIndex: 1
+      },
+      // 54
+      {
+        question: "下列哪一項是「室內空氣品質」常見的污染來源？",
+        questionEn: "Which is a common source of indoor air pollution?",
+        options: ["植物光合作用", "抽菸與燃燒香燭", "開窗通風", "擺放綠色植物"],
+        optionsEn: [
+          "Plant photosynthesis",
+          "Smoking and burning incense",
+          "Opening windows for ventilation",
+          "Placing green plants indoors"
+        ],
+        correctIndex: 1
+      },
+      // 55
+      {
+        question: "關於節能標章，下列何者較正確？",
+        questionEn: "Which statement about energy‑saving labels is more correct?",
+        options: ["只代表品質差", "代表能源效率較佳", "與用電量無關", "只在進口產品上出現"],
+        optionsEn: [
+          "They only mean poor quality",
+          "They indicate better energy efficiency",
+          "They have nothing to do with power use",
+          "They only appear on imported products"
+        ],
+        correctIndex: 1
+      },
+      // 56
+      {
+        question: "下列哪一個是「環境監測」的主要目的？",
+        questionEn: "What is the main purpose of environmental monitoring?",
+        options: ["裝飾城市", "收集資料掌握污染與變化趨勢", "宣傳觀光景點", "控制市場價格"],
+        optionsEn: [
+          "Decorating the city",
+          "Collecting data to track pollution and trends",
+          "Promoting tourist spots",
+          "Controlling market prices"
+        ],
+        correctIndex: 1
+      },
+      // 57
+      {
+        question: "「用電離峰」最適合的行為是哪一個？",
+        questionEn: "Which behavior best matches the idea of using electricity in off‑peak hours?",
+        options: ["在尖峰時段大量使用高耗能設備", "把非必要用電移到離峰時段", "全天候維持最高用電量", "完全不理會用電時段"],
+        optionsEn: [
+          "Using many high‑power devices during peak hours",
+          "Moving non‑essential electricity use to off‑peak times",
+          "Keeping electricity use at the maximum all day",
+          "Ignoring peak and off‑peak times completely"
+        ],
+        correctIndex: 1
+      },
+      // 58
+      {
+        question: "下列哪一個屬於「棕地再生」概念？",
+        questionEn: "Which of the following fits the concept of brownfield regeneration?",
+        options: ["開發新的農地做工業區", "將閒置污染工業地整治後再利用", "砍伐森林建新都市", "把舊工廠放著不管"],
+        optionsEn: [
+          "Developing new farmland into industrial zones",
+          "Cleaning up contaminated idle industrial land for reuse",
+          "Cutting forests to build new cities",
+          "Leaving old factories abandoned"
+        ],
+        correctIndex: 1
+      },
+      // 59
+      {
+        question: "「在地採購」對環境的好處為何？",
+        questionEn: "What is an environmental benefit of local purchasing?",
+        options: ["增加運輸距離", "降低運輸過程的能源消耗與排放", "讓產品一定比較高價", "與環保無關"],
+        optionsEn: [
+          "Increasing transportation distance",
+          "Reducing energy use and emissions in transport",
+          "Always making products more expensive",
+          "Having nothing to do with the environment"
+        ],
+        correctIndex: 1
+      },
+      // 60
+      {
+        question: "下列哪一項不利於保護水資源？",
+        questionEn: "Which of the following is NOT helpful for protecting water resources?",
+        options: ["避免將油污倒入水槽", "正確處理化學藥劑與廢油", "任意將垃圾丟入河川", "節約用水"],
+        optionsEn: [
+          "Avoiding pouring oil and grease into the sink",
+          "Properly handling chemicals and waste oil",
+          "Throwing garbage into rivers at will",
+          "Saving water"
+        ],
+        correctIndex: 2
+      },
+      // 61
+      {
+        question: "「PM2.5」主要是指什麼？",
+        questionEn: "What does “PM2.5” mainly refer to?",
+        options: ["粒徑小於 2.5 公釐的石頭", "粒徑小於 2.5 微米的細懸浮微粒", "2.5 公里外的空氣", "空氣中 2.5% 的氧氣"],
+        optionsEn: [
+          "Stones smaller than 2.5 millimeters",
+          "Fine particulate matter smaller than 2.5 micrometers",
+          "Air 2.5 km away",
+          "2.5% of oxygen in the air"
+        ],
+        correctIndex: 1
+      },
+      // 62
+      {
+        question: "關於「環保標章」產品，下列敘述何者正確？",
+        questionEn: "Which statement about eco‑labelled products is correct?",
+        options: ["一定最便宜", "經審查對環境衝擊較小", "代表品質較差", "不需要任何標準就可貼"],
+        optionsEn: [
+          "They are always the cheapest",
+          "They have been reviewed and have lower environmental impact",
+          "They mean lower product quality",
+          "They can be used without any standards"
+        ],
+        correctIndex: 1
+      },
+      // 63
+      {
+        question: "若要減少一次性塑膠吸管的使用，下列何者較佳？",
+        questionEn: "To reduce the use of single‑use plastic straws, which is better?",
+        options: ["改用自備環保吸管或直接不使用", "多拿幾支備用", "用完隨意丟棄", "改用更多塑膠杯"],
+        optionsEn: [
+          "Use your own reusable straw or stop using straws",
+          "Take several extra straws just in case",
+          "Throw them away casually after use",
+          "Use more plastic cups instead"
+        ],
+        correctIndex: 0
+      },
+      // 64
+      {
+        question: "「零廢棄」(Zero Waste) 的核心精神是什麼？",
+        questionEn: "What is the core spirit of “zero waste”?",
+        options: ["完全禁止生產", "盡可能不產生垃圾、將資源循環再利用", "所有垃圾都焚化", "只要掩埋就好"],
+        optionsEn: [
+          "Completely banning production",
+          "Producing as little waste as possible and cycling resources",
+          "Incinerating all waste",
+          "Just burying waste in landfills"
+        ],
+        correctIndex: 1
+      },
+      // 65
+      {
+        question: "學校推動「綠色校園」時，下列哪一項措施最符合目標？",
+        questionEn: "Which measure best matches the goal of a “green campus”?",
+        options: ["大量使用一次性教材", "擴大校園綠地與生態池", "全天候開冷氣與電燈", "鼓勵學生多開車上學"],
+        optionsEn: [
+          "Using a lot of disposable teaching materials",
+          "Expanding green areas and ecological ponds on campus",
+          "Keeping AC and lights on all day",
+          "Encouraging students to drive to school more"
+        ],
+        correctIndex: 1
+      },
+      // 66
+      {
+        question: "「環境承載力」的概念是什麼？",
+        questionEn: "What does the concept of “environmental carrying capacity” mean?",
+        options: ["環境可以無限度承受開發", "環境在不被破壞情況下所能承受的最大負荷", "國家的經濟實力", "人口的最高上限"],
+        optionsEn: [
+          "The environment can withstand unlimited development",
+          "The maximum load the environment can bear without being damaged",
+          "A country’s economic strength",
+          "The maximum population"
+        ],
+        correctIndex: 1
+      },
+      // 67
+      {
+        question: "下列哪一種購物行為較不符合永續概念？",
+        questionEn: "Which shopping behavior is least consistent with sustainability?",
+        options: ["衝動購物、過量購買", "按需求購買、避免浪費", "選擇耐用的產品", "重視產品維修服務"],
+        optionsEn: [
+          "Impulse buying and over‑purchasing",
+          "Buying according to need to avoid waste",
+          "Choosing durable products",
+          "Valuing product repair services"
+        ],
+        correctIndex: 0
+      },
+      // 68
+      {
+        question: "「生態足跡」用來衡量什麼？",
+        questionEn: "What does “ecological footprint” measure?",
+        options: ["城市面積大小", "需要多少土地與資源來支撐一個人的生活型態", "森林覆蓋率", "海岸線長度"],
+        optionsEn: [
+          "The area of a city",
+          "How much land and resources are needed to support a person’s lifestyle",
+          "Forest coverage rate",
+          "Length of coastline"
+        ],
+        correctIndex: 1
+      },
+      // 69
+      {
+        question: "下列哪一種做法較能保護生態河川？",
+        questionEn: "Which practice better protects ecological rivers?",
+        options: ["將河川全部水泥化", "沿岸種植樹木並維持自然河岸", "任意傾倒廢棄物入河", "過度抽取地下水"],
+        optionsEn: [
+          "Cementing all riverbanks",
+          "Planting trees along the banks and maintaining natural shorelines",
+          "Dumping waste into rivers",
+          "Excessive groundwater extraction"
+        ],
+        correctIndex: 1
+      },
+      // 70
+      {
+        question: "關於「環境影響評估」(EIA)，下列哪一項說法正確？",
+        questionEn: "Which statement about Environmental Impact Assessment (EIA) is correct?",
+        options: ["只是一種形式，不需實際執行", "在大型開發前評估對環境的可能影響", "只評估經濟效益", "只與交通建設有關"],
+        optionsEn: [
+          "It is just a formality and need not be implemented",
+          "It assesses possible environmental impacts before large developments",
+          "It evaluates only economic benefits",
+          "It only relates to transport projects"
+        ],
+        correctIndex: 1
+      },
+      // 71
+      {
+        question: "若想減少家中廚餘的環境影響，下列哪一項作法較佳？",
+        questionEn: "To reduce the environmental impact of household food waste, which practice is better?",
+        options: ["全部丟一般垃圾", "適量並做廚餘回收或堆肥", "完全不分類", "任意倒入排水溝"],
+        optionsEn: [
+          "Throwing all food waste into general trash",
+          "Producing a reasonable amount and doing food waste recycling or composting",
+          "Not sorting at all",
+          "Pouring it into drains at will"
+        ],
+        correctIndex: 1
+      },
+      // 72
+      {
+        question: "「環境噪音」主要會影響什麼？",
+        questionEn: "What does environmental noise mainly affect?",
+        options: ["只影響動物，不影響人類", "人類的聽力與身心健康", "只影響空氣品質", "只影響水質"],
+        optionsEn: [
+          "Only animals, not humans",
+          "Human hearing and physical and mental health",
+          "Only air quality",
+          "Only water quality"
+        ],
+        correctIndex: 1
+      },
+      // 73
+      {
+        question: "下列哪一項屬於「氣候調適」措施？",
+        questionEn: "Which of the following is a climate adaptation measure?",
+        options: ["提高海堤高度防止海水倒灌", "增加燃煤發電量", "砍伐所有樹木", "大量興建高耗能建築"],
+        optionsEn: [
+          "Raising seawalls to prevent seawater intrusion",
+          "Increasing coal power generation",
+          "Cutting down all trees",
+          "Building many high‑energy‑consuming buildings"
+        ],
+        correctIndex: 0
+      },
+      // 74
+      {
+        question: "使用「環保清潔劑」的好處是什麼？",
+        questionEn: "What is a benefit of using eco‑friendly cleaning products?",
+        options: ["一定比一般清潔劑更便宜", "降低對水體與生態的傷害", "完全沒有任何化學成分", "清潔效果一定比較差"],
+        optionsEn: [
+          "They are always cheaper than regular cleaners",
+          "They reduce harm to water bodies and ecosystems",
+          "They contain no chemicals at all",
+          "They always clean worse than regular cleaners"
+        ],
+        correctIndex: 1
+      },
+      // 75
+      {
+        question: "下列哪一個是「公害」的典型例子？",
+        questionEn: "Which is a typical example of public nuisance (pollution)?",
+        options: ["適度城市綠化", "工廠排放廢氣造成空氣污染", "社區種植花草", "學校節能減碳計畫"],
+        optionsEn: [
+          "Moderate urban greening",
+          "Factory emissions causing air pollution",
+          "Planting flowers in communities",
+          "School energy‑saving and carbon reduction plans"
+        ],
+        correctIndex: 1
+      },
+      // 76
+      {
+        question: "關於「節能家電」使用方式，下列何者較恰當？",
+        questionEn: "Which way of using energy‑saving appliances is more appropriate?",
+        options: ["買來後長期待機不關", "搭配良好使用習慣才能發揮節能效果", "開越久越節能", "與使用習慣無關"],
+        optionsEn: [
+          "Leaving them on standby for a long time after purchase",
+          "Combining them with good usage habits to save energy",
+          "The longer they run, the more energy they save",
+          "Usage habits make no difference"
+        ],
+        correctIndex: 1
+      },
+      // 77
+      {
+        question: "下列哪一項是「城市綠地」的環境效益？",
+        questionEn: "Which is an environmental benefit of urban green spaces?",
+        options: ["增加都市熱島效應", "提供休憩空間與生物棲地", "製造更多廢棄物", "完全沒有生態功能"],
+        optionsEn: [
+          "Increasing the urban heat island effect",
+          "Providing recreation space and wildlife habitat",
+          "Producing more waste",
+          "Having no ecological function"
+        ],
+        correctIndex: 1
+      },
+      // 78
+      {
+        question: "若要減少電子廢棄物，下列哪一項作法較好？",
+        questionEn: "To reduce electronic waste, which is a better practice?",
+        options: ["經常更換手機追求最新款", "延長產品使用年限並善用回收管道", "隨意丟棄舊電子產品", "買越多備份越好"],
+        optionsEn: [
+          "Frequently changing phones to get the newest model",
+          "Extending product lifespan and using recycling channels",
+          "Randomly throwing away old electronics",
+          "Buying as many backup devices as possible"
+        ],
+        correctIndex: 1
+      },
+      // 79
+      {
+        question: "「能源轉型」常見的方向為何？",
+        questionEn: "What is a common direction of energy transition?",
+        options: ["由再生能源轉回化石燃料", "由高碳能源轉向低碳與再生能源", "完全不變化", "只增加用電量"],
+        optionsEn: [
+          "Switching from renewable energy back to fossil fuels",
+          "Shifting from high‑carbon to low‑carbon and renewable energy",
+          "Keeping everything unchanged",
+          "Only increasing electricity use"
+        ],
+        correctIndex: 1
+      },
+      // 80
+      {
+        question: "下列哪一項最有助於降低學校用電？",
+        questionEn: "Which action helps most in reducing electricity use at school?",
+        options: ["中午無人時仍開燈開冷氣", "下課時關閉教室電燈與電器", "讓電腦終年不停機", "所有教室燈具全開"],
+        optionsEn: [
+          "Keeping lights and AC on at noon when nobody is there",
+          "Turning off classroom lights and devices after class",
+          "Leaving computers on all year round",
+          "Turning on all classroom lights all the time"
+        ],
+        correctIndex: 1
+      },
+      // 81
+      {
+        question: "關於「生物多樣性」，下列哪一項說明較正確？",
+        questionEn: "Which statement about biodiversity is more correct?",
+        options: ["只指動物種類的多寡", "包括物種、基因與生態系多樣性", "只與植物有關", "只看數量不看種類"],
+        optionsEn: [
+          "It only refers to the number of animal species",
+          "It includes diversity of species, genes, and ecosystems",
+          "It only relates to plants",
+          "Only the number matters, not the types"
+        ],
+        correctIndex: 1
+      },
+      // 82
+      {
+        question: "環保觀念中提到的「在地化」(Localization) 主要強調什麼？",
+        questionEn: "In environmental thinking, what does “localization” mainly emphasize?",
+        options: ["完全禁止進出口貿易", "強化在地生產與在地消費，減少運輸負擔", "只吃一種食物", "與環保無關"],
+        optionsEn: [
+          "Completely banning imports and exports",
+          "Strengthening local production and consumption to reduce transportation burden",
+          "Eating only one type of food",
+          "Having nothing to do with environmental protection"
+        ],
+        correctIndex: 1
+      },
+      // 83
+      {
+        question: "下列哪一項不是「綠色校園」應推動的措施？",
+        questionEn: "Which is NOT a measure a green campus should promote?",
+        options: ["減少一次性用品使用", "推動能源與水資源節約", "加強生態與環境教育", "要求學生每天開車上學"],
+        optionsEn: [
+          "Reducing the use of single‑use items",
+          "Promoting energy and water conservation",
+          "Strengthening ecological and environmental education",
+          "Requiring students to drive to school every day"
+        ],
+        correctIndex: 3
+      },
+      // 84
+      {
+        question: "家中使用冰箱時，下列哪一種做法較不環保？",
+        questionEn: "Which way of using a refrigerator at home is less environmentally friendly?",
+        options: ["頻繁開關冰箱門", "避免熱食直接放入冰箱", "整理內容物、減少開門時間", "保持適當溫度設定"],
+        optionsEn: [
+          "Frequently opening and closing the fridge door",
+          "Avoiding putting hot food directly into the fridge",
+          "Organizing contents to reduce door‑open time",
+          "Keeping an appropriate temperature setting"
+        ],
+        correctIndex: 0
+      },
+      // 85
+      {
+        question: "「環保志工」參與的活動通常不包含哪一項？",
+        questionEn: "Which activity is usually NOT part of an environmental volunteer’s work?",
+        options: ["淨灘與環境清理", "協助宣導環保觀念", "監測與回報污染情況", "非法傾倒廢棄物"],
+        optionsEn: [
+          "Beach cleanups and environmental cleaning",
+          "Helping promote environmental awareness",
+          "Monitoring and reporting pollution",
+          "Illegally dumping waste"
+        ],
+        correctIndex: 3
+      },
+      // 86
+      {
+        question: "下列哪一項是「氣候行動」(Climate Action) 的例子？",
+        questionEn: "Which of the following is an example of climate action?",
+        options: ["持續增加燃煤發電比重", "推動再生能源與節能措施", "鼓勵使用高油耗車", "將所有森林砍伐改為農地"],
+        optionsEn: [
+          "Continuing to increase the share of coal power",
+          "Promoting renewable energy and energy‑saving measures",
+          "Encouraging the use of gas‑guzzling cars",
+          "Cutting down all forests and turning them into farmland"
+        ],
+        correctIndex: 1
+      },
+      // 87
+      {
+        question: "「生活週期評估」(LCA) 主要分析什麼？",
+        questionEn: "What does Life Cycle Assessment (LCA) mainly analyze?",
+        options: ["產品從生產到廢棄對環境的全生命週期影響", "產品的顏色變化", "產品的品牌形象", "只有價格高低"],
+        optionsEn: [
+          "The environmental impacts of a product from production to disposal",
+          "Changes in product color",
+          "Brand image of the product",
+          "Only the price level"
+        ],
+        correctIndex: 0
+      },
+      // 88
+      {
+        question: "若要降低紙張使用量，下列哪一項作法較佳？",
+        questionEn: "To reduce paper use, which practice is better?",
+        options: ["所有公告都印成紙本", "多使用電子文件與線上系統", "習慣單面列印一次就丟", "大量影印備用"],
+        optionsEn: [
+          "Printing all announcements on paper",
+          "Using more electronic documents and online systems",
+          "Always printing single‑sided and throwing pages away",
+          "Making lots of photocopies as backup"
+        ],
+        correctIndex: 1
+      },
+      // 89
+      {
+        question: "下列哪一項是「公民科學」在環保上的應用？",
+        questionEn: "Which is an example of citizen science in environmental protection?",
+        options: ["民眾參與鳥類調查與回報觀察資料", "只有專家才能做環境調查", "禁止民眾接觸環境資料", "只在實驗室內進行"],
+        optionsEn: [
+          "Citizens joining bird surveys and reporting observations",
+          "Only experts can conduct environmental surveys",
+          "Banning citizens from accessing environmental data",
+          "Doing everything only in laboratories"
+        ],
+        correctIndex: 0
+      },
+      // 90
+      {
+        question: "「用電尖峰」時段應該怎麼做比較好？",
+        questionEn: "What should we do during peak electricity hours?",
+        options: ["集中在尖峰時段洗衣、烘衣", "避免使用大量電力設備", "全部電器同時開啟", "與離峰時段完全一樣"],
+        optionsEn: [
+          "Do laundry and drying mainly during peak hours",
+          "Avoid using many high‑power devices",
+          "Turn on all appliances at the same time",
+          "Use electricity exactly the same as off‑peak times"
+        ],
+        correctIndex: 1
+      },
+      // 91
+      {
+        question: "下列哪一個是「友善農業」的目標？",
+        questionEn: "Which is a goal of environmentally friendly agriculture?",
+        options: ["大量使用農藥與化肥", "保護土壤、水源與生物多樣性", "只追求短期高產量", "完全不管環境影響"],
+        optionsEn: [
+          "Using large amounts of pesticides and fertilizers",
+          "Protecting soil, water, and biodiversity",
+          "Only pursuing short‑term high yields",
+          "Ignoring environmental impacts completely"
+        ],
+        correctIndex: 1
+      },
+      // 92
+      {
+        question: "關於「綠色採購」，哪一項敘述較正確？",
+        questionEn: "Which statement about green procurement is more correct?",
+        options: ["只看最低價格", "優先選擇對環境衝擊較小的產品與服務", "只看外觀設計", "與政府無關"],
+        optionsEn: [
+          "Only considering the lowest price",
+          "Prioritizing products and services with lower environmental impact",
+          "Only looking at appearance design",
+          "Having nothing to do with government"
+        ],
+        correctIndex: 1
+      },
+      // 93
+      {
+        question: "下列哪一種行為可以減少「食物里程」？",
+        questionEn: "Which behavior can help reduce food miles?",
+        options: ["多選擇遠距進口食物", "採買在地、當季食材", "偏愛空運冷凍食品", "習慣網購跨國美食"],
+        optionsEn: [
+          "Choosing long‑distance imported foods more often",
+          "Buying local and seasonal ingredients",
+          "Preferring air‑freighted frozen foods",
+          "Frequently ordering cross‑border gourmet food online"
+        ],
+        correctIndex: 1
+      },
+      // 94
+      {
+        question: "「環境標示」主要提供什麼資訊？",
+        questionEn: "What information do environmental labels mainly provide?",
+        options: ["產品顏色與尺寸", "產品對環境影響或節能特性", "促銷折扣", "銷售地點"],
+        optionsEn: [
+          "Product color and size",
+          "Environmental impact or energy‑saving features of the product",
+          "Promotional discounts",
+          "Sales locations"
+        ],
+        correctIndex: 1
+      },
+      // 95
+      {
+        question: "下列哪一項最有助於降低教室夏季用電？",
+        questionEn: "Which action helps most to reduce classroom electricity use in summer?",
+        options: ["拉上窗簾、全開冷氣與燈", "適度使用電扇並搭配開窗或合理溫度冷氣", "門窗全關又不開冷氣", "所有電器同時開啟"],
+        optionsEn: [
+          "Closing curtains and turning AC and lights to max",
+          "Using fans appropriately and combining with open windows or reasonable AC settings",
+          "Keeping doors and windows closed with AC off",
+          "Turning on all electrical equipment at once"
+        ],
+        correctIndex: 1
+      },
+      // 96
+      {
+        question: "關於「再生紙」，哪一項說法較正確？",
+        questionEn: "Which statement about recycled paper is more correct?",
+        options: ["品質一定很差不能用", "使用舊紙漿再製，減少對林木需求", "比一般紙張用水更多", "一定沒有環保效益"],
+        optionsEn: [
+          "Its quality is always too poor to use",
+          "It is made from used pulp, reducing the need for new trees",
+          "It uses more water than regular paper",
+          "It definitely has no environmental benefit"
+        ],
+        correctIndex: 1
+      },
+      // 97
+      {
+        question: "下列哪一項是「減塑生活」的具體作法？",
+        questionEn: "Which is a concrete practice of a plastic‑reduction lifestyle?",
+        options: ["每次購物都拿新塑膠袋", "自備購物袋、餐具與水壺", "大量囤積塑膠杯", "偏好小包裝零食"],
+        optionsEn: [
+          "Taking new plastic bags every time you shop",
+          "Bringing your own shopping bag, tableware and water bottle",
+          "Stockpiling lots of plastic cups",
+          "Preferring small packaged snacks"
+        ],
+        correctIndex: 1
+      },
+      // 98
+      {
+        question: "「綠色金融」主要希望達成什麼目標？",
+        questionEn: "What is the main goal of green finance?",
+        options: ["將資金投入高污染產業", "支持環保與低碳產業的發展", "完全不考慮環境風險", "只追求短期高利潤"],
+        optionsEn: [
+          "Channeling funds into highly polluting industries",
+          "Supporting the development of environmentally friendly and low‑carbon industries",
+          "Ignoring environmental risks completely",
+          "Only pursuing short‑term high profits"
+        ],
+        correctIndex: 1
+      },
+      // 99
+      {
+        question: "下列哪一項屬於「校園環境維護」的一部分？",
+        questionEn: "Which of the following is part of campus environmental maintenance?",
+        options: ["在校園任意丟垃圾", "參與校園打掃與綠化", "破壞校園植栽", "塗鴉破壞公共設施"],
+        optionsEn: [
+          "Throwing garbage around campus at will",
+          "Joining campus cleaning and greening",
+          "Damaging campus plants",
+          "Vandalizing public facilities with graffiti"
+        ],
+        correctIndex: 1
+      },
+      // 100
+      {
+        question: "若想在日常生活中支持永續發展，下列哪一項最不恰當？",
+        questionEn: "If you want to support sustainable development in daily life, which is the LEAST appropriate?",
+        options: ["節能、減碳、減少浪費", "支持環保與公平貿易產品", "重視資源回收與再利用", "盡量多消費、多丟棄"],
+        optionsEn: [
+          "Saving energy, cutting carbon, and reducing waste",
+          "Supporting eco‑friendly and fair‑trade products",
+          "Valuing recycling and reuse of resources",
+          "Consuming and throwing away as much as possible"
+        ],
+        correctIndex: 3
+      }
+      ];
+
+
+      const NUM_PLAYERS = 2;
+      const MAX_CARBON = 500;
+      const JAIL_FEE = 50;
+
+      // 起點在右下角對應的格子（cell-9）
+      const GO_CELL_ID = 9;
+
+      // 監獄在「順時鐘路徑上」對應的邏輯位置索引（boardPath[9] === 'cell-0'，左下角）
+      const JAIL_POSITION = 9;
+
+      const players = [];
+      let currentPlayerIndex = 0;
+      const properties = {};
+
+      let currentLang = 'zh';  // 語言狀態：'zh' 或 'en'
+
+      // 順時鐘路徑：從右下角 cell-9 出發
+      const boardPath = [
+        'cell-9',  // 0：起點（右下角）
+        'cell-8',  // 1
+        'cell-7',  // 2
+        'cell-6',  // 3
+        'cell-5',  // 4
+        'cell-4',  // 5
+        'cell-3',  // 6
+        'cell-2',  // 7
+        'cell-1',  // 8
+        'cell-0',  // 9（左下角，監獄）
+        'cell-35', // 10
+        'cell-34', // 11
+        'cell-33', // 12
+        'cell-32', // 13
+        'cell-31', // 14
+        'cell-30', // 15
+        'cell-29', // 16
+        'cell-28', // 17
+        'cell-27', // 18
+        'cell-26', // 19
+        'cell-25', // 20
+        'cell-24', // 21
+        'cell-23', // 22
+        'cell-22', // 23
+        'cell-21', // 24
+        'cell-20', // 25
+        'cell-19', // 26
+        'cell-18', // 27（右上角，重大污染）
+        'cell-17', // 28
+        'cell-16', // 29
+        'cell-15', // 30
+        'cell-14', // 31
+        'cell-13', // 32
+        'cell-12', // 33
+        'cell-11', // 34
+        'cell-10'  // 35
+      ];
+
+      // 角落格子整合 name / nameEn
+      const cellData = [
+        // 左下角：監獄
+        { id: 0,  name: "環評審查", nameEn: "EIA Review",    type: "jail",     group: "special" },
+
+        { id: 1,  name: "掩埋場",   nameEn: "Landfill",      type: "property", group: "pollution", cost: 60,  rent: 6,  carbonEffect: 30 },
+        { id: 2,  name: "機會",     nameEn: "Chance",        type: "chance",   group: "special" },
+        { id: 3,  name: "水泥廠",   nameEn: "Cement Plant",  type: "property", group: "pollution", cost: 80,  rent: 8,  carbonEffect: 40 },
+        { id: 4,  name: "碳稅",     nameEn: "Carbon Tax",    type: "tax",      group: "special",  moneyEffect: -100, carbonEffect: 0 },
+        { id: 5,  name: "回收中心", nameEn: "Recycling Center", type: "property", group: "public",   cost: 150, rent: 15, carbonEffect: 10 },
+        { id: 6,  name: "社區公園", nameEn: "Community Park",   type: "nature",   group: "nature",  cost: 100, rent: 10, carbonEffect: 5 },
+        { id: 7,  name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
+        { id: 8,  name: "人造林",   nameEn: "Plantation",       type: "nature",   group: "nature",  cost: 120, rent: 12, carbonEffect: 8 },
+
+        // 右下角：起點
+        { id: 9,  name: "起點",     nameEn: "Start",        type: "go",       group: "special",  moneyEffect: 200, carbonEffect: 5 },
+
+        { id: 10, name: "碳捕捉廠", nameEn: "Carbon Capture",   type: "property", group: "green",   cost: 400, rent: 40, carbonEffect: 20 },
+        { id: 11, name: "奢侈稅",   nameEn: "Luxury Tax",       type: "tax",      group: "special", moneyEffect: -150, carbonEffect: 0 },
+        { id: 12, name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
+        { id: 13, name: "地熱發電", nameEn: "Geothermal Power", type: "property", group: "green",   cost: 350, rent: 35, carbonEffect: 15 },
+        { id: 14, name: "捷運",     nameEn: "Metro",            type: "property", group: "public",  cost: 200, rent: 20, carbonEffect: 10 },
+        { id: 15, name: "國家公園", nameEn: "National Park",    type: "nature",   group: "nature",  cost: 320, rent: 30, carbonEffect: 10 },
+        { id: 16, name: "機會",     nameEn: "Chance",           type: "chance",   group: "special" },
+        { id: 17, name: "濕地公園", nameEn: "Wetland Park",     type: "nature",   group: "nature",  cost: 300, rent: 28, carbonEffect: 10 },
+
+        // 右上角：重大污染
+        { id: 18, name: "重大污染", nameEn: "Major Pollution",  type: "goToJail", group: "special" },
+
+        { id: 19, name: "電力公司", nameEn: "Power Company",    type: "property", group: "public",  cost: 150, rent: 15, carbonEffect: 10 },
+        { id: 20, name: "研發中心", nameEn: "R&D Center",       type: "property", group: "green",   cost: 280, rent: 24, carbonEffect: 12 },
+        { id: 21, name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
+        { id: 22, name: "風力發電", nameEn: "Wind Power",       type: "property", group: "green",   cost: 260, rent: 22, carbonEffect: 15 },
+        { id: 23, name: "高鐵",     nameEn: "High Speed Rail",  type: "property", group: "public",  cost: 200, rent: 20, carbonEffect: 10 },
+        { id: 24, name: "塑膠工廠", nameEn: "Plastic Factory",  type: "property", group: "pollution", cost: 240, rent: 20, carbonEffect: 70 },
+        { id: 25, name: "機會",     nameEn: "Chance",           type: "chance",   group: "special" },
+        { id: 26, name: "鋼鐵廠",   nameEn: "Steel Mill",       type: "property", group: "pollution", cost: 220, rent: 18, carbonEffect: 60 },
+
+        // 左上角：碳匯中心
+        { id: 27, name: "碳匯中心", nameEn: "Carbon Sink Center", type: "free", group: "special" },
+
+        { id: 28, name: "水力公司", nameEn: "Hydro Company",    type: "property", group: "public",  cost: 150, rent: 15, carbonEffect: 10 },
+        { id: 29, name: "火力發電", nameEn: "Thermal Power",    type: "property", group: "pollution", cost: 200, rent: 16, carbonEffect: 80 },
+        { id: 30, name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
+        { id: 31, name: "石化工業", nameEn: "Petrochemical",    type: "property", group: "pollution", cost: 180, rent: 14, carbonEffect: 70 },
+        { id: 32, name: "大眾運輸", nameEn: "Public Transport", type: "property", group: "public",  cost: 200, rent: 20, carbonEffect: 10 },
+        { id: 33, name: "電動車廠", nameEn: "EV Factory",       type: "property", group: "green",   cost: 160, rent: 12, carbonEffect: 8 },
+        { id: 34, name: "機會",     nameEn: "Chance",           type: "chance",   group: "special" },
+        { id: 35, name: "太陽能板", nameEn: "Solar Panels",     type: "property", group: "green",   cost: 140, rent: 10, carbonEffect: 5 }
+      ];
+
+      // 由「邏輯位置（boardPath 索引）」取得實際的 cell 資料
+      function getCellByLogicalPosition(logicalPosition) {
+        const cellIdStr = boardPath[logicalPosition];
+        const cellId = parseInt(cellIdStr.split('-')[1], 10);
+        return cellData[cellId];
+      }
+
+      const playerColors = ['var(--player1-color)', 'var(--player2-color)', '#4caf50', '#ffc107'];
+
+      // --- 2. DOM 元素 ---
+      const board = document.getElementById('board');
+      const rollButton = document.getElementById('roll-button');
+      const diceDisplay = document.getElementById('dice-display');
+      const moneyDisplay = document.getElementById('money-display');
+      const carbonDisplay = document.getElementById('carbon-display');
+      const carbonBarFill = document.getElementById('carbon-bar-fill');
+      const infoBox = document.getElementById('info-box');
+      const turnIndicator = document.getElementById('turn-indicator');
+      const playerSummary = document.getElementById('player-summary');
+
+      const modalOverlay = document.getElementById('modal-overlay');
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const modalButtons = document.getElementById('modal-buttons');
+
+      // --- 3. 核心功能 ---
+
+      function updateUI() {
+        const player = players[currentPlayerIndex];
+        turnIndicator.textContent = currentLang === 'zh'
+          ? `輪到 玩家 ${player.id + 1}`
+          : `Player ${player.id + 1}'s turn`;
+        turnIndicator.style.color = player.tokenColor;
+        moneyDisplay.textContent = `$${player.money}`;
+        carbonDisplay.textContent = `${player.carbon} / ${MAX_CARBON} CO₂`;
+        const carbonPercentage = Math.min((player.carbon / MAX_CARBON) * 100, 100);
+        carbonBarFill.style.width = `${carbonPercentage}%`;
+        carbonBarFill.style.backgroundColor = (carbonPercentage > 80) ? '#f44336' : '#d32f2f';
+        playerSummary.innerHTML = currentLang === 'zh' ? '<h4>所有玩家</h4>' : '<h4>Players</h4>';
+        players.forEach(p => {
+          const playerDiv = document.createElement('div');
+          playerDiv.className = 'summary-item';
+          playerDiv.innerHTML = `
+            <span class="player-color-box" style="background-color: ${p.tokenColor};"></span>
+            ${currentLang === 'zh'
+              ? `玩家 ${p.id + 1}: $${p.money} | ${p.carbon} CO₂ ${p.isInJail ? "(在環評中)" : ""}`
+              : `Player ${p.id + 1}: $${p.money} | ${p.carbon} CO₂ ${p.isInJail ? "(In EIA)" : ""}`
+            }
+          `;
+          playerSummary.appendChild(playerDiv);
+        });
+      }
+
+      function movePlayerToken(playerId, logicalPosition) {
+        const playerToken = document.getElementById(`player-${playerId}`);
+        const cellId = boardPath[logicalPosition];
+        const cellElement = document.getElementById(cellId);
+        const cellRect = cellElement.getBoundingClientRect();
+        const boardRect = board.getBoundingClientRect();
+        const offset = playerId * 5;
+        const basePos = 24;
+        const top = cellRect.top - boardRect.top + basePos + offset;
+        const left = cellRect.left - boardRect.left + basePos + offset;
+        playerToken.style.top = `${top}px`;
+        playerToken.style.left = `${left}px`;
+      }
+
+      // 語言套用：更新棋盤每一格標題 & 按鈕文字
+      function applyLanguage(lang) {
+        currentLang = lang;
+
+        // 棋盤格子標題
+        cellData.forEach(cell => {
+          const header = document.querySelector(`#cell-${cell.id} .cell-header`);
+          if (!header) return;
+          if (lang === 'zh') {
+            header.textContent = cell.name;
+          } else {
+            header.textContent = cell.nameEn || cell.name;
+          }
+        });
+        const restartBtn = document.getElementById('restart-button');
+        if (restartBtn) {
+          restartBtn.textContent = (lang === 'zh') ? "重新開始" : "Restart";
+        }
+        // 左上角語言按鈕
+        const btn = document.getElementById('lang-toggle');
+        if (btn) {
+          btn.textContent = (lang === 'zh') ? 'EN' : '中';
+        }
+
+        // 側邊欄標題／標籤
+        const statusTitle = document.getElementById('status-title');
+        if (statusTitle) {
+          statusTitle.textContent = (lang === 'zh')
+            ? "當前玩家狀態"
+            : "Current Player";
+        }
+
+        const moneyLabel = document.getElementById('money-label');
+        if (moneyLabel) {
+          moneyLabel.firstChild.textContent = (lang === 'zh')
+            ? "💰 金錢: "
+            : "💰 Money: ";
+        }
+
+        const carbonLabel = document.getElementById('carbon-label');
+        if (carbonLabel) {
+          carbonLabel.firstChild.textContent = (lang === 'zh')
+            ? "🏭 碳排: "
+            : "🏭 Carbon: ";
+        }
+
+        if (rollButton) {
+          rollButton.textContent = (lang === 'zh')
+            ? "擲骰子"
+            : "Roll";
+        }
+
+        const infoBoxEl = document.getElementById('info-box');
+        if (infoBoxEl && infoBoxEl.textContent.includes("歡迎來到永續大富翁")) {
+          infoBoxEl.textContent = (lang === 'zh')
+            ? "歡迎來到永續大富翁！"
+            : "Welcome to Sustainable Monopoly!";
+        }
+
+        const playersTitle = document.getElementById('players-title');
+        if (playersTitle) {
+          playersTitle.textContent = (lang === 'zh')
+            ? "所有玩家"
+            : "All Players";
+        }
+          // 左下角 cell-0：環評審查 (監獄)
+          const jailFooter = document.querySelector('#cell-0 .cell-footer');
+          if (jailFooter) {
+            jailFooter.textContent = (lang === 'zh')
+              ? '(監獄)'
+              : '(Jail)';
+          }
+
+          // 左上角 cell-27：碳匯中心 (免費休息)
+          const freeFooter = document.querySelector('#cell-27 .cell-footer');
+          if (freeFooter) {
+            freeFooter.textContent = (lang === 'zh')
+              ? '(免費休息)'
+              : '(Free Rest)';
+          }
+
+          // 右上角 cell-18：重大污染 (前往環評)
+          const goToEiaFooter = document.querySelector('#cell-18 .cell-footer');
+          if (goToEiaFooter) {
+            goToEiaFooter.textContent = (lang === 'zh')
+              ? '(前往環評)'
+              : '(Go to EIA)';
+          }
+          // 5. 更新地圖中央文字標題
+          const centerTitleEl = document.getElementById('center-title');
+            if (centerTitleEl) {
+              centerTitleEl.textContent = (lang === 'zh')
+                ? GAME_TITLE_ZH
+                : GAME_TITLE_EN;
+            }
+
+            // 6. 更新瀏覽器分頁標題（同時帶上雙語）
+            if (lang === 'zh') {
+              document.title = `${GAME_TITLE_ZH} (${GAME_TITLE_EN})`;
+            } else {
+              document.title = `${GAME_TITLE_EN} (${GAME_TITLE_ZH})`;
+            }
+            // 這一行很重要：先抓到你的 ？ 按鈕
+            const helpBtn = document.getElementById('help-button');
+            let helpTooltip = null;
+
+            // === 把這一大段貼在這裡 ===
+            if (helpBtn) {
+              helpTooltip = document.createElement('div');
+              helpTooltip.className = 'help-button-tooltip';
+              document.body.appendChild(helpTooltip);
+
+              const getHelpText = () => {
+                if (currentLang === 'zh') {
+                  return [
+                    "【遊戲說明】",
+                    "1. 依序擲骰子，棋子順時針走格子。",
+                    "2. 停在地產可回答問題後決定是否購買，之後其他玩家踩到要付租金。",
+                    "3. 某些格子會增加或減少碳排／金錢，請留意說明。",
+                    "4. 重大污染會被送往環評審查 (監獄)，答對題目並付罰款才能離開。",
+                    "5. 當金錢 < 0 或碳排 ≥ 上限，遊戲結束。"
+                  ].join("\n");
+                } else {
+                  return [
+                    "[How to Play]",
+                    "1. Take turns rolling the dice and move clockwise.",
+                    "2. On properties, answer a quiz then decide whether to buy; others pay rent when they land there.",
+                    "3. Some spaces increase or decrease your money / CO₂, read the text carefully.",
+                    "4. Major pollution sends you to EIA Review (jail); answer correctly and pay the fine to get out.",
+                    "5. If your money < 0 or CO₂ ≥ limit, the game ends."
+                  ].join("\n");
+                }
+              };
+
+              // 滑鼠移上去顯示
+              helpBtn.addEventListener('mouseenter', () => {
+                helpTooltip.textContent = getHelpText();
+                helpTooltip.classList.add('show');
+              });
+
+              // 滑鼠移開隱藏
+              helpBtn.addEventListener('mouseleave', () => {
+                helpTooltip.classList.remove('show');
+              });
+            }
+            
+        updateUI();
+      }
+
+
+      /**
+       * 擲骰子函式 (順時鐘版本，起點在 cell-9)
+       */
+      async function rollDice() {
+        rollButton.disabled = true;
+        const currentPlayer = players[currentPlayerIndex];
+
+        if (currentPlayer.isInJail) {
+          await handleJailTurn(currentPlayer);
+          return;
+        }
+
+        const roll = Math.floor(Math.random() * 6) + 1;
+        diceDisplay.textContent = `🎲 ${roll}`;
+        logInfo(
+          currentLang === 'zh'
+            ? `你 (玩家 ${currentPlayer.id + 1}) 擲出了 ${roll} 點。`
+            : `You (Player ${currentPlayer.id + 1}) rolled ${roll}.`
+        );
+
+        const oldPosition = currentPlayer.position;
+        currentPlayer.position = (oldPosition + roll) % boardPath.length;
+
+        let passedGo = false;
+        if (currentPlayer.position < oldPosition) {
+          passedGo = true;
+          await handleLandOnCell(currentPlayer, cellData[GO_CELL_ID], true);
+        }
+
+        movePlayerToken(currentPlayer.id, currentPlayer.position);
+        await new Promise(r => setTimeout(r, 600));
+
+        const currentCell = getCellByLogicalPosition(currentPlayer.position);
+
+        if (currentCell.type === 'go' && passedGo) {
+          logInfo(currentLang === 'zh' ? "你剛好停在起點！" : "You landed on Start!");
+        } else {
+          await handleLandOnCell(currentPlayer, currentCell, false);
+        }
+
+        if (checkGameStatus(currentPlayer)) {
+          if (currentPlayer.isInJail) {
+            nextTurn();
+          } else {
+            nextTurn();
+          }
+        }
+      }
+
+      function nextTurn() {
+        currentPlayerIndex = (currentPlayerIndex + 1) % NUM_PLAYERS;
+        updateUI();
+        logInfo(
+          currentLang === 'zh'
+            ? `--- 輪到 玩家 ${currentPlayerIndex + 1} ---`
+            : `--- Player ${currentPlayerIndex + 1}'s turn ---`
+        );
+        rollButton.disabled = false;
+      }
+
+      // 通用彈窗（修正版：必須按按鈕才算作答）
+      function showModal(title, message, buttons) {
+        return new Promise(resolve => {
+          modalTitle.textContent = title;
+          modalMessage.innerHTML = message.replace(/\n/g, '<br>');
+          modalButtons.innerHTML = '';
+
+          modalOverlay.onclick = null;
+
+          buttons.forEach(btnInfo => {
+            const button = document.createElement('button');
+            button.className = 'modal-btn';
+            if (btnInfo.cssClass) {
+              button.classList.add(btnInfo.cssClass);
+            }
+            button.textContent = btnInfo.text;
+            button.onclick = () => {
+              modalOverlay.classList.add('modal-hidden');
+              modal.classList.add('modal-hidden');
+              modalOverlay.onclick = null;
+              resolve(btnInfo.value);
+            };
+            modalButtons.appendChild(button);
+          });
+
+          modalOverlay.classList.remove('modal-hidden');
+          modal.classList.remove('modal-hidden');
+        });
+      }
+      // 遊戲開始時的規則說明視窗
+      function showGameIntro() {
+      const isZh = (currentLang === 'zh');
+
+      const title = isZh
+        ? "🎯 遊戲規則說明"
+        : "🎯 Game Rules";
+
+      const linesZh = [
+        "歡迎來到「碳權大富翁：永續行動力」！",
+        "",
+        "● 基本流程",
+        "1. 玩家依序擲骰，棋子沿外圈格子順時針前進。",
+        "2. 停在地產時，先回答環保問答，再決定是否購買。",
+        "3. 之後其他玩家踩到你的地，要支付租金。",
+        "",
+        "● 金錢與碳排",
+        "4. 某些格子會增加或減少金錢與碳排，請留意格子文字。",
+        "5. 踩到「重大污染」會被送往環評審查（監獄），",
+        "   必須答對題目並付罰款才能離開。",
+        "",
+        "● 遊戲結束",
+        "6. 當金錢 < 0 或碳排 ≥ 上限時，該玩家遊戲結束。",
+        "",
+        "祝你在追求獲利的同時，也能守住地球的永續界線！"
+      ];
+
+      const linesEn = [
+        "Welcome to “Carbon Tycoon: The Sustainability Drive”! ",
+        "",
+        "● Basic Flow",
+        "1. Players take turns rolling the dice and move clockwise around the board.",
+        "2. On properties, answer a green quiz first, then decide whether to buy.",
+        "3. Other players pay you rent when they land on your properties.",
+        "",
+        "● Money & CO₂",
+        "4. Some spaces change your money or CO₂. Read each space carefully.",
+        "5. Landing on Major Pollution sends you to EIA Review (jail).",
+        "   Answer correctly and pay the fine to get out.",
+        "",
+        "● Game End",
+        "6. If your money is below 0 or CO₂ reaches the limit, you are out.",
+        "",
+        "Try to balance profit and sustainability, and keep the planet livable!"
+      ];
+
+      const message = (isZh ? linesZh : linesEn).join("\n");
+
+      // 關鍵：return 這個 Promise，給 initGame 的 await 用
+      return showModal(title, message, [
+        {
+          text: isZh ? "開始遊戲" : "Start Game",
+          value: "start",
+          cssClass: "primary"
+        }
+      ]);
+      }
+
+
+      // 測驗
+      async function askQuiz() {
+      const qIndex = Math.floor(Math.random() * questionBank.length);
+      const quiz = questionBank[qIndex];
+      const letterMap = ['A', 'B', 'C', 'D'];
+
+      const isZh = (currentLang === 'zh');
+
+      // 題目：優先用對應語言，沒有英文就退回中文
+      const questionText = isZh
+        ? quiz.question
+        : (quiz.questionEn || quiz.question);
+
+      // 選項：優先用 optionsEn，沒有就退回中文 options
+      const optionsToUse = isZh
+        ? quiz.options
+        : (quiz.optionsEn || quiz.options);
+
+      const buttons = optionsToUse.map((option, index) => ({
+        text: `${letterMap[index]}. ${option}`,
+        value: index
+      }));
+
+      const title = isZh ? "🌍 環保知識問答" : "🌍 Green Quiz";
+
+      const selectedIndex = await showModal(
+        title,
+        questionText,
+        buttons
+      );
+
+      const isCorrect = (selectedIndex === quiz.correctIndex);
+
+      if (isCorrect) {
+        alert(isZh ? "回答正確！" : "Correct!");
+      } else {
+        const correctText = optionsToUse[quiz.correctIndex];
+        const correctAnswer = `${letterMap[quiz.correctIndex]}. ${correctText}`;
+        alert(
+          isZh
+            ? `回答錯誤！\n\n正確答案是: ${correctAnswer}`
+            : `Wrong answer!\n\nCorrect: ${correctAnswer}`
+        );
+      }
+      return isCorrect;
+      }
+
+
+      // 監獄回合
+      async function handleJailTurn(player) {
+        logInfo(
+          currentLang === 'zh'
+            ? `你 (玩家 ${player.id + 1}) 正在「環評審查」中...`
+            : `You (Player ${player.id + 1}) are in EIA Review...`
+        );
+        if (player.money >= JAIL_FEE) {
+
+          const title = currentLang === 'zh' ? "⛓ 環評審查" : "⛓ EIA Review";
+          const msgZh = `你要支付 $${JAIL_FEE} 的罰款來離開「環評審查」嗎？\n(回答問題才能成功支付)`;
+          const msgEn = `Pay $${JAIL_FEE} fine to leave EIA?\n(You must answer a question correctly)`;
+
+          const decision = await showModal(
+            title,
+            currentLang === 'zh' ? msgZh : msgEn,
+            currentLang === 'zh'
+              ? [
+                  { text: `支付 $${JAIL_FEE}`, value: 'pay', cssClass: 'primary' },
+                  { text: "繼續留下", value: 'stay' }
+                ]
+              : [
+                  { text: `Pay $${JAIL_FEE}`, value: 'pay', cssClass: 'primary' },
+                  { text: "Stay", value: 'stay' }
+                ]
+          );
+
+          if (decision === 'pay') {
+            logInfo(
+              currentLang === 'zh'
+                ? "請先回答一個環保問題，才能支付罰款！"
+                : "Answer a quiz question before paying the fine!"
+            );
+            const isCorrect = await askQuiz();
+
+            if (isCorrect) {
+              logInfo(
+                currentLang === 'zh'
+                  ? `回答正確！你成功支付了 $${JAIL_FEE} 罰款。`
+                  : `Correct! You paid $${JAIL_FEE} fine.`
+              );
+              player.money -= JAIL_FEE;
+              player.isInJail = false;
+              updateUI();
+              nextTurn();
+            } else {
+              logInfo(
+                currentLang === 'zh'
+                  ? "回答錯誤！你必須在環評中心再待一回合。"
+                  : "Wrong! You must stay in EIA one more turn."
+              );
+              nextTurn();
+            }
+          } else {
+            logInfo(
+              currentLang === 'zh'
+                ? "你決定繼續留在環評中心。"
+                : "You chose to stay in EIA."
+            );
+            nextTurn();
+          }
+        } else {
+          logInfo(
+            currentLang === 'zh'
+              ? `你錢不夠 ($${player.money})，無法支付 $${JAIL_FEE} 的罰款。`
+              : `Not enough money ($${player.money}) to pay $${JAIL_FEE} fine.`
+          );
+          nextTurn();
+        }
+      }
+
+      function applyCarbonEffect(player, carbonEffect) {
+        if (carbonEffect > 0) {
+          player.carbon += carbonEffect;
+          logInfo(
+            currentLang === 'zh'
+              ? `碳排放增加 +${carbonEffect} CO₂。`
+              : `Carbon emission +${carbonEffect} CO₂.`
+          );
+        } else if (carbonEffect < 0) {
+          const oldCarbon = player.carbon;
+          player.carbon = Math.max(0, player.carbon + carbonEffect);
+          const reduction = oldCarbon - player.carbon;
+          logInfo(
+            currentLang === 'zh'
+              ? `環保行動！碳排放抵銷 -${reduction} CO₂。`
+              : `Green action! Carbon reduced by -${reduction} CO₂.`
+          );
+        }
+      }
+
+      async function handleLandOnCell(player, cell, isPassingGo = false) {
+        if (cell.type === 'go' && isPassingGo) {
+          player.money += cell.moneyEffect;
+          applyCarbonEffect(player, cell.carbonEffect);
+          logInfo(
+            currentLang === 'zh'
+              ? `領取薪水 $${cell.moneyEffect}。`
+              : `Collected salary $${cell.moneyEffect}.`
+          );
+          updateUI();
+          return;
+        }
+
+        if (!isPassingGo) {
+          logInfo(
+            currentLang === 'zh'
+              ? `你踩到了 [${cell.name}]。`
+              : `You landed on [${cell.nameEn || cell.name}].`
+          );
+        }
+
+        switch (cell.type) {
+          case 'go':
+            player.money += cell.moneyEffect;
+            applyCarbonEffect(player, cell.carbonEffect);
+            logInfo(
+              currentLang === 'zh'
+                ? `你剛好停在起點！領取薪水 $${cell.moneyEffect}。`
+                : `You landed on Start! Gain $${cell.moneyEffect}.`
+            );
+            break;
+          case 'property':
+          case 'nature':
+            await handlePropertyLanding(player, cell);
+            break;
+          case 'tax':
+            player.money += cell.moneyEffect;
+            logInfo(
+              currentLang === 'zh'
+                ? `你必須支付 $${Math.abs(cell.moneyEffect)} 的稅金！`
+                : `You need to pay $${Math.abs(cell.moneyEffect)} tax!`
+            );
+            break;
+          case 'jail':
+            logInfo(
+              player.isInJail
+                ? (currentLang === 'zh'
+                    ? "你正在「環評審查」中。"
+                    : "You are in EIA Review.")
+                : (currentLang === 'zh'
+                    ? "你來「環評審查」中心... 只是來訪。"
+                    : "You visit the EIA center... just visiting.")
+            );
+            break;
+          case 'free':
+            logInfo(
+              currentLang === 'zh'
+                ? "你停在「碳匯中心」，這是唯一能主動減少碳排的地方！"
+                : "You are at the Carbon Sink Center, a place to actively reduce CO₂!"
+            );
+            applyCarbonEffect(player, -20);
+            break;
+          case 'goToJail':
+            logInfo(
+              currentLang === 'zh'
+                ? "糟糕！發生重大污染事件！你必須立即前往「環評審查」！"
+                : "Oops! Major pollution event! Go directly to EIA Review!"
+            );
+            player.position = JAIL_POSITION;
+            player.isInJail = true;
+            movePlayerToken(player.id, player.position);
+            break;
+          case 'chance':
+            const luck = Math.random();
+            if (luck > 0.6) {
+              player.money += 50;
+              logInfo(
+                currentLang === 'zh'
+                  ? "機會：獲得政府綠能補助 $50！"
+                  : "Chance: You received $50 green subsidy!"
+              );
+            } else if (luck > 0.3) {
+              logInfo(
+                currentLang === 'zh'
+                  ? "機會：你參加了植樹活動！抵銷 -20 CO₂。"
+                  : "Chance: You joined a tree planting event! -20 CO₂."
+              );
+              applyCarbonEffect(player, -20);
+            } else {
+              player.carbon += 15;
+              logInfo(
+                currentLang === 'zh'
+                  ? "機會：你的工廠發生意外，碳排 +15 CO₂！"
+                  : "Chance: Factory accident, +15 CO₂!"
+              );
+            }
+            break;
+        }
+        updateUI();
+      }
+
+      // 購買地產
+      async function handlePropertyLanding(player, cell) {
+        const ownerId = properties[cell.id];
+        const cellNameZh = cell.name;
+        const cellNameEn = cell.nameEn || cell.name;
+
+        if (ownerId === undefined) {
+          if (player.money >= cell.cost) {
+
+            logInfo(
+              currentLang === 'zh'
+                ? `你必須先回答一個環保問題，才能獲得購買 [${cellNameZh}] 的資格！`
+                : `Answer a green quiz to get the right to buy [${cellNameEn}].`
+            );
+            const isCorrect = await askQuiz();
+
+            if (isCorrect) {
+              logInfo(
+                currentLang === 'zh'
+                  ? "回答正確！你獲得了購買權。"
+                  : "Correct! You may buy this property."
+              );
+
+              const message =
+                (currentLang === 'zh'
+                  ? `[${cellNameZh}] (無主地)\n\n`
+                  : `[${cellNameEn}] (Unowned)\n\n`) +
+                (currentLang === 'zh'
+                  ? `購買價格：$${cell.cost}\n建置碳排：+${cell.carbonEffect} CO₂\n基礎租金：$${cell.rent}\n\n你要購買嗎？`
+                  : `Price: $${cell.cost}\nCarbon: +${cell.carbonEffect} CO₂\nBase rent: $${cell.rent}\n\nBuy this property?`);
+
+              const buttons =
+                currentLang === 'zh'
+                  ? [
+                      { text: `購買 ($${cell.cost})`, value: 'buy', cssClass: 'primary' },
+                      { text: "放棄", value: 'pass' }
+                    ]
+                  : [
+                      { text: `Buy ($${cell.cost})`, value: 'buy', cssClass: 'primary' },
+                      { text: "Skip", value: 'pass' }
+                    ];
+
+              const decision = await showModal(
+                currentLang === 'zh' ? "🏠 購買地產？" : "🏠 Buy Property?",
+                message,
+                buttons
+              );
+
+              if (decision === 'buy') {
+                player.money -= cell.cost;
+                applyCarbonEffect(player, cell.carbonEffect);
+                properties[cell.id] = player.id;
+
+                document.getElementById(`cell-${cell.id}`).classList.add('owner-' + player.id);
+
+                logInfo(
+                  currentLang === 'zh'
+                    ? `你成功購買了 [${cellNameZh}]！`
+                    : `You bought [${cellNameEn}]!`
+                );
+              } else {
+                logInfo(
+                  currentLang === 'zh'
+                    ? `你決定暫不購買 [${cellNameZh}]。`
+                    : `You decided not to buy [${cellNameEn}].`
+                );
+              }
+            } else {
+              logInfo(
+                currentLang === 'zh'
+                  ? `回答錯誤！你失去了這次購買 [${cellNameZh}] 的機會。`
+                  : `Wrong answer! You lost the chance to buy [${cellNameEn}].`
+              );
+            }
+          } else {
+            logInfo(
+              currentLang === 'zh'
+                ? `你想購買 [${cellNameZh}]，但你的金錢 ($${player.money}) 不足 $${cell.cost}。`
+                : `You want to buy [${cellNameEn}], but you only have $${player.money} (need $${cell.cost}).`
+            );
+          }
+        } else if (ownerId === player.id) {
+          logInfo(
+            currentLang === 'zh'
+              ? `你踩到了自己的地產 [${cellNameZh}]。`
+              : `You landed on your own property [${cellNameEn}].`
+          );
+        } else {
+          const owner = players[ownerId];
+          let rent = cell.rent;
+          if (cell.group === 'public') {
+            rent = calculatePublicRent(owner.id);
+            logInfo(
+              currentLang === 'zh'
+                ? `[${cellNameZh}] 是公共事業。`
+                : `[${cellNameEn}] is a public utility.`
+            );
+          }
+          logInfo(
+            currentLang === 'zh'
+              ? `你踩到了 玩家 ${owner.id + 1} 的地！`
+              : `You landed on Player ${owner.id + 1}'s property!`
+          );
+          logInfo(
+            currentLang === 'zh'
+              ? `你必須支付 $${rent} 的租金。`
+              : `You must pay $${rent} in rent.`
+          );
+          player.money -= rent;
+          owner.money += rent;
+          updateUI();
+          logInfo(
+            currentLang === 'zh'
+              ? `玩家 ${owner.id + 1} 獲得了 $${rent}。`
+              : `Player ${owner.id + 1} received $${rent}.`
+          );
+        }
+      }
+
+      function calculatePublicRent(ownerId) {
+        let count = 0;
+        cellData.filter(c => c.group === 'public').forEach(cell => {
+          if (properties[cell.id] === ownerId) { count++; }
+        });
+        const rentLevels = [0, 25, 50, 100, 200, 300, 400];
+        const rent = rentLevels[count];
+        logInfo(
+          currentLang === 'zh'
+            ? `地主擁有 ${count} 處公共事業，租金為 $${rent}。`
+            : `Owner has ${count} public utilities, rent is $${rent}.`
+        );
+        return rent;
+      }
+
+      function checkGameStatus(player) {
+        if (player.money < 0) {
+          alert(
+            currentLang === 'zh'
+              ? `遊戲結束！\n\n玩家 ${player.id + 1} 因為金錢小於 $0 而破產了！`
+              : `Game Over!\n\nPlayer ${player.id + 1} has gone bankrupt (money < 0).`
+          );
+          logInfo(
+            currentLang === 'zh'
+              ? `遊戲結束！玩家 ${player.id + 1} 破產了。`
+              : `Game Over! Player ${player.id + 1} is bankrupt.`
+          );
+          rollButton.disabled = true;
+          return false;
+        }
+        if (player.carbon >= MAX_CARBON) {
+          alert(
+            currentLang === 'zh'
+              ? `遊戲結束！\n\n玩家 ${player.id + 1} 的碳排放達到了 ${player.carbon}，超過 ${MAX_CARBON} 上限！`
+              : `Game Over!\n\nPlayer ${player.id + 1}'s carbon emission reached ${player.carbon}, exceeding ${MAX_CARBON}.`
+          );
+          logInfo(
+            currentLang === 'zh'
+              ? `遊戲結束！玩家 ${player.id + 1} 碳排爆表。`
+              : `Game Over! Player ${player.id + 1}'s carbon exceeds the limit.`
+          );
+          rollButton.disabled = true;
+          return false;
+        }
+        return true;
+      }
+
+      function logInfo(message) {
+        infoBox.innerHTML = message + "<br>" + infoBox.innerHTML;
+      }
+
+      // --- 4. 遊戲初始化 ---
+      async function initGame() {
+      // 1. 建立玩家與棋子
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        players.push({
+          id: i,
+          money: 1500,
+          carbon: 0,
+          position: 0,
+          isInJail: false,
+          tokenColor: playerColors[i % playerColors.length]
+        });
+        const playerToken = document.createElement('div');
+        playerToken.id = `player-${i}`;
+        playerToken.className = 'player';
+        playerToken.style.backgroundColor = players[i].tokenColor;
+        board.appendChild(playerToken);
+        movePlayerToken(i, 0);
+      }
+
+      currentPlayerIndex = 0;
+
+      // 2. 綁定按鈕
+      rollButton.addEventListener('click', rollDice);
+
+      const langBtn = document.getElementById('lang-toggle');
+      if (langBtn) {
+        langBtn.addEventListener('click', () => {
+          const nextLang = (currentLang === 'zh') ? 'en' : 'zh';
+          applyLanguage(nextLang);
+        });
+      }
+      
+      // 3. 預設語言
+      applyLanguage('zh');
+
+      // 4. 一開始彈出規則說明（重點：這裡才可以 await）
+      await showGameIntro();
+
+      // 5. 顯示起始訊息
+      logInfo("歡迎來到碳權大富翁：永續行動力！\n玩家 1 (藍色) 請擲骰子。");
+      updateUI();
+      }
+        const restartButton = document.getElementById('restart-button');
+        if (restartButton) {
+          restartButton.addEventListener('click', () => {
+            // 最簡單、最穩定的重新開始方式：重新載入整個頁面
+            location.reload();
+          });
+        }
+
+
+      initGame();
+    });
+</script>
+
+
+</body>
+</html>
