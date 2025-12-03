@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>永續記憶卡：宏全供應鏈配對</title>
+<title>Sustainable Memory Card: Hon Chuan Supply Chain Match</title>
 <style>
   /* ====== 色票 ====== */
 :root{
@@ -427,10 +427,10 @@ header .meta a.pill:hover {
 <!-- ====== 開始畫面 ====== -->
 <div id="start-screen" class="overlay-start">
   <div class="start-box">
-  <h1>ESG 記憶配對遊戲</h1>
-  <p>快來挑戰！配對卡片，學習環保知識 🌱</p>
-  <a href="try2_3.html" class="lang-switch-btn">Switch to English</a>
-  <button id="start-btn">開始遊戲</button>
+  <h1>ESG Memory Matching Game</h1>
+  <p>Come challenge yourself! Match the cards and learn about environmental knowledge 🌱</p>
+  <a href="try2_2.html" class="lang-switch-btn">切換為中文</a>
+  <button id="start-btn">Start Game</button>
 </div>
 </div>
 
@@ -438,18 +438,18 @@ header .meta a.pill:hover {
 <!-- 教學引導（首次顯示，也可點❓再開） -->
 <div class="guide" id="guide">
   <div class="guide-card">
-    <h2 style="margin:0 0 6px">遊戲操作教學</h2>
-    <div class="tip" style="color:#246084">3 步驟快速上手</div>
+    <h2 style="margin:0 0 6px">How to Play</h2>
+    <div class="tip" style="color:#246084">3 steps to get started quickly</div>
     <div class="steps">
-      <div class="step"><b>🖱️</b><strong>1）點兩張卡</strong><br>若圖示相同即配對成功。</div>
-      <div class="step"><b>⏱️</b><strong>2）把握時間</strong><br>在限時內完成所有配對。</div>
-      <div class="step"><b>🎯</b><strong>3）解鎖小卡</strong><br>每次配對會跳出 ESG 小知識。</div>
+      <div class="step"><b>🖱️</b><strong>1）Click two cards</strong><br>If the icons match, the pair is successful.</div>
+      <div class="step"><b>⏱️</b><strong>2）Keep track of time</strong><br>Finish all matches within the time limit.</div>
+      <div class="step"><b>🎯</b><strong>3）Unlock Knowledge</strong><br>Each successful pair unlocks ESG knowledge.</div>
     </div>
     <div class="guide-actions">
-      <a href="try2_3.html" class="icon-btn">English</a>
+      <a href="try2_2.html" class="icon-btn">中文</a>
       
-      <button class="btn" id="startBtn">挑戰開始</button>
-      <button class="icon-btn" id="skipBtn">略過</button>
+      <button class="btn" id="startBtn">Start Challenge</button>
+      <button class="icon-btn" id="skipBtn">Skip</button>
     </div>
   </div>
 </div>
@@ -496,19 +496,19 @@ header .meta a.pill:hover {
 <!-- 遊戲機台 -->
 <div class="wrap">
   <header>
-    <h1>永續記憶卡：宏全供應鏈配對</h1>
+    <h1>HQC Sustainable Match-Up</h1>
     <div class="meta">
       <select id="levelSel" class="select">
-        <option value="0">S — 原料階段（Supply） </option>
-        <option value="1">P — 製程階段（Production） </option>
-        <option value="2">M — 包裝階段（Material） </option>
-        <option value="3">W — 倉儲與回收階段（Warehouse） </option>
+        <option value="0">S — Supply Stage (Raw Materials) </option>
+        <option value="1">P — Production Stage </option>
+        <option value="2">M — Material Stage (Packaging) </option>
+        <option value="3">W — Warehouse & Recycling Stage </option>
       </select>
-      <a href="try2_3.html" class="pill">English</a>
-      <div class="pill">時間：<b id="time">--</b></div>
-      <div class="pill">步數：<b id="moves">0</b></div>
-      <div class="pill">配對：<b id="matches">0</b>/<b id="pairs">--</b></div>
-      <button class="btn" id="restartBtn">重新開始</button>
+      <a href="try2_2.html" class="pill">中文</a>
+      <div class="pill">Time:<b id="time">--</b></div>
+      <div class="pill">Moves:<b id="moves">0</b></div>
+      <div class="pill">Matches:<b id="matches">0</b>/<b id="pairs">--</b></div>
+      <button class="btn" id="restartBtn">Restart</button>
       <button class="icon-btn" id="helpBtn">❓</button>
     </div>
   </header>
@@ -516,15 +516,15 @@ header .meta a.pill:hover {
   <div class="panel">
     <div><div id="grid" class="grid"></div><div id="know" class="know"></div></div>
     <aside class="side">
-      <h3>任務 / 進度</h3>
+      <h3>Mission / Progress</h3>
       <div id="mission" class="tip"></div>
       <div class="chips" id="progressChips"></div>
-      <div class="tip">已解鎖小卡：<b id="unlocked">0</b>/<b id="need">--</b></div>
+      <div class="tip">Unlocked Facts:<b id="unlocked">0</b>/<b id="need">--</b></div>
       <hr>
-      <h3>供應鏈階段進度</h3>
-      <div class="tip">目前階段：<b id="stageNow">--</b></div>
-      <hr><h3>排行榜（本機）</h3>
-      <table id="rank"><thead><tr><th>#</th><th>暱稱</th><th>關卡</th><th>時間</th><th>步數</th><th>日期</th></tr></thead><tbody></tbody></table>
+      <h3>Supply Chain Stage Progress</h3>
+      <div class="tip">Current Stage:<b id="stageNow">--</b></div>
+      <hr><h3>Local Leaderboard</h3>
+      <table id="rank"><thead><tr><th>#</th><th>Nickname</th><th>Stage</th><th>Time</th><th>Moves</th><th>Date</th></tr></thead><tbody></tbody></table>
     </aside>
   </div>
 </div>
@@ -532,11 +532,11 @@ header .meta a.pill:hover {
 <div class="toast" id="toast"></div>
 <div class="overlay" id="overlay">
   <div class="dialog">
-    <h2 id="resultTitle">時間到！</h2>
+    <h2 id="resultTitle">Time's Up!</h2>
     <p id="resultText"></p>
-    <div class="row"><input id="nick" class="input" placeholder="暱稱"><button class="btn" id="saveScoreBtn">儲存</button></div>
-    <div class="row"><input id="shareUrl" class="input" readonly><button class="btn" id="copyBtn">複製</button></div>
-    <div class="row"><button class="btn" id="playAgainBtn">再來一局</button></div>
+    <div class="row"><input id="nick" class="input" placeholder="Nickname"><button class="btn" id="saveScoreBtn">Save Score</button></div>
+    <div class="row"><input id="shareUrl" class="input" readonly><button class="btn" id="copyBtn">Copy Link</button></div>
+    <div class="row"><button class="btn" id="playAgainBtn">Play Again</button></div>
   </div>
 </div>
 
@@ -599,10 +599,10 @@ document.getElementById("helpBtn").addEventListener("click", ()=>{
 <script>
 /* ================== 關卡設定（SPMW 一站式供應鏈主線） ================== */
 const LEVELS = [
-  { name: 'S — 原料階段（Supply）',  size:4, time:60, targetMoves:40, desc:'掌握材料替代與碳盤查，從源頭減碳開始。' },
-  { name: 'P — 製程階段（Production）', size:4, time:60, targetMoves:40, desc:'導入綠電與節能設備，優化製程效率。' },
-  { name: 'M — 包裝階段（Material）', size:4, time:60, targetMoves:40, desc:'設計輕量化瓶蓋與易撕包裝，提升可回收性。' },
-  { name: 'W — 倉儲與回收階段（Warehouse）', size:4, time:60, targetMoves:40, desc:'整合物流與再生回收，打造閉環循環經濟。' }
+  { name: 'S — Supply Stage (Raw Materials)',  size:4, time:60, targetMoves:40, desc:'Master material substitution and carbon accounting to start decarbonizing at the source.' },
+  { name: 'P — Production Stage', size:4, time:60, targetMoves:40, desc:'Adopt green power and energy-saving equipment to optimize process efficiency.' },
+  { name: 'M — Material Stage (Packaging)', size:4, time:60, targetMoves:40, desc:'Design lightweight caps and easy-tear packaging to enhance recyclability.' },
+  { name: 'W — Warehouse & Recycling Stage', size:4, time:60, targetMoves:40, desc:'Integrate logistics and regenerative recycling to build a closed-loop economy.' }
 ];
 
 let LV = 0;
@@ -612,44 +612,44 @@ let LV = 0;
 /* ================== 宏全供應鏈卡牌庫 ================== */
 const ESG_ICONS = [
   /* ---- S：原料階段（Supply） ---- */
-  {emoji:'🧪', label:'碳盤查', tip:'建立上游原料碳盤查，掌握排放來源。'},
-  {emoji:'🔁', label:'再生料導入', tip:'導入 rPET 取代原生料，降低碳足跡。'},
-  {emoji:'🧰', label:'品管 QC', tip:'嚴格檢驗減少瑕疵品與浪費。'},
-  {emoji:'🧴', label:'瓶胚製造', tip:'優化瓶胚重量設計，節省塑料與能耗。'},
-  {emoji:'🌱', label:'綠色採購', tip:'優先選用低碳與環保認證原料。'},
-  {emoji:'🧮', label:'供應商評估', tip:'以 ESG 準則評量供應商的永續表現。'},
-  {emoji:'📊', label:'生命週期分析', tip:'分析原料從製造到廢棄的環境影響。'},
-  {emoji:'⚗️', label:'材料研發', tip:'開發新型環保塑料與可分解材料。'},
+  {emoji:'🧪', label:'Carbon Footprint Analysis', tip:'Establish upstream raw material carbon accounting to track emission sources.'},
+  {emoji:'🔁', label:'Recycled Content Integration', tip:'Introduce rPET to replace virgin materials, lowering the carbon footprint.'},
+  {emoji:'🧰', label:'Quality Control (QC)', tip:'Strict inspection reduces defective products and waste.'},
+  {emoji:'🧴', label:'Preform Manufacturing', tip:'Optimize preform weight to save plastic and energy consumption.'},
+  {emoji:'🌱', label:'Green Procurement', tip:'Prioritize low-carbon and eco-certified raw materials.'},
+  {emoji:'🧮', label:'Supplier Evaluation', tip:'Assess supplier sustainability performance using ESG criteria.'},
+  {emoji:'📊', label:'Life Cycle Assessment (LCA)', tip:'Analyze the environmental impact from manufacturing to disposal.'},
+  {emoji:'⚗️', label:'Material R&D', tip:'Develop new eco-friendly plastics and biodegradable materials.'},
 
   /* ---- P：製程階段（Production） ---- */
-  {emoji:'🌞', label:'綠電導入', tip:'採用太陽能、風能，降低製程碳排。'},
-  {emoji:'⚙️', label:'節能製程', tip:'使用高效率馬達與餘熱回收技術。'},
-  {emoji:'🏭', label:'無菌充填', tip:'節能高良率的綠色生產技術。'},
-  {emoji:'💧', label:'節水循環', tip:'製程回收水系統減少取水與排放。'},
-  {emoji:'🧊', label:'製冷優化', tip:'導入冷卻塔與變頻系統節能降耗。'},
-  {emoji:'🌡️', label:'溫控管理', tip:'動態調節製程溫度以降低能源使用。'},
-  {emoji:'🧯', label:'零事故管理', tip:'落實安全製程與設備維護。'},
-  {emoji:'🪫', label:'廢熱回收', tip:'再利用生產過程中產生的餘熱。'},
+  {emoji:'🌞', label:'Green Energy Adoption', tip:'Utilize solar and wind power to reduce carbon emissions during production.'},
+  {emoji:'⚙️', label:'Energy-Efficient Processes', tip:'Use high-efficiency motors and waste-heat recovery technology.'},
+  {emoji:'🏭', label:'Aseptic Filling', tip:'Energy-saving and high-yield green production technology.'},
+  {emoji:'💧', label:'Water Recycling', tip:'Process water recovery systems reduce intake and discharge.'},
+  {emoji:'🧊', label:'Cooling Optimization', tip:'Implement cooling towers and VFD systems for energy savings.'},
+  {emoji:'🌡️', label:'Temperature Management', tip:'Dynamically adjust process temperatures to lower energy usage.'},
+  {emoji:'🧯', label:'Zero Incident Management', tip:'Ensure process safety and equipment maintenance.'},
+  {emoji:'🪫', label:'Waste Heat Recovery', tip:'Reuse residual heat generated during the production process.'},
 
   /* ---- M：包裝階段（Material） ---- */
-  {emoji:'🍶', label:'PET 瓶設計', tip:'瓶身減重 1–2g 可顯著降低運輸碳排。'},
-  {emoji:'🏷️', label:'標籤減重', tip:'易撕式標籤方便分流回收。'},
-  {emoji:'🔩', label:'瓶蓋輕量化', tip:'降低用料量並提升回收性。'},
-  {emoji:'📦', label:'包裝減量', tip:'去除非必要包裝結構以減少材料浪費。'},
-  {emoji:'📐', label:'模具優化', tip:'設計節省材料且提高生產效率的模具。'},
-  {emoji:'🧷', label:'黏合劑改良', tip:'採用可分離式環保膠提高回收純度。'},
-  {emoji:'🎨', label:'油墨減量', tip:'使用環保油墨減少印刷污染。'},
-  {emoji:'🪶', label:'包裝創新', tip:'研發紙基與生物降解替代包材。'},
+  {emoji:'🍶', label:'PET Bottle Lightweighting', tip:'Reducing bottle weight by 1–2g significantly lowers transport carbon emissions.'},
+  {emoji:'🏷️', label:'Label Reduction', tip:'Easy-tear labels facilitate recycling separation.'},
+  {emoji:'🔩', label:'Cap Lightweighting', tip:'Reduces material usage and enhances recyclability.'},
+  {emoji:'📦', label:'Packaging Reduction', tip:'Eliminate unnecessary packaging structures to minimize material waste.'},
+  {emoji:'📐', label:'Mold Optimization', tip:'Design molds that save material and boost production efficiency.'},
+  {emoji:'🧷', label:'Adhesive Improvement', tip:'Use separable eco-friendly glue to enhance recycling purity.'},
+  {emoji:'🎨', label:'Ink Reduction', tip:'Use eco-friendly inks to minimize printing pollution.'},
+  {emoji:'🪶', label:'Packaging Innovation', tip:'Research and develop paper-based and biodegradable packaging alternatives.'},
 
   /* ---- W：倉儲與回收階段（Warehouse） ---- */
-  {emoji:'🚚', label:'物流優化', tip:'最佳化路線與裝載率，減少碳排。'},
-  {emoji:'🏬', label:'智慧倉儲', tip:'集中配送降低空車與能源浪費。'},
-  {emoji:'♻️', label:'回收再生', tip:'實現瓶到瓶閉環循環。'},
-  {emoji:'🌬️', label:'能源回收', tip:'倉儲引入太陽能與風能再利用。'},
-  {emoji:'📦', label:'包材回收', tip:'建立包裝回收系統減少廢棄物。'},
-  {emoji:'🚴', label:'低碳配送', tip:'採用電動車與綠色物流。'},
-  {emoji:'🔋', label:'儲能管理', tip:'整合電池與太陽能板提升能源效率。'},
-  {emoji:'🛰️', label:'智慧監測', tip:'利用物聯網監控溫濕度與能源使用。'}
+  {emoji:'🚚', label:'Logistics Optimization', tip:'Optimize routes and loading capacity to reduce carbon emissions.'},
+  {emoji:'🏬', label:'Smart Warehousing', tip:'Centralized distribution reduces empty vehicle runs and energy waste.'},
+  {emoji:'♻️', label:'Recycling and Regeneration', tip:'Achieve bottle-to-bottle closed-loop recycling.'},
+  {emoji:'🌬️', label:'Energy Recovery in Warehousing', tip:'Introduce solar and wind energy for on-site use.'},
+  {emoji:'📦', label:'Packaging Material Take-back', tip:'Establish a return system for packaging waste.'},
+  {emoji:'🚴', label:'Low-Carbon Delivery', tip:'Adopt electric vehicles and green logistics.'},
+  {emoji:'🔋', label:'Energy Storage Management', tip:'Integrate batteries with solar panels for improved energy efficiency.'},
+  {emoji:'🛰️', label:'Smart Monitoring', tip:'Use IoT to monitor temperature, humidity, and energy consumption.'}
 ];
 
 /* ================== DOM ================== */
@@ -686,8 +686,6 @@ let deck = [];
 let first = null, second = null, lock = false;
 let moves = 0, matched = 0, timer = null, timeLeft = TIME_LIMIT;
 let discovered = new Set();
-let lastRetentionScore = 0;  // ✅ 新增：最後一次遊戲的記憶留存度分數
-
 
 /* ================== 工具 ================== */
 function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } return arr; }
@@ -760,7 +758,7 @@ function onFlip(e){
       matched++; matchEl.textContent = matched;
 
       const lab = first.dataset.label;
-      discovered.add(lab); renderChips(); showToast(`配對成功：${lab}`); showKnow(lab);
+      discovered.add(lab); renderChips(); showToast(`Match Found：${lab}`); showKnow(lab);
 
       resetPick();
       if(matched === deck.length/2) endGame(true);
@@ -788,7 +786,7 @@ function startTimer(){
 /* ================== 任務 / 小卡進度 ================== */
 function renderMission(){ 
   const lv = LEVELS[LV];
-  missionEl.textContent = `${lv.name}：${lv.desc}（限時 ${lv.time} 秒內完成所有配對，步數 ≤ ${lv.targetMoves} 為達標）`;
+  missionEl.textContent = `${lv.name}：${lv.desc}（Finish all pairs within the ${lv.time} s time limit; achieve a target score with ${lv.targetMoves} moves or less)`;
 }
 
 function updateStage(){
@@ -828,13 +826,13 @@ function startGame(){
 function nextStage(){
   LV++;
   if(LV >= LEVELS.length){
-    showToast('🎉 你已完成 SPMW 一站式供應鏈學習任務！');
+    showToast('🎉 You have completed the SPMW One-Stop Supply Chain mission!');
     overlay.style.display = 'flex';
-    resultTitle.textContent = '全流程完成 🎯';
-    resultText.innerHTML = '恭喜！你已理解從原料 → 製程 → 包裝 → 回收的完整 ESG 一站式流程。';
+    resultTitle.textContent = 'All Stages Completed 🎯';
+    resultText.innerHTML = 'Congratulations! You have mastered the entire ESG One-Stop Process from Raw Materials → Production → Packaging → Recycling.';
     return;
   }
-  showToast(`🌍 進入下一階段：${LEVELS[LV].name}`);
+  showToast(`🌍 Entering Next Stage:${LEVELS[LV].name}`);
   setTimeout(()=>startGame(), 1000);
 }
 
@@ -845,34 +843,15 @@ function endGame(win){
   const pass = win && (moves <= lv.targetMoves);
 
   const resultTxt = win
-    ? `<b>${LEVELS[LV].name}</b> 完成！<br>${LEVELS[LV].desc}<br><br>你用了 <b>${moves}</b> 步完成全部配對，耗時 <b>${format(timeUsed)}</b>。`
-    : `已完成 <b>${matched}</b> 組；再加油！`;
+    ? `<b>${LEVELS[LV].name}</b> complete!<br>${LEVELS[LV].desc}<br><br>You finished all matches in <b>${moves}</b> moves, taking <b>${format(timeUsed)}</b>。`
+    : `You matched <b>${matched}</b> pairs; keep practicing!`;
 
-  // ✅ 新增：計算記憶留存度
-  if (win) {
-    const totalPairs = deck.length / 2;
-    const efficiency = totalPairs / moves;
-    lastRetentionScore = Math.round(efficiency * 100);
-  }
-
-  resultTitle.textContent = win ? '階段完成 🎉' : '時間到！';
+  resultTitle.textContent = win ? 'Stage Complete 🎉' : "Time's Up!";
   resultText.innerHTML = resultTxt;
-
-    // ✅ 新增：把記憶留存度顯示給玩家（只在過關時）
-  if (win) {
-    resultText.innerHTML += `
-      <br><br>
-      <span style="font-size:14px;color:#0E63E6;">
-        📊 記憶留存度：<b>${lastRetentionScore}</b> 分
-        （依「配對效率＝完成組數 ÷ 步數」計算）
-      </span>
-    `;
-  }
-
 
   /* ✅ 若非最後一關，出現「開始下一關」 */
   if (win && LV < LEVELS.length - 1) {
-    resultText.innerHTML += `<br><br><button id="nextBtn" class="btn">開始下一關</button>`;
+    resultText.innerHTML += `<br><br><button id="nextBtn" class="btn">Start Next Stage</button>`;
     setTimeout(() => {
       document.getElementById("nextBtn").addEventListener("click", () => {
         overlay.style.display = "none";
@@ -883,10 +862,10 @@ function endGame(win){
 
   /* ✅ 若是最後一關，才顯示分享連結與暱稱輸入 */
   else if (win && LV === LEVELS.length - 1) {
-    resultTitle.textContent = "挑戰成功 🎯";
+    resultTitle.textContent = "Challenge Mastered 🎯";
     resultText.innerHTML += `
-      <br><br>你已完成所有四個階段任務！
-      <br><br>留下你的名字與連結分享成果👇`;
+      <br><br>You have successfully completed all four stage missions!
+      <br><br>Enter your name and share your achievement link below 👇`;
     // ✅ 顯示 overlay 中的暱稱與分享列
     document.querySelectorAll('.row').forEach(r => r.style.display = 'flex');
   } 
@@ -934,11 +913,11 @@ levelSel.addEventListener('change', ()=>{ LV = Number(levelSel.value); startGame
 document.getElementById('saveScoreBtn').addEventListener('click', ()=>{
   const timeUsed = TIME_LIMIT - timeLeft;
   pushScore(nickInput.value.trim(), LV, GRID_SIZE, timeUsed>0?timeUsed:TIME_LIMIT, moves);
-  showToast('已儲存到排行榜');
+  showToast('Score successfully saved to Leaderboard!');
 });
 document.getElementById('copyBtn').addEventListener('click', async ()=>{
-  try{ await navigator.clipboard.writeText(shareInput.value); showToast('連結已複製'); }
-  catch{ shareInput.select(); document.execCommand('copy'); showToast('已複製（備援）'); }
+  try{ await navigator.clipboard.writeText(shareInput.value); showToast('Share link successfully copied!'); }
+  catch{ shareInput.select(); document.execCommand('copy'); showToast('Copied to clipboard (Fallback)'); }
 });
 
 /* ================== 啟動 ================== */
@@ -949,7 +928,7 @@ startGame();
   const qMoves = u.searchParams.get('moves');
   const qTime  = u.searchParams.get('time');
   const qLv    = u.searchParams.get('lv');
-  if(qMoves && qTime){ showToast(`來自分享：${LEVELS[Number(qLv)||0].name} 成績 ${format(Number(qTime))}／${qMoves} 步`) }
+  if(qMoves && qTime){ showToast(`Shared Result:${LEVELS[Number(qLv)||0].name} Score ${format(Number(qTime))}／${qMoves} moves`) }
 })();
 </script>
 <!-- ================== 背景粒子 ================== -->
@@ -1037,16 +1016,3 @@ startGame();
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-

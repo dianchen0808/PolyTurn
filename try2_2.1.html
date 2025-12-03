@@ -686,8 +686,6 @@ let deck = [];
 let first = null, second = null, lock = false;
 let moves = 0, matched = 0, timer = null, timeLeft = TIME_LIMIT;
 let discovered = new Set();
-let lastRetentionScore = 0;  // ✅ 新增：最後一次遊戲的記憶留存度分數
-
 
 /* ================== 工具 ================== */
 function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } return arr; }
@@ -848,27 +846,8 @@ function endGame(win){
     ? `<b>${LEVELS[LV].name}</b> 完成！<br>${LEVELS[LV].desc}<br><br>你用了 <b>${moves}</b> 步完成全部配對，耗時 <b>${format(timeUsed)}</b>。`
     : `已完成 <b>${matched}</b> 組；再加油！`;
 
-  // ✅ 新增：計算記憶留存度
-  if (win) {
-    const totalPairs = deck.length / 2;
-    const efficiency = totalPairs / moves;
-    lastRetentionScore = Math.round(efficiency * 100);
-  }
-
   resultTitle.textContent = win ? '階段完成 🎉' : '時間到！';
   resultText.innerHTML = resultTxt;
-
-    // ✅ 新增：把記憶留存度顯示給玩家（只在過關時）
-  if (win) {
-    resultText.innerHTML += `
-      <br><br>
-      <span style="font-size:14px;color:#0E63E6;">
-        📊 記憶留存度：<b>${lastRetentionScore}</b> 分
-        （依「配對效率＝完成組數 ÷ 步數」計算）
-      </span>
-    `;
-  }
-
 
   /* ✅ 若非最後一關，出現「開始下一關」 */
   if (win && LV < LEVELS.length - 1) {
