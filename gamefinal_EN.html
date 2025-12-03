@@ -2,9 +2,8 @@
 <html lang="en"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plastic Quick Decider</title>
+    <title>Plastic Quick Decider (Pre-Test)</title>
     <style>
-        /* CSS 樣式與原版相同，此處未做修改 */
         * {
             margin: 0;
             padding: 0;
@@ -13,10 +12,10 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background-image: url('Firefly_Gemini Flash.png'); /* 假設圖片已更名並放在同一資料夾 */
-            background-size: 100% 100%; /* 拉伸圖片以填滿 100% 寬度和 100% 高度 */
-            background-repeat: no-repeat; /* 圖片不重複 */
-            background-attachment: fixed; /* 讓背景在結算頁面滾動時固定不動 */
+            background-image: url('Firefly_Gemini Flash.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -51,7 +50,7 @@
             width: 100%;
             transform-origin: center;
             transition: transform 0.5s ease-in, opacity 0.5s ease-in;
-            position: relative; /* 【NEW】Added for button positioning */
+            position: relative;
         }
         
         .start-modal.shrinking {
@@ -347,18 +346,47 @@
         }
         
         .result-rank {
-            font-size: 1.8em;
+            font-size: 2em;
             font-weight: bold;
             color: #fcc419;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .result-score {
-            font-size: 1.5em;
-            margin-bottom: 30px;
-            color: black;
+        /* Stats Grid Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
         }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: 800;
+        }
+        
+        .stat-value.score-val { color: #4dabf7; }
+        .stat-value.acc-val { color: #51cf66; }
 
         .restart-btn {
             background: white;
@@ -370,14 +398,23 @@
             cursor: pointer;
             font-weight: bold;
             transition: transform 0.2s;
-            margin-top: 20px;
+            margin-top: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .restart-btn:hover {
+        .post-test-btn {
+            background: linear-gradient(135deg, #fcc419 0%, #fab005 100%);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .restart-btn:hover, .post-test-btn:hover {
             transform: scale(1.05);
         }
 
-        .restart-btn:active {
+        .restart-btn:active, .post-test-btn:active {
             transform: scale(0.95);
         }
 
@@ -408,44 +445,72 @@
             background-color: #51cf66;
         }
 
+        /* Review List Styles */
         .knowledge-base {
-            margin-top: 40px;
+            margin-top: 30px;
             background: rgba(0, 0, 0, 0.5);
             border-radius: 15px;
             padding: 20px;
             text-align: left;
+            max-height: 400px;
+            overflow-y: auto;
         }
         
         .knowledge-base h3 {
             font-size: 1.3em;
             margin-bottom: 20px;
             text-align: center;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
         }
         
-        .knowledge-item {
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 15px;
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        
-        .knowledge-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+
+        .review-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 6px solid #ccc;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
-        .knowledge-question {
-            font-size: 1em;
-            margin-bottom: 8px;
-        }
-        
-        .knowledge-answer {
-            font-size: 1.1em;
+
+        .review-item.correct { border-left-color: #51cf66; }
+        .review-item.wrong { border-left-color: #ff6b6b; }
+
+        .review-q {
             font-weight: bold;
-            color: #fcc419;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            line-height: 1.4;
         }
-        
-        /* 【OLD】Language Switch CSS */
+
+        .review-status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .review-status {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .review-status.correct { color: #2b8a3e; }
+        .review-status.wrong { color: #c92a2a; }
+
+        .review-feedback {
+            font-size: 0.9em;
+            color: #555;
+            background: #f1f3f5;
+            padding: 8px;
+            border-radius: 6px;
+        }
 
         .lang-switch-modal {
             position: absolute;
@@ -483,8 +548,6 @@
             text-decoration: none;
             font-weight: bold;
         }
-        
-        /* 【NEW CSS - Leaderboard】 */
         
         .nickname-container {
             display: flex;
@@ -577,13 +640,13 @@
         </span>
     </div>
 
-    <a href="gamefinal_CN.html" id="langSwitchIcon" title="切換至繁體中文">中</a>
+    <a href="game_pre_CN.html" id="langSwitchIcon" title="切換至繁體中文">中</a>
 
     <div id="startScreen">
         <div class="start-modal" id="startModal">
-            <a href="gamefinal_CN.html" class="lang-switch-modal">繁體中文</a>
+            <a href="game_pre_CN.html" class="lang-switch-modal">繁體中文</a>
             
-            <h2>Game Rules</h2>
+            <h2>Game Rules (Pre-test)</h2>
             <p>You are a "Plastic Quick Decider"!<br>Read the statement on the card and decide if it's correct or incorrect.</p>
             <p class="highlight">
                 Swipe Right (✓) = "Correct"<br>
@@ -624,16 +687,26 @@
         <div class="result" id="result">
             <h2>Game Over!</h2>
             <div class="result-rank" id="finalRank"></div>
-            <div class="result-score">
-                Your total collection: <span id="finalScore"></span>
+            
+            <!-- New Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">rPET Collected</div>
+                    <div class="stat-value score-val"><span id="finalScore">0</span>g</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value acc-val"><span id="finalAccuracy">0%</span></div>
+                </div>
             </div>
 
             <div class="nickname-container" id="nicknameContainer">
                 <input type="text" id="nicknameInput" placeholder="Enter nickname (max 10 chars)" maxlength="10">
                 <button id="saveScoreBtn">Save Score</button>
             </div>
-
-            <button class="restart-btn" onclick="restartGame()">Restart</button>
+            
+            <button class="restart-btn post-test-btn" onclick="goToPostTest()">Start Post-Test (Randomized) ➜</button>
+            <button class="restart-btn" onclick="restartGame()">Restart Pre-Test</button>
 
             <div class="leaderboard-container" id="leaderboard">
                 <h3>🏆 Leaderboard (Top 5) 🏆</h3>
@@ -647,7 +720,6 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // 【修改】所有題目和回饋都已翻譯
         const questions = [
             { question: "I can throw my finished PET bottle into the recycling bin, even if there's still some drink left inside.", answer: false, feedback: "Leftover liquid will contaminate the entire batch of recyclables!" },
             { question: "The most important steps when recycling PET bottles are 'Empty, Rinse' to avoid liquid residue.", answer: true, feedback: "Clean recyclables are the first step to rPET!" },
@@ -663,23 +735,26 @@
 
         const GAME_DURATION_PER_QUESTION = 5;
         const RPET_PER_QUESTION = 10;
-        const LEADERBOARD_KEY = 'sustainabilityGameLeaderboard'; // 【NEW】
-        const MAX_LEADERBOARD_ENTRIES = 5; // 【NEW】
+        const LEADERBOARD_KEY = 'sustainabilityGameLeaderboard';
+        const MAX_LEADERBOARD_ENTRIES = 5;
         
-        let currentIndex = 0, score = 0, startX = 0, currentX = 0;
+        let currentIndex = 0, score = 0, correctCount = 0, startX = 0, currentX = 0;
         let isDragging = false, currentCard = null, timeRemaining = GAME_DURATION_PER_QUESTION;
         let timerInterval = null, toastTimer = null;
+        let userResults = [];
 
         function init() {
             currentIndex = 0;
             score = 0;
+            correctCount = 0;
+            userResults = [];
             updateScore();
             document.getElementById('result').classList.remove('show');
             document.getElementById('cardContainer').style.display = 'block';
             document.getElementById('knowledgeBase').innerHTML = '';
             
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; /* 【NEW】Hide lang button */
+            document.getElementById('langSwitchIcon').style.display = 'none';
             const startScreen = document.getElementById('startScreen');
             const modal = document.getElementById('startModal');
             startScreen.style.display = 'flex'; 
@@ -701,7 +776,7 @@
             setTimeout(() => {
                 startScreen.style.display = 'none'; 
                 document.getElementById('helpIcon').style.display = 'flex'; 
-                document.getElementById('langSwitchIcon').style.display = 'flex'; /* 【NEW】Show lang button */
+                document.getElementById('langSwitchIcon').style.display = 'flex'; 
                 
                 createCard(); 
             }, 500); 
@@ -784,20 +859,27 @@
                 const correctAnswer = questions[currentIndex].answer;
                 const feedback = questions[currentIndex].feedback;
                 let toastMessage = "";
+                let isCorrect = (userAnswer === correctAnswer);
 
-                if (userAnswer === correctAnswer) {
+                if (isCorrect) {
                     score++;
-                    // 【修改】提示訊息翻譯
+                    correctCount++;
                     toastMessage = "Correct! " + feedback;
                     showToast(toastMessage, true); 
                 } else {
-                    // 【修改】提示訊息翻譯
                     toastMessage = "Incorrect! " + feedback;
                     if (feedback) {
                         showToast(toastMessage, false);
                     }
                 }
                 
+                // Record result
+                userResults.push({
+                    question: questions[currentIndex].question,
+                    isCorrect: isCorrect,
+                    feedback: feedback
+                });
+
                 updateScore();
 
                 const flyDistance = window.innerWidth;
@@ -819,7 +901,7 @@
             }
 
             startX = 0;
-            currentC = 0;
+            currentX = 0;
         }
 
         function updateScore() {
@@ -831,12 +913,15 @@
             stopTimer();
             document.getElementById('cardContainer').style.display = 'none';
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; /* 【NEW】Hide lang button */
+            document.getElementById('langSwitchIcon').style.display = 'none'; 
             
             const finalRpet = score * RPET_PER_QUESTION;
-            document.getElementById('finalScore').textContent = `${finalRpet}g`;
+            document.getElementById('finalScore').textContent = `${finalRpet}`;
             
-            // 【修改】等級稱號翻譯
+            // Calculate accuracy
+            const accuracy = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
+
             let rank = "Recycling Novice";
             if (score >= 10) rank = "Sustainability Decision Maker 🌍";
             else if (score >= 7) rank = "Closed-Loop Master ♻️";
@@ -844,9 +929,8 @@
             document.getElementById('finalRank').textContent = rank;
             
             buildKnowledgeBase();
-            loadLeaderboard(); // 【NEW】Load the leaderboard
+            loadLeaderboard();
 
-            // 【NEW】Reset nickname input
             document.getElementById('nicknameInput').value = '';
             document.getElementById('nicknameInput').disabled = false;
             document.getElementById('saveScoreBtn').disabled = false;
@@ -856,25 +940,24 @@
 
         function buildKnowledgeBase() {
             const container = document.getElementById('knowledgeBase');
-            // 【修改】回顧標題翻譯
-            container.innerHTML = '<h3>Challenge Review</h3>';
+            container.innerHTML = '<h3>Challenge Review</h3><div class="review-list"></div>';
+            const list = container.querySelector('.review-list');
             
-            questions.forEach(q => {
+            userResults.forEach(res => {
                 const item = document.createElement('div');
-                item.className = 'knowledge-item';
+                item.className = `review-item ${res.isCorrect ? 'correct' : 'wrong'}`;
                 
-                const questionText = document.createElement('div');
-                questionText.className = 'knowledge-question';
-                questionText.textContent = q.question;
+                const statusHtml = res.isCorrect 
+                    ? '<span class="review-status correct">✓ Correct</span>' 
+                    : '<span class="review-status wrong">✕ Incorrect</span>';
+
+                item.innerHTML = `
+                    <div class="review-q">${res.question}</div>
+                    <div class="review-status-row">${statusHtml}</div>
+                    <div class="review-feedback">${res.feedback}</div>
+                `;
                 
-                const answerText = document.createElement('div');
-                answerText.className = 'knowledge-answer';
-                // 【修改】答案文字翻譯
-                answerText.textContent = `Correct Answer: ${q.answer ? "Correct (✓)" : "Incorrect (✕)"}`;
-                
-                item.appendChild(questionText);
-                item.appendChild(answerText);
-                container.appendChild(item);
+                list.appendChild(item);
             });
         }
 
@@ -898,8 +981,13 @@
         function handleTimeOut() {
             if (!currentCard) return;
 
-            // 【修改】時間到提示翻譯
             showToast("Time's up! Be quicker!", false);
+            
+            userResults.push({
+                question: questions[currentIndex].question,
+                isCorrect: false,
+                feedback: questions[currentIndex].feedback
+            });
 
             currentCard.style.transition = 'transform 0.3s ease-out';
             currentCard.style.transform = `translateX(-${window.innerWidth}px) rotate(-30deg)`;
@@ -920,7 +1008,6 @@
             const seconds = Math.ceil(timeRemaining);
             const percentage = (timeRemaining / GAME_DURATION_PER_QUESTION) * 100;
             
-            // 【修改】計時器文字翻譯
             document.getElementById('timerText').textContent = `${seconds}s`;
             document.getElementById('timerBar').style.width = `${percentage}%`;
             
@@ -949,14 +1036,12 @@
             }, 2500); 
         }
 
-        // 【NEW JS - Leaderboard】
-        
         function saveScore() {
             const nicknameInput = document.getElementById('nicknameInput');
             const name = nicknameInput.value.trim();
             
             if (!name) {
-                showToast("Please enter your nickname!", false); // Use existing toast
+                showToast("Please enter your nickname!", false);
                 return;
             }
 
@@ -965,22 +1050,20 @@
             
             scores.push({ name: name, score: currentScore });
             
-            // Sort and save
             scores.sort((a, b) => b.score - a.score);
             localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(scores));
 
-            // Disable button and input
             nicknameInput.disabled = true;
             document.getElementById('saveScoreBtn').disabled = true;
             
             showToast("Score saved!", true);
-            loadLeaderboard(); // Refresh the list
+            loadLeaderboard();
         }
 
         function loadLeaderboard() {
             const scores = JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || [];
             const listElement = document.getElementById('leaderboardList');
-            listElement.innerHTML = ''; // Clear list
+            listElement.innerHTML = '';
 
             const topScores = scores.slice(0, MAX_LEADERBOARD_ENTRIES);
 
@@ -999,8 +1082,12 @@
             init();
         }
 
+        function goToPostTest() {
+            window.location.href = 'game_post_EN.html';
+        }
+
         document.getElementById('startGameBtn').addEventListener('click', startGame);
-        document.getElementById('saveScoreBtn').addEventListener('click', saveScore); // 【NEW】Bind the save button
+        document.getElementById('saveScoreBtn').addEventListener('click', saveScore);
 
         init(); 
     </script>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>塑戰速決 (前測)</title>
+    <title>塑戰速決 (後測)</title>
     <style>
         * {
             margin: 0;
@@ -78,8 +78,9 @@
         }
         
         #startGameBtn {
-            background: #667eea;
+            background: linear-gradient(135deg, #fcc419 0%, #fab005 100%);
             color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
             border: none;
             padding: 15px 40px;
             border-radius: 50px;
@@ -354,7 +355,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* 統計方塊 Grid */
+        /* Stats Grid Styles */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -406,9 +407,8 @@
         }
 
         .post-test-btn {
-            background: linear-gradient(135deg, #fcc419 0%, #fab005 100%);
+            background: #667eea;
             color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .restart-btn:hover, .post-test-btn:hover {
@@ -446,7 +446,7 @@
             background-color: #51cf66;
         }
 
-        /* 知識庫 / 回顧列表樣式 */
+        /* Review List Styles */
         .knowledge-base {
             margin-top: 30px;
             background: rgba(0, 0, 0, 0.5);
@@ -641,20 +641,21 @@
         </span>
     </div>
 
-    <a href="game_pre_EN.html" id="langSwitchIcon" title="Switch to English">EN</a>
+    <a href="game_post_EN.html" id="langSwitchIcon" title="Switch to English">EN</a>
 
     <div id="startScreen">
         <div class="start-modal" id="startModal">
-            <a href="game_pre_EN.html" class="lang-switch-modal">English</a>
+            <a href="game_post_EN.html" class="lang-switch-modal">English</a>
             
-            <h2>遊戲說明 (前測)</h2>
-            <p>你是一位「永續決策者」！<br>請閱讀卡片上的敘述，判斷是否正確。</p>
+            <h2>遊戲說明 (後測)</h2>
+            <p>歡迎來到後測！<br>請閱讀卡片上的敘述，判斷是否正確。</p>
             <p class="highlight">
+                <b>注意：題目順序已隨機打亂！</b><br>
                 向右滑 (✓) 代表「正確」<br>
                 向左滑 (✕) 代表「錯誤」
             </p>
-            <p>注意！每題只有 5 秒鐘！<br>答對可收集 10g rPET！</p>
-            <button id="startGameBtn">開始挑戰</button>
+            <p>注意！每題只有 5 秒鐘！<br>看看你學會了多少！</p>
+            <button id="startGameBtn">開始後測</button>
         </div>
     </div>
 
@@ -675,7 +676,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>塑戰速決</h1>
+            <h1>塑戰速決 (後測)</h1>
             <div class="score">rPET 收集: <span id="score">0</span>g / <span id="total">100</span></div>
             <div class="timer-container">
                 <div class="timer-bar" id="timerBar"></div>
@@ -686,7 +687,7 @@
         <div class="card-container" id="cardContainer"></div>
 
         <div class="result" id="result">
-            <h2>遊戲結束！</h2>
+            <h2>後測結束！</h2>
             <div class="result-rank" id="finalRank"></div>
             
             <!-- 新的統計方塊佈局 -->
@@ -706,8 +707,8 @@
                 <button id="saveScoreBtn">儲存分數</button>
             </div>
             
-            <button class="restart-btn post-test-btn" onclick="goToPostTest()">進入後測 (隨機順序) ➜</button>
-            <button class="restart-btn" onclick="restartGame()">重新開始前測</button>
+            <button class="restart-btn post-test-btn" onclick="goBackPre()">➜ 回到前測首頁</button>
+            <button class="restart-btn" onclick="restartGame()">重新挑戰後測</button>
 
             <div class="leaderboard-container" id="leaderboard">
                 <h3>🏆 排行榜 (Top 5) 🏆</h3>
@@ -721,7 +722,8 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const questions = [
+        // 定義題目
+        const questionsSource = [
             { question: "我喝完的寶特瓶，裡面還有剩一些飲料，可以直接丟進回收桶。", answer: false, feedback: "殘留的液體會汙染整批回收物！" },
             { question: "回收寶特瓶時，最重要的步驟是『清空、沖洗』，避免液體殘留。", answer: true, feedback: "乾淨的回收物是 rPET 的第一步！" },
             { question: "『生物可分解塑膠 (PLA)』看起來很環保，所以用完後，應該丟進 PET 寶特瓶回收桶。", answer: false, feedback: "PLA 會汙染 PET 回收流，讓 rPET 報廢！" },
@@ -734,6 +736,8 @@
             { question: "只要是塑膠，都可以混在一起回收。", answer: false, feedback: "不同材質的塑膠必須分開，才能進入各自的循環。" }
         ];
 
+        let questions = []; // 將在 init 中隨機排序
+
         const GAME_DURATION_PER_QUESTION = 5;
         const RPET_PER_QUESTION = 10;
         const LEADERBOARD_KEY = 'sustainabilityGameLeaderboard'; 
@@ -744,11 +748,25 @@
         let timerInterval = null, toastTimer = null;
         let userResults = []; // 儲存答題結果
 
+        // Fisher-Yates Shuffle 演算法
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
         function init() {
+            // 每次初始化時，複製題目並隨機排序
+            questions = shuffleArray([...questionsSource]);
+
             currentIndex = 0;
             score = 0;
             correctCount = 0;
-            userResults = []; // 重置結果
+            userResults = [];
             updateScore();
             document.getElementById('result').classList.remove('show');
             document.getElementById('cardContainer').style.display = 'block';
@@ -873,14 +891,14 @@
                         showToast(toastMessage, false);
                     }
                 }
-
-                // 記錄結果
+                
+                // Record result
                 userResults.push({
                     question: questions[currentIndex].question,
                     isCorrect: isCorrect,
                     feedback: feedback
                 });
-                
+
                 updateScore();
 
                 const flyDistance = window.innerWidth;
@@ -919,7 +937,6 @@
             const finalRpet = score * RPET_PER_QUESTION;
             document.getElementById('finalScore').textContent = `${finalRpet}`;
             
-            // 計算並顯示正確率
             const accuracy = Math.round((correctCount / questions.length) * 100);
             document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
 
@@ -941,7 +958,7 @@
 
         function buildKnowledgeBase() {
             const container = document.getElementById('knowledgeBase');
-            container.innerHTML = '<h3>本次挑戰回顧</h3><div class="review-list"></div>';
+            container.innerHTML = '<h3>本次後測回顧</h3><div class="review-list"></div>';
             const list = container.querySelector('.review-list');
             
             userResults.forEach(res => {
@@ -984,7 +1001,6 @@
 
             showToast("時間到！動作要快！", false);
             
-            // 記錄時間到的結果 (視為錯誤)
             userResults.push({
                 question: questions[currentIndex].question,
                 isCorrect: false,
@@ -1084,8 +1100,8 @@
             init();
         }
 
-        function goToPostTest() {
-            window.location.href = 'game_post_CN.html';
+        function goBackPre() {
+            window.location.href = 'game_pre_CN.html';
         }
 
         document.getElementById('startGameBtn').addEventListener('click', startGame);
