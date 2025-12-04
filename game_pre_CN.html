@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en"> <head>
+<html lang="zh-TW">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plastic Quick Decider (Post-Test)</title>
+    <title>塑戰速決 (前測)</title>
     <style>
         * {
             margin: 0;
@@ -12,10 +13,10 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background-image: url('Firefly_Gemini Flash.png'); 
-            background-size: 100% 100%; 
-            background-repeat: no-repeat; 
-            background-attachment: fixed; 
+            background-image: url('Firefly_Gemini Flash.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -51,6 +52,9 @@
             transform-origin: center;
             transition: transform 0.5s ease-in, opacity 0.5s ease-in;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .start-modal.shrinking {
@@ -96,9 +100,8 @@
         }
         
         #startGameBtn {
-            background: linear-gradient(135deg, #fcc419 0%, #fab005 100%);
+            background: #667eea;
             color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
             border: none;
             padding: 15px 40px;
             border-radius: 50px;
@@ -375,7 +378,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* Stats Grid Styles */
+        /* 統計方塊 Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -409,47 +412,6 @@
         
         .stat-value.score-val { color: #4dabf7; }
         .stat-value.acc-val { color: #51cf66; }
-
-        /* Comparison Styles */
-        .comparison-container {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .comparison-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-
-        .comparison-text {
-            font-size: 1.1em;
-            color: #555;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .comparison-text .arrow {
-            color: #888;
-        }
-
-        .comparison-diff {
-            margin-top: 5px;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .comparison-diff.improvement-positive { color: #51cf66; }
-        .comparison-diff.improvement-negative { color: #ff6b6b; }
-        .comparison-diff.improvement-neutral { color: #888; }
 
         .restart-btn {
             background: white;
@@ -508,7 +470,7 @@
             background-color: #51cf66;
         }
 
-        /* Review List Styles */
+        /* 知識庫 / 回顧列表樣式 */
         .knowledge-base {
             margin-top: 30px;
             background: rgba(0, 0, 0, 0.5);
@@ -574,13 +536,13 @@
             padding: 8px;
             border-radius: 6px;
         }
-
+        
         .nickname-container {
             display: flex;
             gap: 10px;
             margin-top: 20px;
             margin-bottom: 20px;
-            max-width: 300px; /* Limit width */
+            max-width: 300px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -626,7 +588,7 @@
         }
         #leaderboardList {
             list-style-type: decimal;
-            padding-left: 30px; /* For 1. 2. 3. */
+            padding-left: 30px;
             font-size: 1.1em;
         }
         #leaderboardList li {
@@ -636,7 +598,7 @@
         }
         #leaderboardList li span:first-child {
             font-weight: bold;
-            color: #fcc419; /* Yellow for name */
+            color: #fcc419;
             max-width: 70%;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -644,7 +606,7 @@
         }
         #leaderboardList li span:last-child {
             font-weight: bold;
-            color: white; /* White for score */
+            color: white;
         }
         #leaderboardList .no-scores {
             list-style: none;
@@ -659,27 +621,26 @@
     <div id="helpIcon">
         ❓
         <span class="tooltip">
-            <b>How to Play:</b><br>
-            Swipe Right (✓) for "Correct"<br>
-            Swipe Left (✕) for "Incorrect"<br>
-            Watch the 5-sec timer!
+            <b>玩法提示：</b><br>
+            向右滑 (✓) 代表「是」<br>
+            向左滑 (✕) 代表「否」<br>
+            注意每題 5 秒倒數！
         </span>
     </div>
 
     <div id="startScreen">
         <div class="start-modal" id="startModal">
-            <h2>Game Rules (Post-test)</h2>
-            <p>Welcome to the Post-test!<br>Read the statement and decide if it's correct.</p>
+            <h2>遊戲說明 (前測)</h2>
+            <p>你是一位「永續決策者」！<br>請閱讀卡片上的敘述，判斷是否正確。</p>
             <p class="highlight">
-                <b>Note: Questions are randomized!</b><br>
-                Swipe Right (✓) = "Correct"<br>
-                Swipe Left (✕) = "Incorrect"
+                向右滑 (✓) 代表「正確」<br>
+                向左滑 (✕) 代表「錯誤」
             </p>
-            <p>Warning! Only 5 seconds per question!<br>Let's check your understanding!</p>
+            <p>注意！每題只有 5 秒鐘！<br>答對可收集 10g rPET！</p>
             
-            <!-- Lang Switch moved above start button -->
-            <a href="game_post_CN.html" class="lang-switch-btn">切換至繁體中文</a>
-            <button id="startGameBtn">Start Post-Test</button>
+            <!-- 語言切換按鈕移動至此，位於開始按鈕上方 -->
+            <a href="game_pre_EN.html" class="lang-switch-btn">Switch to English</a>
+            <button id="startGameBtn">開始挑戰</button>
         </div>
     </div>
 
@@ -687,57 +648,55 @@
         <div class="hint hint-left">
             <div class="hint-item">
                 <div class="hint-icon">✕</div>
-                <span>Incorrect</span>
+                <span>錯誤</span>
             </div>
         </div>
         <div class="hint hint-right">
             <div class="hint-item">
                 <div class="hint-icon">✓</div>
-                <span>Correct</span>
+                <span>正確</span>
             </div>
         </div>
     </div>
 
     <div class="container">
         <div class="header">
-            <h1>Plastic Quick Decider (Post)</h1>
-            <div class="score">rPET Collected: <span id="score">0</span>g / <span id="total">100</span></div>
+            <h1>塑戰速決</h1>
+            <div class="score">rPET 收集: <span id="score">0</span>g / <span id="total">100</span></div>
             <div class="timer-container">
                 <div class="timer-bar" id="timerBar"></div>
-                <div class="timer-text" id="timerText">5s</div>
+                <div class="timer-text" id="timerText">5秒</div>
             </div>
         </div>
 
         <div class="card-container" id="cardContainer"></div>
 
         <div class="result" id="result">
-            <h2>Post-Test Complete!</h2>
+            <h2>遊戲結束！</h2>
             <div class="result-rank" id="finalRank"></div>
             
-            <!-- New Stats Grid -->
+            <!-- 統計方塊佈局 -->
             <div class="stats-grid">
                 <div class="stat-box">
-                    <div class="stat-label">rPET Collected</div>
+                    <div class="stat-label">rPET 收集量</div>
                     <div class="stat-value score-val"><span id="finalScore">0</span>g</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-label">回答準確率</div>
                     <div class="stat-value acc-val"><span id="finalAccuracy">0%</span></div>
                 </div>
             </div>
-            
-            <!-- Comparison inserted via JS -->
 
             <div class="nickname-container" id="nicknameContainer">
-                <input type="text" id="nicknameInput" placeholder="Enter nickname (max 10 chars)" maxlength="10">
-                <button id="saveScoreBtn">Save Score</button>
+                <input type="text" id="nicknameInput" placeholder="輸入你的昵稱 (最多10個字)" maxlength="10">
+                <button id="saveScoreBtn">儲存分數</button>
             </div>
             
-            <button class="restart-btn post-test-btn" onclick="goBackPre()">➜ Back to Pre-Test</button>
-            <button class="restart-btn" onclick="restartGame()">Restart Post-Test</button>
+            <button class="restart-btn post-test-btn" onclick="goToPostTest()">進入後測 (隨機順序) ➜</button>
+            <button class="restart-btn" onclick="restartGame()">重新開始前測</button>
 
             <div class="leaderboard-container" id="leaderboard">
-                <h3>🏆 Leaderboard (Top 5) 🏆</h3>
+                <h3>🏆 排行榜 (Top 5) 🏆</h3>
                 <ol id="leaderboardList">
                     </ol>
             </div>
@@ -748,71 +707,50 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const questionsSource = [
-            { question: "I can throw my finished PET bottle into the recycling bin, even if there's still some drink left inside.", answer: false, feedback: "Leftover liquid will contaminate the entire batch of recyclables!" },
-            { question: "The most important steps when recycling PET bottles are 'Empty, Rinse' to avoid liquid residue.", answer: true, feedback: "Clean recyclables are the first step to rPET!" },
-            { question: "'Biocompostable plastic (PLA)' looks eco-friendly, so it should be thrown in the PET bottle recycling bin.", answer: false, feedback: "PLA contaminates the PET recycling stream, ruining the rPET!" },
-            { question: "Recycled PET bottles can only be 'downcycled' into clothes, not made back into food-grade bottles.", answer: false, feedback: "'Bottle-to-bottle' (rPET) technology allows it to be reborn!" },
-            { question: "Bottles made from rPET (recycled plastic) have lower hygiene and safety standards.", answer: false, feedback: "Food-grade rPET has the same safety standards as new material!" },
-            { question: "Glass bottles are heavier than PET. Transporting 100 glass bottles creates more carbon emissions than 100 PET bottles.", answer: true, feedback: "'Lightweighting' is key to reducing transport emissions!" },
-            { question: "Package 'lightweighting' (e.g., thinner bottles, smaller caps) is a sustainable practice.", answer: true, feedback: "Using less raw material = less carbon emissions." },
-            { question: "Producing empty bottles right next to the beverage factory ('on-site production') wastes more energy than shipping them by truck.", answer: false, feedback: "'On-site production' saves all transport-related carbon emissions!" },
-            { question: "When recycling, the cap and bottle should be separated.", answer: false, feedback: "The EPA recommends leaving the cap on for recycling!" },
-            { question: "All plastics can be mixed together for recycling.", answer: false, feedback: "Different plastic types must be sorted to enter their own recycling loops." }
+        const questions = [
+            { question: "我喝完的寶特瓶，裡面還有剩一些飲料，可以直接丟進回收桶。", answer: false, feedback: "殘留的液體會汙染整批回收物！" },
+            { question: "回收寶特瓶時，最重要的步驟是『清空、沖洗』，避免液體殘留。", answer: true, feedback: "乾淨的回收物是 rPET 的第一步！" },
+            { question: "『生物可分解塑膠 (PLA)』看起來很環保，所以用完後，應該丟進 PET 寶特瓶回收桶。", answer: false, feedback: "PLA 會汙染 PET 回收流，讓 rPET 報廢！" },
+            { question: "寶特瓶 (PET) 回收後，只能降級做成衣服，不能再做回食品級的瓶子。", answer: false, feedback: "「瓶到瓶」技術 (rPET) 能讓它重生！" },
+            { question: "使用 rPET (再生塑膠) 製成的瓶子，衛生和安全標準比較低。", answer: false, feedback: "食品級 rPET 的安全標準與新料相同！" },
+            { question: "玻璃瓶比寶特瓶重。運輸 100 瓶玻璃瓶，會比運輸 100 瓶寶特瓶產生更多碳排放。", answer: true, feedback: "「輕量化」是減少運輸碳排的關鍵！" },
+            { question: "包裝『輕量化』（例如用更薄的瓶身、更小的瓶蓋）是一種永續行為。", answer: true, feedback: "使用更少的原料 = 更少的碳排。" },
+            { question: "在飲料工廠隔壁直接生產空瓶（駐廠生產），會比從外地用卡車運送空瓶更浪費能源。", answer: false, feedback: "「駐廠生產」能省下所有運輸碳排！" },
+            { question: "回收時，瓶蓋和瓶身應該要分開丟棄。", answer: false, feedback: "環保署建議「鎖上瓶蓋」一起回收！" },
+            { question: "只要是塑膠，都可以混在一起回收。", answer: false, feedback: "不同材質的塑膠必須分開，才能進入各自的循環。" }
         ];
-
-        let questions = [];
 
         const GAME_DURATION_PER_QUESTION = 5;
         const RPET_PER_QUESTION = 10;
-        const LEADERBOARD_KEY = 'sustainabilityGameLeaderboard';
-        const MAX_LEADERBOARD_ENTRIES = 5;
+        const LEADERBOARD_KEY = 'sustainabilityGameLeaderboard'; 
+        const MAX_LEADERBOARD_ENTRIES = 5; 
         
         let currentIndex = 0, score = 0, correctCount = 0, startX = 0, currentX = 0;
         let isDragging = false, currentCard = null, timeRemaining = GAME_DURATION_PER_QUESTION;
         let timerInterval = null, toastTimer = null;
-        let userResults = [];
-
-        // Fisher-Yates Shuffle
-        function shuffleArray(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
+        let userResults = []; 
 
         function init() {
-            // Shuffle on init
-            questions = shuffleArray([...questionsSource]);
-
             currentIndex = 0;
             score = 0;
             correctCount = 0;
-            userResults = [];
+            userResults = []; 
             updateScore();
             document.getElementById('result').classList.remove('show');
             document.getElementById('cardContainer').style.display = 'block';
             document.getElementById('knowledgeBase').innerHTML = '';
             
-            // Show header score
+            // 顯示分數Header
             const scoreEl = document.querySelector('.header .score');
             if(scoreEl) scoreEl.style.visibility = 'visible';
 
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
             const startScreen = document.getElementById('startScreen');
             const modal = document.getElementById('startModal');
             startScreen.style.display = 'flex'; 
             startScreen.style.opacity = '1';
             modal.classList.remove('shrinking'); 
             modal.style.opacity = '1';
-
-            // remove comparison if exists
-            const existingComparison = document.querySelector('.comparison-container');
-            if(existingComparison) existingComparison.remove();
 
             document.getElementById('cardContainer').innerHTML = ''; 
             stopTimer(); 
@@ -828,7 +766,6 @@
             setTimeout(() => {
                 startScreen.style.display = 'none'; 
                 document.getElementById('helpIcon').style.display = 'flex'; 
-                document.getElementById('langSwitchIcon').style.display = 'flex'; 
                 
                 createCard(); 
             }, 500); 
@@ -910,28 +847,28 @@
                 const userAnswer = deltaX > 0;
                 const correctAnswer = questions[currentIndex].answer;
                 const feedback = questions[currentIndex].feedback;
-                let toastMessage = "";
+                let toastMessage = ""; 
                 let isCorrect = (userAnswer === correctAnswer);
 
                 if (isCorrect) {
                     score++;
                     correctCount++;
-                    toastMessage = "Correct! " + feedback;
+                    toastMessage = "答對了！ " + feedback;
                     showToast(toastMessage, true); 
                 } else {
-                    toastMessage = "Incorrect! " + feedback;
+                    toastMessage = "答錯了！ " + feedback;
                     if (feedback) {
                         showToast(toastMessage, false);
                     }
                 }
-                
-                // Record result
+
+                // 記錄結果
                 userResults.push({
                     question: questions[currentIndex].question,
                     isCorrect: isCorrect,
                     feedback: feedback
                 });
-
+                
                 updateScore();
 
                 const flyDistance = window.innerWidth;
@@ -965,66 +902,29 @@
             stopTimer();
             document.getElementById('cardContainer').style.display = 'none';
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
             
-            // Hide Header score
+            // 隱藏Header分數，避免重複
             const scoreEl = document.querySelector('.header .score');
             if(scoreEl) scoreEl.style.visibility = 'hidden';
             
             const finalRpet = score * RPET_PER_QUESTION;
             document.getElementById('finalScore').textContent = `${finalRpet}`;
             
-            // Calculate accuracy
-            const currentAccuracy = Math.round((correctCount / questions.length) * 100);
-            document.getElementById('finalAccuracy').textContent = `${currentAccuracy}%`;
+            // 計算並顯示正確率
+            const accuracy = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
 
-            // Post-test Comparison Logic
-            const preAccuracy = localStorage.getItem('preTestAccuracy');
-            const statsGrid = document.querySelector('.stats-grid');
-            
-            // Remove existing comparison if any
-            const oldComp = document.querySelector('.comparison-container');
-            if(oldComp) oldComp.remove();
+            // 【前測特有】儲存正確率，供後測使用
+            localStorage.setItem('preTestAccuracy', accuracy);
 
-            if (preAccuracy !== null) {
-                const diff = currentAccuracy - parseInt(preAccuracy);
-                let diffSign = '';
-                let diffClass = 'improvement-neutral';
-                let diffText = 'Same';
-
-                if (diff > 0) {
-                    diffSign = '▲';
-                    diffClass = 'improvement-positive';
-                    diffText = 'Improvement';
-                } else if (diff < 0) {
-                    diffSign = '▼';
-                    diffClass = 'improvement-negative';
-                    diffText = 'Decline';
-                }
-
-                const comparisonHtml = `
-                    <div class="comparison-container">
-                        <div class="comparison-title">📊 Pre vs Post Analysis</div>
-                        <div class="comparison-text">
-                            Pre: ${preAccuracy}% <span class="arrow">➜</span> Post: ${currentAccuracy}%
-                        </div>
-                        <div class="comparison-diff ${diffClass}">
-                            ${diffSign} ${diffText} ${Math.abs(diff)}%
-                        </div>
-                    </div>
-                `;
-                
-                statsGrid.insertAdjacentHTML('afterend', comparisonHtml);
-            }
-
-            let rank = "Recycling Novice";
-            if (score >= 10) rank = "Sustainability Decision Maker 🌍";
-            else if (score >= 7) rank = "Closed-Loop Master ♻️";
-            else if (score >= 4) rank = "Eco-Citizen 👍";
+            let rank = "回收新手";
+            if (score >= 10) rank = "永續決策者 🌍";
+            else if (score >= 7) rank = "閉環大師 ♻️";
+            else if (score >= 4) rank = "環保公民 👍";
             document.getElementById('finalRank').textContent = rank;
             
             buildKnowledgeBase();
-            loadLeaderboard();
+            loadLeaderboard(); 
 
             document.getElementById('nicknameInput').value = '';
             document.getElementById('nicknameInput').disabled = false;
@@ -1035,7 +935,7 @@
 
         function buildKnowledgeBase() {
             const container = document.getElementById('knowledgeBase');
-            container.innerHTML = '<h3>Post-Test Review</h3><div class="review-list"></div>';
+            container.innerHTML = '<h3>本次挑戰回顧</h3><div class="review-list"></div>';
             const list = container.querySelector('.review-list');
             
             userResults.forEach(res => {
@@ -1043,8 +943,8 @@
                 item.className = `review-item ${res.isCorrect ? 'correct' : 'wrong'}`;
                 
                 const statusHtml = res.isCorrect 
-                    ? '<span class="review-status correct">✓ Correct</span>' 
-                    : '<span class="review-status wrong">✕ Incorrect</span>';
+                    ? '<span class="review-status correct">✓ 答對了</span>' 
+                    : '<span class="review-status wrong">✕ 答錯了</span>';
 
                 item.innerHTML = `
                     <div class="review-q">${res.question}</div>
@@ -1076,8 +976,9 @@
         function handleTimeOut() {
             if (!currentCard) return;
 
-            showToast("Time's up! Be quicker!", false);
+            showToast("時間到！動作要快！", false);
             
+            // 記錄時間到的結果 (視為錯誤)
             userResults.push({
                 question: questions[currentIndex].question,
                 isCorrect: false,
@@ -1103,7 +1004,7 @@
             const seconds = Math.ceil(timeRemaining);
             const percentage = (timeRemaining / GAME_DURATION_PER_QUESTION) * 100;
             
-            document.getElementById('timerText').textContent = `${seconds}s`;
+            document.getElementById('timerText').textContent = `${seconds}秒`;
             document.getElementById('timerBar').style.width = `${percentage}%`;
             
             const timerBar = document.getElementById('timerBar');
@@ -1136,7 +1037,7 @@
             const name = nicknameInput.value.trim();
             
             if (!name) {
-                showToast("Please enter your nickname!", false);
+                showToast("請輸入你的昵稱！", false); 
                 return;
             }
 
@@ -1151,19 +1052,19 @@
             nicknameInput.disabled = true;
             document.getElementById('saveScoreBtn').disabled = true;
             
-            showToast("Score saved!", true);
-            loadLeaderboard();
+            showToast("分數已儲存！", true);
+            loadLeaderboard(); 
         }
 
         function loadLeaderboard() {
             const scores = JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || [];
             const listElement = document.getElementById('leaderboardList');
-            listElement.innerHTML = '';
+            listElement.innerHTML = ''; 
 
             const topScores = scores.slice(0, MAX_LEADERBOARD_ENTRIES);
 
             if (topScores.length === 0) {
-                listElement.innerHTML = '<li class="no-scores">No scores yet</li>';
+                listElement.innerHTML = '<li class="no-scores">目前沒有紀錄</li>';
             } else {
                 topScores.forEach(entry => {
                     const li = document.createElement('li');
@@ -1178,11 +1079,11 @@
         }
 
         function goToPostTest() {
-            window.location.href = 'game_post_EN.html';
+            window.location.href = 'game_post_CN.html';
         }
 
         document.getElementById('startGameBtn').addEventListener('click', startGame);
-        document.getElementById('saveScoreBtn').addEventListener('click', saveScore);
+        document.getElementById('saveScoreBtn').addEventListener('click', saveScore); 
 
         init(); 
     </script>

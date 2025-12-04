@@ -52,11 +52,33 @@
             transform-origin: center;
             transition: transform 0.5s ease-in, opacity 0.5s ease-in;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .start-modal.shrinking {
             transform: translate(50vw, -50vh) scale(0);
             opacity: 0;
+        }
+
+        .lang-switch-btn {
+            background: #f0f0f0;
+            color: #555;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            margin-bottom: 5px; /* Adjusted spacing */
+            transition: background 0.2s;
+            border: 1px solid #ddd;
+            display: inline-block;
+        }
+        .lang-switch-btn:hover {
+            background: #e0e0e0;
+            color: #333;
         }
 
         .start-modal h2 {
@@ -88,7 +110,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: transform 0.2s;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         
         #startGameBtn:hover {
@@ -168,6 +190,7 @@
             text-align: center;
             margin-bottom: 30px;
             color: black;
+            transition: opacity 0.3s;
         }
 
         .header h1 {
@@ -179,6 +202,7 @@
             font-size: 1.2em;
             opacity: 0.9;
             color: black;
+            transition: opacity 0.3s, visibility 0.3s;
         }
 
         .timer-container {
@@ -355,7 +379,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* Stats Grid Styles */
+        /* 統計方塊 Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -390,6 +414,47 @@
         .stat-value.score-val { color: #4dabf7; }
         .stat-value.acc-val { color: #51cf66; }
 
+        /* 前後測對比樣式 */
+        .comparison-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .comparison-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .comparison-text {
+            font-size: 1.1em;
+            color: #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-text .arrow {
+            color: #888;
+        }
+
+        .comparison-diff {
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .comparison-diff.improvement-positive { color: #51cf66; }
+        .comparison-diff.improvement-negative { color: #ff6b6b; }
+        .comparison-diff.improvement-neutral { color: #888; }
+
         .restart-btn {
             background: white;
             color: #667eea;
@@ -407,8 +472,9 @@
         }
 
         .post-test-btn {
-            background: #667eea;
+            background: linear-gradient(135deg, #fcc419 0%, #fab005 100%);
             color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .restart-btn:hover, .post-test-btn:hover {
@@ -446,7 +512,7 @@
             background-color: #51cf66;
         }
 
-        /* Review List Styles */
+        /* 知識庫 / 回顧列表樣式 */
         .knowledge-base {
             margin-top: 30px;
             background: rgba(0, 0, 0, 0.5);
@@ -511,43 +577,6 @@
             background: #f1f3f5;
             padding: 8px;
             border-radius: 6px;
-        }
-        
-        .lang-switch-modal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #f0f0f0;
-            color: #555;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .lang-switch-modal:hover {
-            background: #e0e0e0;
-        }
-
-        #langSwitchIcon {
-            position: fixed;
-            top: 20px;
-            right: 70px;
-            font-size: 1.2em;
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            text-decoration: none;
-            font-weight: bold;
         }
         
         .nickname-container {
@@ -641,20 +670,19 @@
         </span>
     </div>
 
-    <a href="game_post_EN.html" id="langSwitchIcon" title="Switch to English">EN</a>
-
     <div id="startScreen">
         <div class="start-modal" id="startModal">
-            <a href="game_post_EN.html" class="lang-switch-modal">English</a>
-            
             <h2>遊戲說明 (後測)</h2>
-            <p>歡迎來到後測！<br>請閱讀卡片上的敘述，判斷是否正確。</p>
+            <p>歡迎來到後測階段！<br>請再次閱讀敘述，判斷是否正確。</p>
             <p class="highlight">
                 <b>注意：題目順序已隨機打亂！</b><br>
                 向右滑 (✓) 代表「正確」<br>
                 向左滑 (✕) 代表「錯誤」
             </p>
-            <p>注意！每題只有 5 秒鐘！<br>看看你學會了多少！</p>
+            <p>注意！每題只有 5 秒鐘！<br>看看你的知識是否已經內化！</p>
+            
+            <!-- 語言切換按鈕移動至此 -->
+            <a href="game_post_EN.html" class="lang-switch-btn">Switch to English</a>
             <button id="startGameBtn">開始後測</button>
         </div>
     </div>
@@ -690,7 +718,7 @@
             <h2>後測結束！</h2>
             <div class="result-rank" id="finalRank"></div>
             
-            <!-- 新的統計方塊佈局 -->
+            <!-- 統計方塊佈局 -->
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-label">rPET 收集量</div>
@@ -701,6 +729,8 @@
                     <div class="stat-value acc-val"><span id="finalAccuracy">0%</span></div>
                 </div>
             </div>
+            
+            <!-- 將會在此處動態插入前後測對比 (JS 控制) -->
 
             <div class="nickname-container" id="nicknameContainer">
                 <input type="text" id="nicknameInput" placeholder="輸入你的昵稱 (最多10個字)" maxlength="10">
@@ -708,7 +738,7 @@
             </div>
             
             <button class="restart-btn post-test-btn" onclick="goBackPre()">➜ 回到前測首頁</button>
-            <button class="restart-btn" onclick="restartGame()">重新挑戰後測</button>
+            <button class="restart-btn" onclick="restartGame()">重新開始後測</button>
 
             <div class="leaderboard-container" id="leaderboard">
                 <h3>🏆 排行榜 (Top 5) 🏆</h3>
@@ -722,7 +752,6 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // 定義題目
         const questionsSource = [
             { question: "我喝完的寶特瓶，裡面還有剩一些飲料，可以直接丟進回收桶。", answer: false, feedback: "殘留的液體會汙染整批回收物！" },
             { question: "回收寶特瓶時，最重要的步驟是『清空、沖洗』，避免液體殘留。", answer: true, feedback: "乾淨的回收物是 rPET 的第一步！" },
@@ -736,7 +765,7 @@
             { question: "只要是塑膠，都可以混在一起回收。", answer: false, feedback: "不同材質的塑膠必須分開，才能進入各自的循環。" }
         ];
 
-        let questions = []; // 將在 init 中隨機排序
+        let questions = [];
 
         const GAME_DURATION_PER_QUESTION = 5;
         const RPET_PER_QUESTION = 10;
@@ -746,9 +775,9 @@
         let currentIndex = 0, score = 0, correctCount = 0, startX = 0, currentX = 0;
         let isDragging = false, currentCard = null, timeRemaining = GAME_DURATION_PER_QUESTION;
         let timerInterval = null, toastTimer = null;
-        let userResults = []; // 儲存答題結果
+        let userResults = []; 
 
-        // Fisher-Yates Shuffle 演算法
+        // Fisher-Yates Shuffle
         function shuffleArray(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -760,26 +789,33 @@
         }
 
         function init() {
-            // 每次初始化時，複製題目並隨機排序
+            // 每次初始化都隨機洗牌
             questions = shuffleArray([...questionsSource]);
 
             currentIndex = 0;
             score = 0;
             correctCount = 0;
-            userResults = [];
+            userResults = []; 
             updateScore();
             document.getElementById('result').classList.remove('show');
             document.getElementById('cardContainer').style.display = 'block';
             document.getElementById('knowledgeBase').innerHTML = '';
             
+            // 顯示分數Header
+            const scoreEl = document.querySelector('.header .score');
+            if(scoreEl) scoreEl.style.visibility = 'visible';
+
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
             const startScreen = document.getElementById('startScreen');
             const modal = document.getElementById('startModal');
             startScreen.style.display = 'flex'; 
             startScreen.style.opacity = '1';
             modal.classList.remove('shrinking'); 
             modal.style.opacity = '1';
+
+            // 清除之前的對比結果，避免重複添加
+            const existingComparison = document.querySelector('.comparison-container');
+            if(existingComparison) existingComparison.remove();
 
             document.getElementById('cardContainer').innerHTML = ''; 
             stopTimer(); 
@@ -795,7 +831,6 @@
             setTimeout(() => {
                 startScreen.style.display = 'none'; 
                 document.getElementById('helpIcon').style.display = 'flex'; 
-                document.getElementById('langSwitchIcon').style.display = 'flex'; 
                 
                 createCard(); 
             }, 500); 
@@ -891,14 +926,14 @@
                         showToast(toastMessage, false);
                     }
                 }
-                
-                // Record result
+
+                // 記錄結果
                 userResults.push({
                     question: questions[currentIndex].question,
                     isCorrect: isCorrect,
                     feedback: feedback
                 });
-
+                
                 updateScore();
 
                 const flyDistance = window.innerWidth;
@@ -932,13 +967,56 @@
             stopTimer();
             document.getElementById('cardContainer').style.display = 'none';
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
+            
+            // 隱藏Header分數，避免重複
+            const scoreEl = document.querySelector('.header .score');
+            if(scoreEl) scoreEl.style.visibility = 'hidden';
             
             const finalRpet = score * RPET_PER_QUESTION;
             document.getElementById('finalScore').textContent = `${finalRpet}`;
             
-            const accuracy = Math.round((correctCount / questions.length) * 100);
-            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
+            // 計算並顯示正確率
+            const currentAccuracy = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('finalAccuracy').textContent = `${currentAccuracy}%`;
+
+            // 【後測新增】讀取前測準確率並進行對比
+            const preAccuracy = localStorage.getItem('preTestAccuracy');
+            const statsGrid = document.querySelector('.stats-grid');
+            
+            // 清除可能已存在的對比方塊
+            const oldComp = document.querySelector('.comparison-container');
+            if(oldComp) oldComp.remove();
+
+            if (preAccuracy !== null) {
+                const diff = currentAccuracy - parseInt(preAccuracy);
+                let diffSign = '';
+                let diffClass = 'improvement-neutral';
+                let diffText = '持平';
+
+                if (diff > 0) {
+                    diffSign = '▲';
+                    diffClass = 'improvement-positive';
+                    diffText = '進步';
+                } else if (diff < 0) {
+                    diffSign = '▼';
+                    diffClass = 'improvement-negative';
+                    diffText = '退步';
+                }
+
+                const comparisonHtml = `
+                    <div class="comparison-container">
+                        <div class="comparison-title">📊 前後測能力分析</div>
+                        <div class="comparison-text">
+                            前測準確率: ${preAccuracy}% <span class="arrow">➜</span> 後測: ${currentAccuracy}%
+                        </div>
+                        <div class="comparison-diff ${diffClass}">
+                            ${diffSign} ${diffText} ${Math.abs(diff)}%
+                        </div>
+                    </div>
+                `;
+                
+                statsGrid.insertAdjacentHTML('afterend', comparisonHtml);
+            }
 
             let rank = "回收新手";
             if (score >= 10) rank = "永續決策者 🌍";
@@ -958,7 +1036,7 @@
 
         function buildKnowledgeBase() {
             const container = document.getElementById('knowledgeBase');
-            container.innerHTML = '<h3>本次後測回顧</h3><div class="review-list"></div>';
+            container.innerHTML = '<h3>本次挑戰回顧</h3><div class="review-list"></div>';
             const list = container.querySelector('.review-list');
             
             userResults.forEach(res => {
@@ -1001,6 +1079,7 @@
 
             showToast("時間到！動作要快！", false);
             
+            // 記錄時間到的結果 (視為錯誤)
             userResults.push({
                 question: questions[currentIndex].question,
                 isCorrect: false,

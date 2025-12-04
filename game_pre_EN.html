@@ -2,7 +2,7 @@
 <html lang="en"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plastic Quick Decider (Post-Test)</title>
+    <title>Plastic Quick Decider (Pre-Test)</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background-image: url('Firefly_Gemini Flash.png'); 
+            background-image: url('Firefly_Gemini Flash.png');
             background-size: 100% 100%; 
             background-repeat: no-repeat; 
             background-attachment: fixed; 
@@ -51,6 +51,9 @@
             transform-origin: center;
             transition: transform 0.5s ease-in, opacity 0.5s ease-in;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .start-modal.shrinking {
@@ -96,9 +99,8 @@
         }
         
         #startGameBtn {
-            background: linear-gradient(135deg, #fcc419 0%, #fab005 100%);
+            background: #667eea;
             color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
             border: none;
             padding: 15px 40px;
             border-radius: 50px;
@@ -410,47 +412,6 @@
         .stat-value.score-val { color: #4dabf7; }
         .stat-value.acc-val { color: #51cf66; }
 
-        /* Comparison Styles */
-        .comparison-container {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .comparison-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-
-        .comparison-text {
-            font-size: 1.1em;
-            color: #555;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .comparison-text .arrow {
-            color: #888;
-        }
-
-        .comparison-diff {
-            margin-top: 5px;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .comparison-diff.improvement-positive { color: #51cf66; }
-        .comparison-diff.improvement-negative { color: #ff6b6b; }
-        .comparison-diff.improvement-neutral { color: #888; }
-
         .restart-btn {
             background: white;
             color: #667eea;
@@ -668,18 +629,17 @@
 
     <div id="startScreen">
         <div class="start-modal" id="startModal">
-            <h2>Game Rules (Post-test)</h2>
-            <p>Welcome to the Post-test!<br>Read the statement and decide if it's correct.</p>
+            <h2>Game Rules (Pre-test)</h2>
+            <p>You are a "Plastic Quick Decider"!<br>Read the statement on the card and decide if it's correct or incorrect.</p>
             <p class="highlight">
-                <b>Note: Questions are randomized!</b><br>
                 Swipe Right (✓) = "Correct"<br>
                 Swipe Left (✕) = "Incorrect"
             </p>
-            <p>Warning! Only 5 seconds per question!<br>Let's check your understanding!</p>
+            <p>Warning! Only 5 seconds per question!<br>Get 10g of rPET for each correct answer!</p>
             
             <!-- Lang Switch moved above start button -->
-            <a href="game_post_CN.html" class="lang-switch-btn">切換至繁體中文</a>
-            <button id="startGameBtn">Start Post-Test</button>
+            <a href="game_pre_CN.html" class="lang-switch-btn">切換至繁體中文</a>
+            <button id="startGameBtn">Start Challenge</button>
         </div>
     </div>
 
@@ -700,7 +660,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>Plastic Quick Decider (Post)</h1>
+            <h1>Plastic Quick Decider</h1>
             <div class="score">rPET Collected: <span id="score">0</span>g / <span id="total">100</span></div>
             <div class="timer-container">
                 <div class="timer-bar" id="timerBar"></div>
@@ -711,7 +671,7 @@
         <div class="card-container" id="cardContainer"></div>
 
         <div class="result" id="result">
-            <h2>Post-Test Complete!</h2>
+            <h2>Game Over!</h2>
             <div class="result-rank" id="finalRank"></div>
             
             <!-- New Stats Grid -->
@@ -725,16 +685,14 @@
                     <div class="stat-value acc-val"><span id="finalAccuracy">0%</span></div>
                 </div>
             </div>
-            
-            <!-- Comparison inserted via JS -->
 
             <div class="nickname-container" id="nicknameContainer">
                 <input type="text" id="nicknameInput" placeholder="Enter nickname (max 10 chars)" maxlength="10">
                 <button id="saveScoreBtn">Save Score</button>
             </div>
             
-            <button class="restart-btn post-test-btn" onclick="goBackPre()">➜ Back to Pre-Test</button>
-            <button class="restart-btn" onclick="restartGame()">Restart Post-Test</button>
+            <button class="restart-btn post-test-btn" onclick="goToPostTest()">Start Post-Test (Randomized) ➜</button>
+            <button class="restart-btn" onclick="restartGame()">Restart Pre-Test</button>
 
             <div class="leaderboard-container" id="leaderboard">
                 <h3>🏆 Leaderboard (Top 5) 🏆</h3>
@@ -748,7 +706,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const questionsSource = [
+        const questions = [
             { question: "I can throw my finished PET bottle into the recycling bin, even if there's still some drink left inside.", answer: false, feedback: "Leftover liquid will contaminate the entire batch of recyclables!" },
             { question: "The most important steps when recycling PET bottles are 'Empty, Rinse' to avoid liquid residue.", answer: true, feedback: "Clean recyclables are the first step to rPET!" },
             { question: "'Biocompostable plastic (PLA)' looks eco-friendly, so it should be thrown in the PET bottle recycling bin.", answer: false, feedback: "PLA contaminates the PET recycling stream, ruining the rPET!" },
@@ -761,8 +719,6 @@
             { question: "All plastics can be mixed together for recycling.", answer: false, feedback: "Different plastic types must be sorted to enter their own recycling loops." }
         ];
 
-        let questions = [];
-
         const GAME_DURATION_PER_QUESTION = 5;
         const RPET_PER_QUESTION = 10;
         const LEADERBOARD_KEY = 'sustainabilityGameLeaderboard';
@@ -773,21 +729,7 @@
         let timerInterval = null, toastTimer = null;
         let userResults = [];
 
-        // Fisher-Yates Shuffle
-        function shuffleArray(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
-
         function init() {
-            // Shuffle on init
-            questions = shuffleArray([...questionsSource]);
-
             currentIndex = 0;
             score = 0;
             correctCount = 0;
@@ -802,17 +744,12 @@
             if(scoreEl) scoreEl.style.visibility = 'visible';
 
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
             const startScreen = document.getElementById('startScreen');
             const modal = document.getElementById('startModal');
             startScreen.style.display = 'flex'; 
             startScreen.style.opacity = '1';
             modal.classList.remove('shrinking'); 
             modal.style.opacity = '1';
-
-            // remove comparison if exists
-            const existingComparison = document.querySelector('.comparison-container');
-            if(existingComparison) existingComparison.remove();
 
             document.getElementById('cardContainer').innerHTML = ''; 
             stopTimer(); 
@@ -828,7 +765,6 @@
             setTimeout(() => {
                 startScreen.style.display = 'none'; 
                 document.getElementById('helpIcon').style.display = 'flex'; 
-                document.getElementById('langSwitchIcon').style.display = 'flex'; 
                 
                 createCard(); 
             }, 500); 
@@ -965,7 +901,6 @@
             stopTimer();
             document.getElementById('cardContainer').style.display = 'none';
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
             
             // Hide Header score
             const scoreEl = document.querySelector('.header .score');
@@ -975,47 +910,11 @@
             document.getElementById('finalScore').textContent = `${finalRpet}`;
             
             // Calculate accuracy
-            const currentAccuracy = Math.round((correctCount / questions.length) * 100);
-            document.getElementById('finalAccuracy').textContent = `${currentAccuracy}%`;
+            const accuracy = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
 
-            // Post-test Comparison Logic
-            const preAccuracy = localStorage.getItem('preTestAccuracy');
-            const statsGrid = document.querySelector('.stats-grid');
-            
-            // Remove existing comparison if any
-            const oldComp = document.querySelector('.comparison-container');
-            if(oldComp) oldComp.remove();
-
-            if (preAccuracy !== null) {
-                const diff = currentAccuracy - parseInt(preAccuracy);
-                let diffSign = '';
-                let diffClass = 'improvement-neutral';
-                let diffText = 'Same';
-
-                if (diff > 0) {
-                    diffSign = '▲';
-                    diffClass = 'improvement-positive';
-                    diffText = 'Improvement';
-                } else if (diff < 0) {
-                    diffSign = '▼';
-                    diffClass = 'improvement-negative';
-                    diffText = 'Decline';
-                }
-
-                const comparisonHtml = `
-                    <div class="comparison-container">
-                        <div class="comparison-title">📊 Pre vs Post Analysis</div>
-                        <div class="comparison-text">
-                            Pre: ${preAccuracy}% <span class="arrow">➜</span> Post: ${currentAccuracy}%
-                        </div>
-                        <div class="comparison-diff ${diffClass}">
-                            ${diffSign} ${diffText} ${Math.abs(diff)}%
-                        </div>
-                    </div>
-                `;
-                
-                statsGrid.insertAdjacentHTML('afterend', comparisonHtml);
-            }
+            // Store accuracy for Post-test comparison
+            localStorage.setItem('preTestAccuracy', accuracy);
 
             let rank = "Recycling Novice";
             if (score >= 10) rank = "Sustainability Decision Maker 🌍";
@@ -1035,7 +934,7 @@
 
         function buildKnowledgeBase() {
             const container = document.getElementById('knowledgeBase');
-            container.innerHTML = '<h3>Post-Test Review</h3><div class="review-list"></div>';
+            container.innerHTML = '<h3>Challenge Review</h3><div class="review-list"></div>';
             const list = container.querySelector('.review-list');
             
             userResults.forEach(res => {
