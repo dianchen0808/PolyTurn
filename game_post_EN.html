@@ -51,6 +51,9 @@
             transform-origin: center;
             transition: transform 0.5s ease-in, opacity 0.5s ease-in;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .start-modal.shrinking {
@@ -802,7 +805,7 @@
             if(scoreEl) scoreEl.style.visibility = 'visible';
 
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
+            // document.getElementById('langSwitchIcon').style.display = 'none'; // REMOVED
             const startScreen = document.getElementById('startScreen');
             const modal = document.getElementById('startModal');
             startScreen.style.display = 'flex'; 
@@ -828,7 +831,7 @@
             setTimeout(() => {
                 startScreen.style.display = 'none'; 
                 document.getElementById('helpIcon').style.display = 'flex'; 
-                document.getElementById('langSwitchIcon').style.display = 'flex'; 
+                // document.getElementById('langSwitchIcon').style.display = 'flex'; // REMOVED
                 
                 createCard(); 
             }, 500); 
@@ -965,7 +968,7 @@
             stopTimer();
             document.getElementById('cardContainer').style.display = 'none';
             document.getElementById('helpIcon').style.display = 'none'; 
-            document.getElementById('langSwitchIcon').style.display = 'none'; 
+            // document.getElementById('langSwitchIcon').style.display = 'none'; // REMOVED
             
             // Hide Header score
             const scoreEl = document.querySelector('.header .score');
@@ -1177,8 +1180,8 @@
             init();
         }
 
-        function goToPostTest() {
-            window.location.href = 'game_post_EN.html';
+        function goBackPre() {
+            window.location.href = 'game_pre_EN.html';
         }
 
         document.getElementById('startGameBtn').addEventListener('click', startGame);
