@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"> <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Plastic Quick Decider (Post-Test)</title>
     <style>
         * {
@@ -23,6 +23,8 @@
             padding: 20px;
             overflow-x: hidden;
             overflow-y: auto;
+            touch-action: pan-y;
+            overscroll-behavior: none;
         }
 
         #startScreen {
@@ -256,6 +258,7 @@
             cursor: grab;
             transition: transform 0.1s;
             user-select: none;
+            touch-action: none;
         }
 
         .card.dragging {
@@ -656,6 +659,47 @@
             font-style: italic;
             padding: 0;
         }
+
+        @media (max-width: 600px) {
+            .card-container {
+                height: 55vh;
+                min-height: 300px;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+
+            .card-question {
+                font-size: 1.3em;
+            }
+
+            .hint {
+                top: auto;
+                bottom: 5vh; 
+                transform: none;
+            }
+
+            .hint-left {
+                left: 20px;
+            }
+
+            .hint-right {
+                right: 20px;
+            }
+
+            .hint-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5em;
+                opacity: 0.7;
+            }
+            
+            .hint-item span {
+                font-size: 0.8em;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            }
+        }
     </style>
 </head>
 <body>
@@ -968,7 +1012,6 @@
             stopTimer();
             document.getElementById('cardContainer').style.display = 'none';
             document.getElementById('helpIcon').style.display = 'none'; 
-            // document.getElementById('langSwitchIcon').style.display = 'none'; // REMOVED
             
             // Hide Header score
             const scoreEl = document.querySelector('.header .score');
@@ -978,8 +1021,8 @@
             document.getElementById('finalScore').textContent = `${finalRpet}`;
             
             // Calculate accuracy
-            const currentAccuracy = Math.round((correctCount / questions.length) * 100);
-            document.getElementById('finalAccuracy').textContent = `${currentAccuracy}%`;
+            const accuracy = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
 
             // Post-test Comparison Logic
             const preAccuracy = localStorage.getItem('preTestAccuracy');
@@ -1180,8 +1223,8 @@
             init();
         }
 
-        function goBackPre() {
-            window.location.href = 'game_pre_EN.html';
+        function goToPostTest() {
+            window.location.href = 'game_post_EN.html';
         }
 
         document.getElementById('startGameBtn').addEventListener('click', startGame);

@@ -2,7 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 加入 maximum-scale=1.0, user-scalable=no 防止雙擊縮放與手勢縮放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>塑戰速決 (前測)</title>
     <style>
         * {
@@ -24,6 +25,9 @@
             padding: 20px;
             overflow-x: hidden;
             overflow-y: auto;
+            /* 關鍵：防止瀏覽器預設的滑動切換頁面或縮放行為，保留垂直捲動供結果頁使用 */
+            touch-action: pan-y;
+            overscroll-behavior: none;
         }
 
         #startScreen {
@@ -256,6 +260,8 @@
             cursor: grab;
             transition: transform 0.1s;
             user-select: none;
+            /* 關鍵：完全禁止卡片上的瀏覽器預設手勢，確保滑動順暢不縮放 */
+            touch-action: none;
         }
 
         .card.dragging {
@@ -614,6 +620,52 @@
             color: #ccc;
             font-style: italic;
             padding: 0;
+        }
+
+        /* ----- 手機響應式優化 ----- */
+        @media (max-width: 600px) {
+            /* 1. 調整卡片高度，避免太長超出畫面 */
+            .card-container {
+                height: 55vh;
+                min-height: 300px;
+            }
+            
+            /* 2. 減少卡片內距，留更多空間給文字 */
+            .card {
+                padding: 25px;
+            }
+
+            .card-question {
+                font-size: 1.3em; 
+            }
+
+            /* 3. 將提示圖示移到底部，避免遮擋題目 */
+            .hint {
+                top: auto;
+                bottom: 5vh; 
+                transform: none;
+                /* 稍微透明一點，減少視覺干擾 */
+            }
+
+            .hint-left {
+                left: 20px;
+            }
+
+            .hint-right {
+                right: 20px;
+            }
+
+            .hint-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5em;
+                opacity: 0.7; /* 半透明 */
+            }
+            
+            .hint-item span {
+                font-size: 0.8em;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            }
         }
     </style>
 </head>
