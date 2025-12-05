@@ -1,192 +1,703 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>宏全國際環保永續連線挑戰</title>
-<style>
-  body { font-family: 'Microsoft JhengHei', sans-serif; background: #e0f7fa; margin:0; }
-  header { background:#00796b; color:#fff; padding:20px; display:flex; align-items:center; justify-content:center; gap:10px; }
-  header img { width:80px; }
-  h1 { margin:0; font-size:26px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hon Chuan Eco Match</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        
+        /* Custom Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes pop-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-  .container { display:flex; justify-content:center; align-items:flex-start; padding:30px; gap:50px; }
-  .column { display:flex; flex-direction:column; gap:15px; }
-
-  .category { background:#fff; border:3px solid #00796b; border-radius:25px; padding:20px; width:220px; text-align:center; cursor:pointer; transition:.2s; font-weight:bold; }
-  .category:hover { background:#e0f2f1; transform:scale(1.05); }
-
-  .event { background:#fff; border:2px dashed #00796b; border-radius:12px; padding:15px; text-align:center; cursor:pointer; transition:.2s; }
-  .event:hover { background:#f1f8e9; transform:scale(1.05); }
-
-  .selected { border-color:#009688; background:#b2dfdb; }
-
-  #message { text-align:center; font-size:20px; margin-top:20px; font-weight:bold; }
-
-  footer { text-align:center; padding:20px; font-size:14px; color:#555; }
-
-  #events { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; border-left:2px solid #00796b; padding-left:30px; }
-
-  .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; color:white; font-size:32px; font-weight:bold; z-index:1000; flex-direction:column; }
-  .overlay button { margin-top:20px; padding:10px 20px; font-size:20px; border:none; border-radius:10px; background:#009688; color:white; cursor:pointer; }
-
-  #langScreen, #startScreen { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:30px; z-index:2000; }
-  #langScreen h2 { font-size:30px; color:#00796b; }
-  #langScreen button, #startButton { margin-top:20px; padding:12px 30px; font-size:20px; background:#00796b; color:white; border:none; border-radius:10px; cursor:pointer; }
-  #startScreen { display:none; }
-</style>
-</head>
-<body>
-
-<header>
-  <img src="https://www.honchuan.com/images/logo.png" alt="宏全國際LOGO">
-  <h1 id="titleText">宏全國際環保永續連線挑戰 🌏</h1>
-</header>
-
-<div id="langScreen">
-  <h2>請選擇語言 / Select Language</h2>
-  <button onclick="setLanguage('zh')">中文</button>
-  <button onclick="setLanguage('en')">English</button>
-</div>
-
-<div id="startScreen">
-  <h2 id="welcomeTitle"></h2>
-  <p id="welcomeText"></p>
-  <button id="startButton" onclick="startGame()"></button>
-</div>
-
-<div class="container" id="gameContainer" style="display:none;">
-  <div class="column" id="categories"></div>
-  <div class="column"><div id="events"></div></div>
-</div>
-
-<p id="message"></p>
-
-<footer id="footerText"></footer>
-
-<div class="overlay" id="overlay">
-  <span id="finishText"></span>
-  <button onclick="location.reload()" id="restartText"></button>
-</div>
-
-<audio id="correctSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_9fba5f3d7d.mp3"></audio>
-<audio id="wrongSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_6f6dfb6f7b.mp3"></audio>
-
-<script>
-let lang = 'zh';
-let selectedEvent = null;
-let correctCount = 0;
-
-const textData = {
-  zh: {
-    title:"宏全國際環保永續連線挑戰 🌏",
-    welcomeTitle:"🌿 歡迎來到宏全國際環保永續挑戰 🌿",
-    welcome:"在這款遊戲中，您需要將右邊的事件卡正確連線到左邊的分類卡。點事件 → 點分類即可作答！",
-    start:"開始遊戲",
-    finish:"🎉 恭喜完成所有分類挑戰！ 🎉",
-    restart:"重新開始遊戲",
-    footer:"♻️ 宏全國際集團推動永續環保．守護地球一同努力 🌱",
-    correct:"✅ 正確！",
-    wrong:"❌ 錯誤，請再試一次！",
-    categories:["利於降低空汙","不利於降低空汙","利於降低汙水處理","不利於降低汙水處理"],
-    events:{
-      "利於降低空汙":["種植綠化樹木","推廣電動車","設立綠能工廠","減少塑膠燃燒","使用再生能源"],
-      "不利於降低空汙":["排放廢氣","露天焚燒垃圾","開柴油貨車","燃放煙火","工廠未加裝濾煙設備"],
-      "利於降低汙水處理":["設置污水處理廠","使用環保洗劑","廢水再利用","推廣雨水回收","建立綠色管網系統"],
-      "不利於降低汙水處理":["半夜偷排廢水","亂倒油脂入水溝","未處理工業廢水","將化學劑排入下水道","生活污水直排河流"]
-    }
-  },
-  en:{
-    title:"Hon Chuan Environmental Sustainability Match Game 🌏",
-    welcomeTitle:"🌿 Welcome to the Sustainability Matching Challenge 🌿",
-    welcome:"Match each environmental event on the right with the correct category on the left. Select event → select category!",
-    start:"Start Game",
-    finish:"🎉 Congratulations! You completed all matches! 🎉",
-    restart:"Restart Game",
-    footer:"♻️ Hon Chuan Group – Together for a Sustainable Future 🌱",
-    correct:"✅ Correct!",
-    wrong:"❌ Incorrect, try again!",
-    categories:["Helps Reduce Air Pollution","Harms Air Quality","Helps Wastewater Treatment","Harms Wastewater Treatment"],
-    events:{
-      "Helps Reduce Air Pollution":["Planting trees","Promoting EVs","Building green factories","Reducing plastic burning","Using renewable energy"],
-      "Harms Air Quality":["Releasing exhaust","Open trash burning","Driving diesel trucks","Setting off fireworks","Factories without filters"],
-      "Helps Wastewater Treatment":["Building treatment plants","Using eco detergents","Wastewater recycling","Rainwater collection","Green pipeline systems"],
-      "Harms Wastewater Treatment":["Illegal wastewater dumping","Pouring oil into drains","Untreated industrial waste","Dumping chemicals","Direct sewage discharge"]
-    }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+        
+        .hidden { display: none !important; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
   }
-};
-
-function setLanguage(l){
-  lang=l;
-  document.getElementById('langScreen').style.display='none';
-  document.getElementById('startScreen').style.display='flex';
-  document.getElementById('titleText').textContent=textData[lang].title;
-  document.getElementById('welcomeTitle').textContent=textData[lang].welcomeTitle;
-  document.getElementById('welcomeText').textContent=textData[lang].welcome;
-  document.getElementById('startButton').textContent=textData[lang].start;
-  document.getElementById('footerText').textContent=textData[lang].footer;
-  document.getElementById('finishText').textContent=textData[lang].finish;
-  document.getElementById('restartText').textContent=textData[lang].restart;
-}
-
-function startGame(){
-  document.getElementById('startScreen').style.display='none';
-  document.getElementById('gameContainer').style.display='flex';
-  loadCategories();
-  loadEvents();
-}
-
-function loadCategories(){
-  const catContainer=document.getElementById('categories');
-  catContainer.innerHTML='';
-  textData[lang].categories.forEach(cat=>{
-    const div=document.createElement('div');
-    div.className='category';
-    div.textContent=cat;
-    div.onclick=()=>checkMatch(cat);
-    catContainer.appendChild(div);
-  });
-}
-
-function loadEvents(){
-  const eventContainer=document.getElementById('events');
-  eventContainer.innerHTML='';
-  const allEvents=[];
-  Object.keys(textData[lang].events).forEach(cat=>{
-    textData[lang].events[cat].forEach(ev=>allEvents.push({event:ev, cat:cat}));
-  });
-  allEvents.sort(()=>Math.random()-0.5);
-  allEvents.forEach(item=>{
-    const div=document.createElement('div');
-    div.className='event';
-    div.textContent=item.event;
-    div.dataset.category=item.cat;
-    div.onclick=()=>selectEvent(div);
-    eventContainer.appendChild(div);
-  });
-}
-
-function selectEvent(div){
-  document.querySelectorAll('.event').forEach(e=>e.classList.remove('selected'));
-  div.classList.add('selected');
-  selectedEvent=div;
-}
-
-function checkMatch(category){
-  if(!selectedEvent) return;
-  if(selectedEvent.dataset.category===category){
-    document.getElementById('correctSound').play();
-    selectedEvent.style.visibility='hidden';
-    selectedEvent=null;
-    correctCount++;
-    document.getElementById('message').textContent=textData[lang].correct;
-  }else{
-    document.getElementById('wrongSound').play();
-    document.getElementById('message').textContent=textData[lang].wrong;
-  }
-  if(correctCount===document.querySelectorAll('.event').length) document.getElementById('overlay').style.display='flex';
 }
 </script>
+</head>
+<body class="bg-teal-50 text-slate-800 min-h-screen flex flex-col selection:bg-teal-200">
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+        <div id="toast-content" class="flex items-center gap-2 px-6 py-3 rounded-full shadow-lg font-bold text-white bg-gray-500">
+            <span id="toast-icon"></span>
+            <span id="toast-msg"></span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-teal-700 to-emerald-600 text-white p-4 shadow-lg sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <!-- Optimization: Removed white background wrapper for logo -->
+                <img src="https://www.honchuan.com/images/logo.png" alt="Logo" class="h-12 w-auto object-contain" onError="this.style.display='none'">
+                <h1 id="header-title" class="text-lg md:text-2xl font-bold tracking-wide truncate">
+                    Hon Chuan Eco Match
+                </h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- Phase Indicator -->
+                <span id="phase-badge" class="hidden text-xs font-bold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-md uppercase tracking-wider">
+                    PRE-TEST
+                </span>
+                <button id="btn-switch-lang" class="hidden text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors border border-white/30">
+                    Switch Lang
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow relative w-full max-w-6xl mx-auto p-4">
+
+        <!-- VIEW: Language Selector -->
+        <section id="view-lang" class="view-section flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border-b-4 border-teal-600 max-w-md w-full text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="bg-teal-100 p-4 rounded-full animate-float">
+                        <i data-lucide="globe" class="w-12 h-12 text-teal-600"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-teal-800 mb-8">
+                    請選擇語言 <br> Select Language
+                </h2>
+                <div class="space-y-4">
+                    <button onclick="setLanguage('zh')" class="w-full py-4 text-xl font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-transform transform hover:scale-105 active:scale-95 shadow-md">
+                        中文 (Chinese)
+                    </button>
+                    <button onclick="setLanguage('en')" class="w-full py-4 text-xl font-bold text-teal-700 bg-teal-100 hover:bg-teal-200 rounded-xl transition-transform transform hover:scale-105 active:scale-95 shadow-md">
+                        English
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: Intro -->
+        <section id="view-intro" class="view-section hidden flex flex-col items-center justify-center min-h-[60vh]">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border-b-4 border-teal-600 max-w-lg w-full text-center relative overflow-hidden animate-pop-in">
+                <div class="absolute top-[-50px] right-[-50px] w-32 h-32 bg-teal-50 rounded-full opacity-50 z-0"></div>
+                <div class="relative z-10">
+                    <h2 id="intro-title" class="text-3xl font-bold text-teal-800 mb-4"></h2>
+                    <div class="flex justify-center my-6">
+                        <i data-lucide="leaf" class="w-16 h-16 text-green-500 animate-bounce"></i>
+                    </div>
+                    <p id="intro-desc" class="text-lg text-slate-600 mb-8 leading-relaxed"></p>
+                    <div class="bg-teal-50 p-4 rounded-xl mb-6 text-sm text-teal-800 text-left">
+                        <p id="intro-mode-desc" class="font-medium">
+                            <!-- Populated by JS: Explanation of Pre/Post test -->
+                        </p>
+                    </div>
+                    <button onclick="startGame(true)" class="group flex items-center justify-center w-full py-4 text-xl font-bold text-white bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95">
+                        <span id="intro-btn-text" class="mr-2"></span>
+                        <i data-lucide="play" class="w-6 h-6 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: Game Board -->
+        <section id="view-game" class="view-section hidden py-4 animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left: Categories -->
+                <div class="lg:col-span-3 grid grid-cols-2 lg:grid-cols-1 gap-4 lg:sticky lg:top-24 h-fit">
+                    <h3 id="game-instruction" class="lg:hidden col-span-2 text-center text-teal-800 font-bold opacity-70 mb-2 text-sm">
+                        <!-- JS populated -->
+                    </h3>
+                    <div id="categories-container" class="contents lg:block lg:space-y-4">
+                        <!-- Categories injected here -->
+                    </div>
+                </div>
+
+                <!-- Right: Event Cards -->
+                <div class="lg:col-span-9 bg-teal-900/5 rounded-3xl p-6 min-h-[50vh]">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-teal-800 font-bold flex items-center gap-2">
+                            <span>📋 <span id="game-events-title">Events</span></span>
+                            <span id="cards-remaining" class="text-sm font-normal bg-teal-100 text-teal-800 px-3 py-1 rounded-full">
+                                0
+                            </span>
+                        </h3>
+                        <!-- Timer Display -->
+                        <div class="bg-white border border-teal-200 px-4 py-2 rounded-lg shadow-sm flex items-center gap-2">
+                            <i data-lucide="timer" class="w-5 h-5 text-teal-600"></i>
+                            <span id="game-timer" class="font-mono text-xl font-bold text-teal-700">00:00</span>
+                        </div>
+                    </div>
+
+                    <div id="cards-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <!-- Cards injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: Result -->
+    <div id="modal-result" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl transform scale-90 transition-transform duration-300" id="modal-content">
+            <div class="flex justify-center mb-6">
+                <div class="bg-yellow-100 p-6 rounded-full animate-pulse">
+                    <i data-lucide="trophy" class="w-16 h-16 text-yellow-500"></i>
+                </div>
+            </div>
+            
+            <h2 id="result-title" class="text-2xl font-bold text-slate-800 mb-2"></h2>
+            
+            <!-- Dynamic Result Content (Table or Text) -->
+            <div id="result-body" class="mb-6 text-slate-600"></div>
+
+            <button id="btn-result-action" class="w-full flex items-center justify-center gap-2 py-4 text-xl font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-colors shadow-lg">
+                <!-- Icon & Text injected via JS -->
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-200 text-slate-600 text-center p-4 text-sm border-t border-slate-300 mt-auto">
+        <p id="footer-text"></p>
+    </footer>
+
+    <!-- Game Logic -->
+    <script>
+        // --- DATA ---
+        const DATA = {
+            zh: {
+                title: "宏全國際環保永續連線挑戰",
+                welcomeTitle: "🌿 歡迎來到環保永續挑戰 🌿",
+                welcome: "請將下方的「事件卡」點選後，配對到上方或左側正確的「分類」。一起守護地球！",
+                modeDesc: "📌 挑戰流程：\n1. 前測：第一次遊玩，記錄時間與準確率。\n2. 後測：再次挑戰，比較學習成果！",
+                startPre: "開始前測挑戰",
+                startPost: "開始後測挑戰",
+                finishPre: "🎉 前測完成！",
+                finishPost: "🏆 挑戰全部完成！",
+                restart: "重新開始",
+                footer: "♻️ 宏全國際集團推動永續環保．守護地球一同努力 🌱",
+                correct: "✅ 答對了！",
+                wrong: "❌ 哎呀，再試一次！",
+                instruction: "👇 點選事件卡，再點選分類",
+                eventsTitle: "待分類事件",
+                stats: {
+                    time: "花費時間",
+                    errors: "錯誤次數",
+                    accuracy: "準確率",
+                    improvement: "進步",
+                    preLabel: "前測 (第一次)",
+                    postLabel: "後測 (第二次)"
+                },
+                categories: ["利於降低空汙", "不利於降低空汙", "利於降低汙水處理", "不利於降低汙水處理"],
+                events: {
+                    "利於降低空汙": ["種植綠化樹木", "推廣電動車", "設立綠能工廠", "減少塑膠燃燒", "使用再生能源"],
+                    "不利於降低空汙": ["排放廢氣", "露天焚燒垃圾", "開柴油貨車", "燃放煙火", "工廠未加裝濾煙設備"],
+                    "利於降低汙水處理": ["設置污水處理廠", "使用環保洗劑", "廢水再利用", "推廣雨水回收", "建立綠色管網系統"],
+                    "不利於降低汙水處理": ["半夜偷排廢水", "亂倒油脂入水溝", "未處理工業廢水", "將化學劑排入下水道", "生活污水直排河流"]
+                }
+            },
+            en: {
+                title: "Hon Chuan Eco Match Challenge",
+                welcomeTitle: "🌿 Sustainability Challenge 🌿",
+                welcome: "Match the 'Event Cards' below to the correct 'Category'. Let's protect our planet together!",
+                modeDesc: "📌 Flow:\n1. Pre-test: First attempt, recording time & accuracy.\n2. Post-test: Second attempt to see improvement!",
+                startPre: "Start Pre-test",
+                startPost: "Start Post-test",
+                finishPre: "🎉 Pre-test Complete!",
+                finishPost: "🏆 All Challenges Complete!",
+                restart: "Restart All",
+                footer: "♻️ Hon Chuan Group – Together for a Sustainable Future 🌱",
+                correct: "✅ Correct!",
+                wrong: "❌ Oops, try again!",
+                instruction: "👇 Select Event Card, then Select Category",
+                eventsTitle: "Events",
+                stats: {
+                    time: "Time",
+                    errors: "Mistakes",
+                    accuracy: "Accuracy",
+                    improvement: "Improved",
+                    preLabel: "Pre-test",
+                    postLabel: "Post-test"
+                },
+                categories: ["Helps Reduce Air Pollution", "Harms Air Quality", "Helps Wastewater Treatment", "Harms Wastewater Treatment"],
+                events: {
+                    "Helps Reduce Air Pollution": ["Planting trees", "Promoting EVs", "Building green factories", "Reducing plastic burning", "Using renewable energy"],
+                    "Harms Air Quality": ["Releasing exhaust", "Open trash burning", "Driving diesel trucks", "Setting off fireworks", "Factories without filters"],
+                    "Helps Wastewater Treatment": ["Building treatment plants", "Using eco detergents", "Wastewater recycling", "Rainwater collection", "Green pipeline systems"],
+                    "Harms Wastewater Treatment": ["Illegal wastewater dumping", "Pouring oil into drains", "Untreated industrial waste", "Dumping chemicals", "Direct sewage discharge"]
+                }
+            }
+        };
+
+        const AUDIO = {
+            correct: new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_9fba5f3d7d.mp3"),
+            wrong: new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_6f6dfb6f7b.mp3")
+        };
+
+        // --- STATE ---
+        let state = {
+            lang: 'zh',
+            phase: 'pre', // 'pre' or 'post'
+            cards: [], // { id, text, category, matched }
+            selectedCardId: null,
+            // Metrics
+            startTime: 0,
+            timerInterval: null,
+            stats: {
+                pre: { timeMs: 0, mistakes: 0, totalCards: 0 },
+                post: { timeMs: 0, mistakes: 0, totalCards: 0 }
+            }
+        };
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            lucide.createIcons();
+            // Show initial view
+            showView('view-lang');
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function setLanguage(lang) {
+            state.lang = lang;
+            updateTextContent();
+            showView('view-intro');
+            document.getElementById('btn-switch-lang').classList.remove('hidden');
+        }
+
+        function startGame(isFullReset = false) {
+            if (isFullReset) {
+                state.phase = 'pre';
+                state.stats.pre = { timeMs: 0, mistakes: 0, totalCards: 0 };
+                state.stats.post = { timeMs: 0, mistakes: 0, totalCards: 0 };
+            }
+            
+            initGameData();
+            updatePhaseBadge();
+            renderGameBoard();
+            showView('view-game');
+            
+            // Start Timer
+            startTimer();
+        }
+
+        function startTimer() {
+            stopTimer();
+            state.startTime = Date.now();
+            const timerEl = document.getElementById('game-timer');
+            timerEl.innerText = "00:00";
+            
+            state.timerInterval = setInterval(() => {
+                const now = Date.now();
+                const diff = now - state.startTime;
+                timerEl.innerText = formatTime(diff);
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+        }
+
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function resetGame() {
+            // Hide modal
+            const modal = document.getElementById('modal-result');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('modal-content').classList.remove('scale-100');
+                document.getElementById('modal-content').classList.add('scale-90');
+                
+                // Return to intro
+                showView('view-intro');
+            }, 300);
+        }
+
+        function initGameData() {
+            const currentData = DATA[state.lang];
+            const allEvents = [];
+            
+            Object.keys(currentData.events).forEach(category => {
+                currentData.events[category].forEach((text, idx) => {
+                    allEvents.push({
+                        id: `${category}-${idx}`,
+                        text: text,
+                        category: category,
+                        matched: false
+                    });
+                });
+            });
+
+            // Store total count
+            state.stats[state.phase].totalCards = allEvents.length;
+
+            // Shuffle
+            state.cards = allEvents.sort(() => Math.random() - 0.5);
+            state.selectedCardId = null;
+        }
+
+        // --- RENDER FUNCTIONS ---
+
+        function showView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            // Show target view
+            const target = document.getElementById(viewId);
+            target.classList.remove('hidden');
+            // Re-trigger animation
+            target.classList.remove('animate-fade-in');
+            void target.offsetWidth; // trigger reflow
+            target.classList.add('animate-fade-in');
+        }
+
+        function updatePhaseBadge() {
+            const badge = document.getElementById('phase-badge');
+            const t = DATA[state.lang].stats;
+            badge.classList.remove('hidden');
+            badge.innerText = state.phase === 'pre' ? t.preLabel : t.postLabel;
+            
+            // Color coding
+            if (state.phase === 'pre') {
+                badge.className = "text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md uppercase tracking-wider border border-yellow-200";
+            } else {
+                badge.className = "text-xs font-bold bg-teal-100 text-teal-800 px-2 py-1 rounded-md uppercase tracking-wider border border-teal-200";
+            }
+        }
+
+        function updateTextContent() {
+            const t = DATA[state.lang];
+            setText('header-title', t.title);
+            setText('footer-text', t.footer);
+            setText('intro-title', t.welcomeTitle);
+            setText('intro-desc', t.welcome);
+            setText('intro-mode-desc', t.modeDesc);
+            setText('intro-btn-text', t.startPre);
+            setText('game-instruction', t.instruction);
+            setText('game-events-title', t.eventsTitle);
+            
+            // Switch button logic
+            const btnSwitch = document.getElementById('btn-switch-lang');
+            btnSwitch.onclick = () => showView('view-lang');
+        }
+
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if(el) el.innerText = text;
+        }
+
+        function renderGameBoard() {
+            const t = DATA[state.lang];
+            const catContainer = document.getElementById('categories-container');
+            const cardContainer = document.getElementById('cards-container');
+            
+            // 1. Render Categories
+            catContainer.innerHTML = '';
+            t.categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `w-full relative p-4 rounded-xl border-4 text-lg font-bold transition-all duration-200 shadow-md flex flex-col items-center justify-center min-h-[100px] mb-4 bg-slate-50 border-slate-200 text-slate-400 hover:bg-slate-100`;
+                btn.innerHTML = `<span class="pointer-events-none">${cat}</span>`;
+                btn.onclick = () => handleCategoryClick(cat);
+                btn.dataset.category = cat;
+                catContainer.appendChild(btn);
+            });
+
+            // 2. Render Cards
+            renderCards();
+        }
+
+        function renderCards() {
+            const cardContainer = document.getElementById('cards-container');
+            const unmatchedCards = state.cards.filter(c => !c.matched);
+            
+            document.getElementById('cards-remaining').innerText = `${unmatchedCards.length}`;
+            
+            cardContainer.innerHTML = '';
+            
+            if (unmatchedCards.length === 0) {
+                // Game Round Finished
+                handleRoundComplete();
+                cardContainer.innerHTML = `<div class="col-span-full py-12 text-center text-teal-600 font-bold text-xl opacity-50">All Clear!</div>`;
+                return;
+            }
+
+            state.cards.forEach(card => {
+                if(card.matched) return;
+
+                const isSelected = state.selectedCardId === card.id;
+                const btn = document.createElement('button');
+                
+                // Tailwind classes for card
+                let classes = "p-4 rounded-xl border-2 text-md font-medium text-left shadow-sm transition-all duration-200 flex items-center h-full w-full ";
+                if (isSelected) {
+                    classes += "border-teal-500 bg-teal-50 ring-2 ring-teal-200 scale-105 z-10 text-teal-900";
+                } else {
+                    classes += "border-white bg-white hover:border-teal-200 hover:shadow-md text-slate-700";
+                }
+                
+                btn.className = classes;
+                btn.innerText = card.text;
+                btn.onclick = () => handleCardClick(card.id);
+                cardContainer.appendChild(btn);
+            });
+
+            // Update Category Styles based on selection state
+            updateCategoryStyles();
+        }
+
+        function updateCategoryStyles() {
+            const cats = document.getElementById('categories-container').children;
+            const hasSelection = !!state.selectedCardId;
+            
+            Array.from(cats).forEach(btn => {
+                if (hasSelection) {
+                    btn.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-400', 'hover:bg-slate-100');
+                    btn.classList.add('border-teal-400', 'bg-white', 'hover:bg-teal-50', 'hover:scale-105', 'cursor-pointer', 'animate-pulse', 'text-teal-800');
+                    
+                    // Add "Select Me" badge if not exists
+                    if(!btn.querySelector('.badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = "badge absolute -top-2 -right-2 bg-teal-500 text-white text-xs px-2 py-1 rounded-full animate-bounce";
+                        badge.innerText = "Select!";
+                        btn.appendChild(badge);
+                    }
+                } else {
+                    // Reset to disabled-ish look
+                    btn.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-400', 'hover:bg-slate-100');
+                    btn.classList.remove('border-teal-400', 'bg-white', 'hover:bg-teal-50', 'hover:scale-105', 'cursor-pointer', 'animate-pulse', 'text-teal-800');
+                    const badge = btn.querySelector('.badge');
+                    if(badge) badge.remove();
+                }
+            });
+        }
+
+        // --- INTERACTION LOGIC ---
+
+        function handleCardClick(id) {
+            // Toggle selection
+            if (state.selectedCardId === id) {
+                state.selectedCardId = null;
+            } else {
+                state.selectedCardId = id;
+            }
+            renderCards(); // Re-render to show selection state
+        }
+
+        function handleCategoryClick(category) {
+            if (!state.selectedCardId) return;
+
+            const cardIndex = state.cards.findIndex(c => c.id === state.selectedCardId);
+            const card = state.cards[cardIndex];
+
+            if (card.category === category) {
+                // MATCH!
+                AUDIO.correct.currentTime = 0;
+                AUDIO.correct.play().catch(e => console.log('Audio blocked', e));
+                
+                showToast(DATA[state.lang].correct, 'success');
+                
+                // Mark matched
+                state.cards[cardIndex].matched = true;
+                state.selectedCardId = null;
+                
+                renderCards(); // Update UI
+            } else {
+                // WRONG!
+                AUDIO.wrong.currentTime = 0;
+                AUDIO.wrong.play().catch(e => console.log('Audio blocked', e));
+                
+                // Track mistake
+                state.stats[state.phase].mistakes++;
+                
+                showToast(DATA[state.lang].wrong, 'error');
+            }
+        }
+
+        function handleRoundComplete() {
+            stopTimer();
+            // Record Time
+            const duration = Date.now() - state.startTime;
+            state.stats[state.phase].timeMs = duration;
+
+            setTimeout(() => {
+                showResultModal();
+            }, 500);
+        }
+
+        function showResultModal() {
+            const modal = document.getElementById('modal-result');
+            const titleEl = document.getElementById('result-title');
+            const bodyEl = document.getElementById('result-body');
+            const btnEl = document.getElementById('btn-result-action');
+            const t = DATA[state.lang];
+
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // Reflow
+            modal.classList.remove('opacity-0');
+            
+            const content = document.getElementById('modal-content');
+            content.classList.remove('scale-90');
+            content.classList.add('scale-100');
+
+            if (state.phase === 'pre') {
+                // --- PRE-TEST RESULT ---
+                titleEl.innerText = t.finishPre;
+                
+                const stats = state.stats.pre;
+                const accuracy = Math.round((stats.totalCards / (stats.totalCards + stats.mistakes)) * 100);
+
+                bodyEl.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <div class="bg-slate-100 p-4 rounded-xl">
+                            <div class="text-sm text-slate-500 mb-1">${t.stats.time}</div>
+                            <div class="text-2xl font-bold text-teal-600">${formatTime(stats.timeMs)}</div>
+                        </div>
+                        <div class="bg-slate-100 p-4 rounded-xl">
+                            <div class="text-sm text-slate-500 mb-1">${t.stats.accuracy}</div>
+                            <div class="text-2xl font-bold ${accuracy >= 80 ? 'text-green-600' : 'text-orange-500'}">${accuracy}%</div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-500">準備好進行後測了嗎？讓我們看看你能進步多少！</p>
+                `;
+
+                btnEl.onclick = () => {
+                    // Transition to Post-test
+                    // Close modal first
+                    modal.classList.add('hidden');
+                    // Setup Post
+                    state.phase = 'post';
+                    startGame(false); // false = do not reset stats object, just game board
+                };
+                btnEl.innerHTML = `<i data-lucide="arrow-right-circle" class="w-6 h-6"></i> ${t.startPost}`;
+
+            } else {
+                // --- POST-TEST RESULT (COMPARISON) ---
+                titleEl.innerText = t.finishPost;
+                
+                const pre = state.stats.pre;
+                const post = state.stats.post;
+
+                const preAcc = Math.round((pre.totalCards / (pre.totalCards + pre.mistakes)) * 100);
+                const postAcc = Math.round((post.totalCards / (post.totalCards + post.mistakes)) * 100);
+                
+                // Calculate time difference (negative is good)
+                const timeDiff = post.timeMs - pre.timeMs;
+                const timeDiffStr = formatTime(Math.abs(timeDiff));
+                
+                // Time comparison Logic:
+                // timeDiff > 0 means Time Increased (Slower) -> Bad -> Red -> ▼
+                // timeDiff <= 0 means Time Decreased (Faster) -> Good -> Green -> ▲
+                const timeClass = timeDiff <= 0 ? 'text-green-600' : 'text-red-500';
+                const timeSymbol = timeDiff <= 0 ? '▲' : '▼';
+
+                bodyEl.innerHTML = `
+                    <div class="overflow-x-auto mt-4 rounded-xl border border-slate-200">
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th class="px-4 py-3"></th>
+                                    <th class="px-4 py-3">${t.stats.preLabel}</th>
+                                    <th class="px-4 py-3">${t.stats.postLabel}</th>
+                                    <th class="px-4 py-3">${t.stats.improvement}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white border-b">
+                                    <th class="px-4 py-3 font-medium text-slate-900">${t.stats.time}</th>
+                                    <td class="px-4 py-3">${formatTime(pre.timeMs)}</td>
+                                    <td class="px-4 py-3 font-bold">${formatTime(post.timeMs)}</td>
+                                    <td class="px-4 py-3 font-bold ${timeClass}">
+                                        ${timeSymbol} ${timeDiffStr}
+                                    </td>
+                                </tr>
+                                <tr class="bg-white">
+                                    <th class="px-4 py-3 font-medium text-slate-900">${t.stats.accuracy}</th>
+                                    <td class="px-4 py-3">${preAcc}%</td>
+                                    <td class="px-4 py-3 font-bold">${postAcc}%</td>
+                                    <td class="px-4 py-3 ${postAcc >= preAcc ? 'text-green-600' : 'text-red-500'}">
+                                        ${postAcc >= preAcc ? '▲' : '▼'} ${Math.abs(postAcc - preAcc)}%
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                btnEl.onclick = resetGame;
+                btnEl.innerHTML = `<i data-lucide="refresh-cw" class="w-6 h-6"></i> ${t.restart}`;
+            }
+
+            // Re-init icons in modal
+            lucide.createIcons();
+        }
+
+        // --- UTILS ---
+        
+        let toastTimeout;
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            const content = document.getElementById('toast-content');
+            const msgEl = document.getElementById('toast-msg');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = msg;
+            
+            // Style
+            content.className = `flex items-center gap-2 px-6 py-3 rounded-full shadow-lg font-bold text-white transition-colors ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+            iconEl.innerHTML = type === 'success' 
+                ? '<i data-lucide="check-circle-2" class="w-5 h-5"></i>' 
+                : '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
+            
+            // Re-init icon
+            lucide.createIcons();
+
+            // Show
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            
+            // Hide after 2s
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 2000);
+        }
+
+    </script>
 </body>
 </html>
