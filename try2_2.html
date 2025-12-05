@@ -809,6 +809,7 @@ function renderChips(){
 
 /* ================== 開局 / 結束 ================== */
 function startGame(){
+  levelSel.value = LV; // ⭐ 始終保持選單顯示與 LV 一致
   // ✅ 每次開始新關卡都隱藏分享與暱稱區
   document.querySelectorAll('.row').forEach(r => r.style.display = 'none');
   overlay.style.display='none';
@@ -835,6 +836,7 @@ function nextStage(){
     return;
   }
   showToast(`🌍 進入下一階段：${LEVELS[LV].name}`);
+  levelSel.value = LV;  // ⭐ 新增：更新關卡選單顯示
   setTimeout(()=>startGame(), 1000);
 }
 

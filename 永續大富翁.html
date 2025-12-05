@@ -5,7 +5,6 @@
     <meta name="viewport" content-width=device-width, initial-scale=1.0">
     <title>碳權大富翁：永續行動力</title>
     <style>
-        /* [ ... CSS 樣式與 v1.7 完全相同 ... ] */
         :root {
             --player1-color: #1976d2;
             --player2-color: #d32f2f;
@@ -34,6 +33,8 @@
             width: 700px;
             height: 700px;
         }
+        
+        /* --- CSS 修改 (解決跑版與空白問題) --- */
         .cell {
             width: 70px;
             height: 70px;
@@ -42,79 +43,90 @@
             background-color: #fff;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start; 
             font-size: 10px;
             text-align: center;
             position: relative;
+            overflow: hidden;
         }
+        
         .cell-header {
-            padding: 5px 2px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             color: #000;
             border-bottom: 1px solid #999;
+            word-break: break-word;
+            line-height: 1.1;
+            hyphens: auto;
         }
+
         .cell-footer { 
-            padding: 5px 0;
-            font-size: 13px;
+            height: 18px;
+            line-height: 18px;
+            padding: 0;
+            font-size: 12px;
             font-weight: bold; 
+            white-space: nowrap;
+            flex-shrink: 0;
+            background-color: rgba(255,255,255,0.3);
         }
+
         .cell-header.group-pollution { background-color: var(--color-pollution); color: #fff; }
         .cell-header.group-green { background-color: var(--color-green); color: #fff; }
         .cell-header.group-public { background-color: var(--color-public); }
         .cell-header.group-nature { background-color: var(--color-nature); }
         .cell-header.group-special { background-color: var(--color-special); }
+        
         .cell-header.type-go, .cell-header.type-jail, .cell-header.type-free, .cell-header.type-goToJail {
             background-color: var(--color-special);
-            padding: 10px 2px;
+            padding: 2px;
         }
+
         .cell.owner-0 { box-shadow: inset 0 0 0 5px var(--player1-color); }
         .cell.owner-1 { box-shadow: inset 0 0 0 5px var(--player2-color); }
-        /* 棋盤中央的大方塊：覆蓋內圈 8×8 格 */
-        /* 棋盤中央容器：用來疊圖＋文字 */
+        
         .center-cell {
-          position: absolute;      /* 已經在 board 中心的那一格位置 */
-          top: 70px;               /* 你原來用的內圈起點，如果已有就保留原數值 */
+          position: absolute;
+          top: 70px;
           left: 70px;
           width: 560px;
           height: 560px;
-
-          /* 關鍵：變成疊層容器，而不是 flex/column 並排 */
           display: block;
-          pointer-events: none;    /* 中央區不擋住四周格子的點擊 */
+          pointer-events: none;
         }
 
-        /* 背景圖：鋪滿中央區塊，在底層 */
         .center-logo {
           position: absolute;
-          inset: 0;                /* 等同 top:0; right:0; bottom:0; left:0; */
+          inset: 0;
           margin: auto;
           max-width: 90%;
           max-height: 90%;
           object-fit: contain;
-          z-index: 0;              /* 在底層 */
-          opacity: 0.95;           /* 想要字更明顯可以再調低一點 */
+          z-index: 0;
+          opacity: 0.95;
         }
 
-        /* 中央標題：疊在圖片上方，置中 */
         .center-title {
           position: absolute;
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -50%);  /* 完全置中 */
-          z-index: 1;                        /* 高於圖片 */
-
+          transform: translate(-50%, -50%);
+          z-index: 1;
           text-align: center;
           font-size: 26px;
           font-weight: 700;
           color: #222;
           text-shadow:
             0 0 4px rgba(255,255,255,0.9),
-            0 0 8px rgba(255,255,255,0.7);   /* 加一點白色光暈，避免文字被圖吃掉 */
-          white-space: pre-line;    /* 這行讓 \n 變成換行 */
-          pointer-events: none;              /* 滑鼠事件不會被文字吃掉 */
+            0 0 8px rgba(255,255,255,0.7);
+          white-space: pre-line;
+          pointer-events: none;
         }
-
 
         .player {
             position: absolute;
@@ -296,7 +308,6 @@
           cursor: pointer;
           z-index: 1000;
         }
-        /* 右上角說明按鈕 */
         .help-button {
           position: fixed;
           top: 10px;
@@ -316,11 +327,10 @@
           padding: 0;
         }
 
-        /* 說明 tooltip 的外觀 */
         .help-button-tooltip {
           position: fixed;
           max-width: 400px;
-          top: 45px;          /* 在按鈕下方 */
+          top: 45px;
           right: 10px;
           background-color: #333;
           color: #fff;
@@ -330,14 +340,13 @@
           line-height: 1.4;
           z-index: 1000;
           box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-          display: none;      /* 預設隱藏 */
-          white-space: pre-line;   /* 這行很重要：讓 \n 變成換行 */
+          display: none;
+          white-space: pre-line;
         }
 
         .help-button-tooltip.show {
           display: block;
         }
-        /* 右下角「重新開始」按鈕 */
         .restart-button {
           position: fixed;
           bottom: 10px;
@@ -351,20 +360,33 @@
           cursor: pointer;
           z-index: 1000;
         }
-
         .restart-button:hover {
           background-color: #f0f0f0;
+        }
+        .report-button {
+            position: fixed;
+            bottom: 45px;
+            right: 10px;
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .report-button:hover {
+            background-color: #bbdefb;
         }
     </style>
 </head>
 <body>
-    <!-- 左上角語言切換 -->
     <button id="lang-toggle" class="lang-toggle">EN</button>
-
-    <!-- 右上角說明按鈕 -->
     <button id="help-button" class="help-button">?</button>
-    <!-- 新增：右下角重新開始 -->
     <button id="restart-button" class="restart-button">重新開始</button>
+    <button id="report-button" class="report-button">學習報告</button>
+
     <div id="game-container">
         <div id="board">
             <div class="center-cell">
@@ -418,17 +440,14 @@
     </div>
 
     <div class="ui-widget" id="player-stats">
-        <!-- 狀態標題：加 id -->
         <h3 id="status-title">當前玩家狀態</h3>
 
-        <!-- 金錢標籤：加 id -->
         <div class="stat" id="money-label">
-            💰 金錢: <span id="money-display">$1500</span>
+            💰 金錢: <span id="money-display">$1000</span>
         </div>
 
-        <!-- 碳排標籤：加 id -->
         <div class="stat" id="carbon-label">
-            🏭 碳排: <span id="carbon-display">0 / 500 CO₂</span>
+            🏭 碳排: <span id="carbon-display">0 / 100 CO₂</span>
         </div>
 
         <div id="carbon-bar-container">
@@ -442,7 +461,6 @@
     </div>
 
     <div class="ui-widget" id="log-widget">
-        <!-- 歡迎文字：加 id -->
         <div id="info-box" aria-live="polite" id="welcome-text">
             歡迎來到永續大富翁！
         </div>
@@ -1752,69 +1770,42 @@
         correctIndex: 3
       }
       ];
+      
+      let availableQuestions = []; // 目前可用的題目索引
+
+      // 洗牌函式
+      function shuffleQuestionDeck() {
+        availableQuestions = Array.from({length: questionBank.length}, (_, i) => i);
+        for (let i = availableQuestions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [availableQuestions[i], availableQuestions[j]] = [availableQuestions[j], availableQuestions[i]];
+        }
+        console.log("題庫已重新洗牌！");
+      }
 
 
       const NUM_PLAYERS = 2;
-      const MAX_CARBON = 500;
+      const MAX_CARBON = 100;
       const JAIL_FEE = 50;
 
-      // 起點在右下角對應的格子（cell-9）
       const GO_CELL_ID = 9;
-
-      // 監獄在「順時鐘路徑上」對應的邏輯位置索引（boardPath[9] === 'cell-0'，左下角）
       const JAIL_POSITION = 9;
 
       const players = [];
       let currentPlayerIndex = 0;
       const properties = {};
 
-      let currentLang = 'zh';  // 語言狀態：'zh' 或 'en'
+      let currentLang = 'zh';
 
-      // 順時鐘路徑：從右下角 cell-9 出發
       const boardPath = [
-        'cell-9',  // 0：起點（右下角）
-        'cell-8',  // 1
-        'cell-7',  // 2
-        'cell-6',  // 3
-        'cell-5',  // 4
-        'cell-4',  // 5
-        'cell-3',  // 6
-        'cell-2',  // 7
-        'cell-1',  // 8
-        'cell-0',  // 9（左下角，監獄）
-        'cell-35', // 10
-        'cell-34', // 11
-        'cell-33', // 12
-        'cell-32', // 13
-        'cell-31', // 14
-        'cell-30', // 15
-        'cell-29', // 16
-        'cell-28', // 17
-        'cell-27', // 18
-        'cell-26', // 19
-        'cell-25', // 20
-        'cell-24', // 21
-        'cell-23', // 22
-        'cell-22', // 23
-        'cell-21', // 24
-        'cell-20', // 25
-        'cell-19', // 26
-        'cell-18', // 27（右上角，重大污染）
-        'cell-17', // 28
-        'cell-16', // 29
-        'cell-15', // 30
-        'cell-14', // 31
-        'cell-13', // 32
-        'cell-12', // 33
-        'cell-11', // 34
-        'cell-10'  // 35
+        'cell-9', 'cell-8', 'cell-7', 'cell-6', 'cell-5', 'cell-4', 'cell-3', 'cell-2', 'cell-1', 'cell-0',
+        'cell-35', 'cell-34', 'cell-33', 'cell-32', 'cell-31', 'cell-30', 'cell-29', 'cell-28', 'cell-27', 'cell-26',
+        'cell-25', 'cell-24', 'cell-23', 'cell-22', 'cell-21', 'cell-20', 'cell-19', 'cell-18', 'cell-17', 'cell-16',
+        'cell-15', 'cell-14', 'cell-13', 'cell-12', 'cell-11', 'cell-10'
       ];
 
-      // 角落格子整合 name / nameEn
       const cellData = [
-        // 左下角：監獄
         { id: 0,  name: "環評審查", nameEn: "EIA Review",    type: "jail",     group: "special" },
-
         { id: 1,  name: "掩埋場",   nameEn: "Landfill",      type: "property", group: "pollution", cost: 60,  rent: 6,  carbonEffect: 30 },
         { id: 2,  name: "機會",     nameEn: "Chance",        type: "chance",   group: "special" },
         { id: 3,  name: "水泥廠",   nameEn: "Cement Plant",  type: "property", group: "pollution", cost: 80,  rent: 8,  carbonEffect: 40 },
@@ -1823,10 +1814,7 @@
         { id: 6,  name: "社區公園", nameEn: "Community Park",   type: "nature",   group: "nature",  cost: 100, rent: 10, carbonEffect: 5 },
         { id: 7,  name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
         { id: 8,  name: "人造林",   nameEn: "Plantation",       type: "nature",   group: "nature",  cost: 120, rent: 12, carbonEffect: 8 },
-
-        // 右下角：起點
         { id: 9,  name: "起點",     nameEn: "Start",        type: "go",       group: "special",  moneyEffect: 200, carbonEffect: 5 },
-
         { id: 10, name: "碳捕捉廠", nameEn: "Carbon Capture",   type: "property", group: "green",   cost: 400, rent: 40, carbonEffect: 20 },
         { id: 11, name: "奢侈稅",   nameEn: "Luxury Tax",       type: "tax",      group: "special", moneyEffect: -150, carbonEffect: 0 },
         { id: 12, name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
@@ -1835,10 +1823,7 @@
         { id: 15, name: "國家公園", nameEn: "National Park",    type: "nature",   group: "nature",  cost: 320, rent: 30, carbonEffect: 10 },
         { id: 16, name: "機會",     nameEn: "Chance",           type: "chance",   group: "special" },
         { id: 17, name: "濕地公園", nameEn: "Wetland Park",     type: "nature",   group: "nature",  cost: 300, rent: 28, carbonEffect: 10 },
-
-        // 右上角：重大污染
         { id: 18, name: "重大污染", nameEn: "Major Pollution",  type: "goToJail", group: "special" },
-
         { id: 19, name: "電力公司", nameEn: "Power Company",    type: "property", group: "public",  cost: 150, rent: 15, carbonEffect: 10 },
         { id: 20, name: "研發中心", nameEn: "R&D Center",       type: "property", group: "green",   cost: 280, rent: 24, carbonEffect: 12 },
         { id: 21, name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
@@ -1847,10 +1832,7 @@
         { id: 24, name: "塑膠工廠", nameEn: "Plastic Factory",  type: "property", group: "pollution", cost: 240, rent: 20, carbonEffect: 70 },
         { id: 25, name: "機會",     nameEn: "Chance",           type: "chance",   group: "special" },
         { id: 26, name: "鋼鐵廠",   nameEn: "Steel Mill",       type: "property", group: "pollution", cost: 220, rent: 18, carbonEffect: 60 },
-
-        // 左上角：碳匯中心
         { id: 27, name: "碳匯中心", nameEn: "Carbon Sink Center", type: "free", group: "special" },
-
         { id: 28, name: "水力公司", nameEn: "Hydro Company",    type: "property", group: "public",  cost: 150, rent: 15, carbonEffect: 10 },
         { id: 29, name: "火力發電", nameEn: "Thermal Power",    type: "property", group: "pollution", cost: 200, rent: 16, carbonEffect: 80 },
         { id: 30, name: "命運",     nameEn: "Fate",             type: "chance",   group: "special" },
@@ -1861,7 +1843,6 @@
         { id: 35, name: "太陽能板", nameEn: "Solar Panels",     type: "property", group: "green",   cost: 140, rent: 10, carbonEffect: 5 }
       ];
 
-      // 由「邏輯位置（boardPath 索引）」取得實際的 cell 資料
       function getCellByLogicalPosition(logicalPosition) {
         const cellIdStr = boardPath[logicalPosition];
         const cellId = parseInt(cellIdStr.split('-')[1], 10);
@@ -1929,11 +1910,8 @@
         playerToken.style.left = `${left}px`;
       }
 
-      // 語言套用：更新棋盤每一格標題 & 按鈕文字
       function applyLanguage(lang) {
         currentLang = lang;
-
-        // 棋盤格子標題
         cellData.forEach(cell => {
           const header = document.querySelector(`#cell-${cell.id} .cell-header`);
           if (!header) return;
@@ -1947,141 +1925,95 @@
         if (restartBtn) {
           restartBtn.textContent = (lang === 'zh') ? "重新開始" : "Restart";
         }
-        // 左上角語言按鈕
+        
+        // 更新學習報告按鈕
+        const reportBtn = document.getElementById('report-button');
+        if (reportBtn) {
+          reportBtn.textContent = (lang === 'zh') ? "學習報告" : "Report";
+        }
+
         const btn = document.getElementById('lang-toggle');
         if (btn) {
           btn.textContent = (lang === 'zh') ? 'EN' : '中';
         }
 
-        // 側邊欄標題／標籤
         const statusTitle = document.getElementById('status-title');
         if (statusTitle) {
-          statusTitle.textContent = (lang === 'zh')
-            ? "當前玩家狀態"
-            : "Current Player";
+          statusTitle.textContent = (lang === 'zh') ? "當前玩家狀態" : "Current Player";
         }
 
         const moneyLabel = document.getElementById('money-label');
         if (moneyLabel) {
-          moneyLabel.firstChild.textContent = (lang === 'zh')
-            ? "💰 金錢: "
-            : "💰 Money: ";
+          moneyLabel.firstChild.textContent = (lang === 'zh') ? "💰 金錢: " : "💰 Money: ";
         }
 
         const carbonLabel = document.getElementById('carbon-label');
         if (carbonLabel) {
-          carbonLabel.firstChild.textContent = (lang === 'zh')
-            ? "🏭 碳排: "
-            : "🏭 Carbon: ";
+          carbonLabel.firstChild.textContent = (lang === 'zh') ? "🏭 碳排: " : "🏭 Carbon: ";
         }
 
         if (rollButton) {
-          rollButton.textContent = (lang === 'zh')
-            ? "擲骰子"
-            : "Roll";
+          rollButton.textContent = (lang === 'zh') ? "擲骰子" : "Roll";
         }
 
         const infoBoxEl = document.getElementById('info-box');
         if (infoBoxEl && infoBoxEl.textContent.includes("歡迎來到永續大富翁")) {
-          infoBoxEl.textContent = (lang === 'zh')
-            ? "歡迎來到永續大富翁！"
-            : "Welcome to Sustainable Monopoly!";
+          infoBoxEl.textContent = (lang === 'zh') ? "歡迎來到永續大富翁！" : "Welcome to Sustainable Monopoly!";
         }
 
         const playersTitle = document.getElementById('players-title');
         if (playersTitle) {
-          playersTitle.textContent = (lang === 'zh')
-            ? "所有玩家"
-            : "All Players";
+          playersTitle.textContent = (lang === 'zh') ? "所有玩家" : "All Players";
         }
-          // 左下角 cell-0：環評審查 (監獄)
-          const jailFooter = document.querySelector('#cell-0 .cell-footer');
-          if (jailFooter) {
-            jailFooter.textContent = (lang === 'zh')
-              ? '(監獄)'
-              : '(Jail)';
-          }
+        
+        const jailFooter = document.querySelector('#cell-0 .cell-footer');
+        if (jailFooter) jailFooter.textContent = (lang === 'zh') ? '(監獄)' : '(Jail)';
 
-          // 左上角 cell-27：碳匯中心 (免費休息)
-          const freeFooter = document.querySelector('#cell-27 .cell-footer');
-          if (freeFooter) {
-            freeFooter.textContent = (lang === 'zh')
-              ? '(免費休息)'
-              : '(Free Rest)';
-          }
+        const freeFooter = document.querySelector('#cell-27 .cell-footer');
+        if (freeFooter) freeFooter.textContent = (lang === 'zh') ? '(免費休息)' : '(Free Rest)';
 
-          // 右上角 cell-18：重大污染 (前往環評)
-          const goToEiaFooter = document.querySelector('#cell-18 .cell-footer');
-          if (goToEiaFooter) {
-            goToEiaFooter.textContent = (lang === 'zh')
-              ? '(前往環評)'
-              : '(Go to EIA)';
-          }
-          // 5. 更新地圖中央文字標題
-          const centerTitleEl = document.getElementById('center-title');
-            if (centerTitleEl) {
-              centerTitleEl.textContent = (lang === 'zh')
-                ? GAME_TITLE_ZH
-                : GAME_TITLE_EN;
-            }
+        const goToEiaFooter = document.querySelector('#cell-18 .cell-footer');
+        if (goToEiaFooter) goToEiaFooter.textContent = (lang === 'zh') ? '(前往環評)' : '(Go to EIA)';
+          
+        const centerTitleEl = document.getElementById('center-title');
+        if (centerTitleEl) {
+          centerTitleEl.textContent = (lang === 'zh') ? GAME_TITLE_ZH : GAME_TITLE_EN;
+        }
 
-            // 6. 更新瀏覽器分頁標題（同時帶上雙語）
-            if (lang === 'zh') {
-              document.title = `${GAME_TITLE_ZH} (${GAME_TITLE_EN})`;
+        if (lang === 'zh') {
+          document.title = `${GAME_TITLE_ZH} (${GAME_TITLE_EN})`;
+        } else {
+          document.title = `${GAME_TITLE_EN} (${GAME_TITLE_ZH})`;
+        }
+
+        const helpBtn = document.getElementById('help-button');
+        let helpTooltip = document.querySelector('.help-button-tooltip');
+        if (!helpTooltip && helpBtn) {
+            helpTooltip = document.createElement('div');
+            helpTooltip.className = 'help-button-tooltip';
+            document.body.appendChild(helpTooltip);
+        }
+
+        if (helpBtn && helpTooltip) {
+          const getHelpText = () => {
+            if (currentLang === 'zh') {
+              return "【遊戲說明】\n1. 依序擲骰子，棋子順時針走格子。\n2. 停在地產可回答問題後決定是否購買，之後其他玩家踩到要付租金。\n3. 某些格子會增加或減少碳排／金錢，請留意說明。\n4. 重大污染會被送往環評審查 (監獄)，答對題目並付罰款才能離開。\n5. 當金錢 < 0 或碳排 ≥ 上限，遊戲結束。";
             } else {
-              document.title = `${GAME_TITLE_EN} (${GAME_TITLE_ZH})`;
+              return "[How to Play]\n1. Take turns rolling the dice.\n2. Answer quiz to buy properties; others pay rent.\n3. Watch out for money/CO2 changes.\n4. Major pollution sends you to Jail; answer quiz to exit.\n5. Game ends if Money < 0 or CO2 >= limit.";
             }
-            // 這一行很重要：先抓到你的 ？ 按鈕
-            const helpBtn = document.getElementById('help-button');
-            let helpTooltip = null;
-
-            // === 把這一大段貼在這裡 ===
-            if (helpBtn) {
-              helpTooltip = document.createElement('div');
-              helpTooltip.className = 'help-button-tooltip';
-              document.body.appendChild(helpTooltip);
-
-              const getHelpText = () => {
-                if (currentLang === 'zh') {
-                  return [
-                    "【遊戲說明】",
-                    "1. 依序擲骰子，棋子順時針走格子。",
-                    "2. 停在地產可回答問題後決定是否購買，之後其他玩家踩到要付租金。",
-                    "3. 某些格子會增加或減少碳排／金錢，請留意說明。",
-                    "4. 重大污染會被送往環評審查 (監獄)，答對題目並付罰款才能離開。",
-                    "5. 當金錢 < 0 或碳排 ≥ 上限，遊戲結束。"
-                  ].join("\n");
-                } else {
-                  return [
-                    "[How to Play]",
-                    "1. Take turns rolling the dice and move clockwise.",
-                    "2. On properties, answer a quiz then decide whether to buy; others pay rent when they land there.",
-                    "3. Some spaces increase or decrease your money / CO₂, read the text carefully.",
-                    "4. Major pollution sends you to EIA Review (jail); answer correctly and pay the fine to get out.",
-                    "5. If your money < 0 or CO₂ ≥ limit, the game ends."
-                  ].join("\n");
-                }
-              };
-
-              // 滑鼠移上去顯示
-              helpBtn.addEventListener('mouseenter', () => {
-                helpTooltip.textContent = getHelpText();
-                helpTooltip.classList.add('show');
-              });
-
-              // 滑鼠移開隱藏
-              helpBtn.addEventListener('mouseleave', () => {
-                helpTooltip.classList.remove('show');
-              });
-            }
+          };
+          helpBtn.onmouseenter = () => {
+            helpTooltip.textContent = getHelpText();
+            helpTooltip.classList.add('show');
+          };
+          helpBtn.onmouseleave = () => {
+            helpTooltip.classList.remove('show');
+          };
+        }
             
         updateUI();
       }
 
-
-      /**
-       * 擲骰子函式 (順時鐘版本，起點在 cell-9)
-       */
       async function rollDice() {
         rollButton.disabled = true;
         const currentPlayer = players[currentPlayerIndex];
@@ -2139,7 +2071,6 @@
         rollButton.disabled = false;
       }
 
-      // 通用彈窗（修正版：必須按按鈕才算作答）
       function showModal(title, message, buttons) {
         return new Promise(resolve => {
           modalTitle.textContent = title;
@@ -2168,114 +2099,84 @@
           modal.classList.remove('modal-hidden');
         });
       }
-      // 遊戲開始時的規則說明視窗
+
       function showGameIntro() {
-      const isZh = (currentLang === 'zh');
+        const isZh = (currentLang === 'zh');
+        const title = isZh ? "🎯 遊戲規則說明" : "🎯 Game Rules";
+        const linesZh = [
+            "歡迎來到「碳權大富翁：永續行動力」！", "", "● 基本流程", "1. 玩家依序擲骰，棋子沿外圈格子順時針前進。",
+            "2. 停在地產時，先回答環保問答，再決定是否購買。", "3. 之後其他玩家踩到你的地，要支付租金。", "",
+            "● 金錢與碳排", "4. 某些格子會增加或減少金錢與碳排，請留意格子文字。", "5. 踩到「重大污染」會被送往環評審查（監獄），",
+            "   必須答對題目並付罰款才能離開。", "", "● 遊戲結束", "6. 當金錢 < 0 或碳排 ≥ 上限時，該玩家遊戲結束。", "",
+            "祝你在追求獲利的同時，也能守住地球的永續界線！"
+        ];
+        const linesEn = [
+            "Welcome to “Carbon Tycoon: The Sustainability Drive”! ", "", "● Basic Flow",
+            "1. Take turns rolling dice, move clockwise.", "2. Answer quiz to buy properties; others pay rent.", "",
+            "● Money & CO₂", "4. Watch money/CO2 changes on spaces.", "5. Major pollution sends you to Jail; answer quiz to exit.",
+            "", "● Game End", "6. Game over if money < 0 or CO₂ >= limit.", "", "Have fun!"
+        ];
 
-      const title = isZh
-        ? "🎯 遊戲規則說明"
-        : "🎯 Game Rules";
+        const message = (isZh ? linesZh : linesEn).join("\n");
+        return showModal(title, message, [{ text: isZh ? "開始遊戲" : "Start Game", value: "start", cssClass: "primary" }]);
+      }
 
-      const linesZh = [
-        "歡迎來到「碳權大富翁：永續行動力」！",
-        "",
-        "● 基本流程",
-        "1. 玩家依序擲骰，棋子沿外圈格子順時針前進。",
-        "2. 停在地產時，先回答環保問答，再決定是否購買。",
-        "3. 之後其他玩家踩到你的地，要支付租金。",
-        "",
-        "● 金錢與碳排",
-        "4. 某些格子會增加或減少金錢與碳排，請留意格子文字。",
-        "5. 踩到「重大污染」會被送往環評審查（監獄），",
-        "   必須答對題目並付罰款才能離開。",
-        "",
-        "● 遊戲結束",
-        "6. 當金錢 < 0 或碳排 ≥ 上限時，該玩家遊戲結束。",
-        "",
-        "祝你在追求獲利的同時，也能守住地球的永續界線！"
-      ];
+      // === 修改後的 askQuiz 函式 (不重複題目) ===
+      async function askQuiz(player) {
+        if (!player) player = players[currentPlayerIndex];
 
-      const linesEn = [
-        "Welcome to “Carbon Tycoon: The Sustainability Drive”! ",
-        "",
-        "● Basic Flow",
-        "1. Players take turns rolling the dice and move clockwise around the board.",
-        "2. On properties, answer a green quiz first, then decide whether to buy.",
-        "3. Other players pay you rent when they land on your properties.",
-        "",
-        "● Money & CO₂",
-        "4. Some spaces change your money or CO₂. Read each space carefully.",
-        "5. Landing on Major Pollution sends you to EIA Review (jail).",
-        "   Answer correctly and pay the fine to get out.",
-        "",
-        "● Game End",
-        "6. If your money is below 0 or CO₂ reaches the limit, you are out.",
-        "",
-        "Try to balance profit and sustainability, and keep the planet livable!"
-      ];
-
-      const message = (isZh ? linesZh : linesEn).join("\n");
-
-      // 關鍵：return 這個 Promise，給 initGame 的 await 用
-      return showModal(title, message, [
-        {
-          text: isZh ? "開始遊戲" : "Start Game",
-          value: "start",
-          cssClass: "primary"
+        // 如果題庫空了，重新洗牌
+        if (availableQuestions.length === 0) {
+            shuffleQuestionDeck();
         }
-      ]);
-      }
 
+        // 從洗好的題庫中取出最後一個索引 (取出後該題號就會從陣列消失)
+        const qIndex = availableQuestions.pop();
+        
+        const quiz = questionBank[qIndex];
+        const letterMap = ['A', 'B', 'C', 'D'];
+        const isZh = (currentLang === 'zh');
 
-      // 測驗
-      async function askQuiz() {
-      const qIndex = Math.floor(Math.random() * questionBank.length);
-      const quiz = questionBank[qIndex];
-      const letterMap = ['A', 'B', 'C', 'D'];
+        const questionText = isZh ? quiz.question : (quiz.questionEn || quiz.question);
+        const optionsToUse = isZh ? quiz.options : (quiz.optionsEn || quiz.options);
 
-      const isZh = (currentLang === 'zh');
+        const buttons = optionsToUse.map((option, index) => ({
+          text: `${letterMap[index]}. ${option}`,
+          value: index
+        }));
 
-      // 題目：優先用對應語言，沒有英文就退回中文
-      const questionText = isZh
-        ? quiz.question
-        : (quiz.questionEn || quiz.question);
-
-      // 選項：優先用 optionsEn，沒有就退回中文 options
-      const optionsToUse = isZh
-        ? quiz.options
-        : (quiz.optionsEn || quiz.options);
-
-      const buttons = optionsToUse.map((option, index) => ({
-        text: `${letterMap[index]}. ${option}`,
-        value: index
-      }));
-
-      const title = isZh ? "🌍 環保知識問答" : "🌍 Green Quiz";
-
-      const selectedIndex = await showModal(
-        title,
-        questionText,
-        buttons
-      );
-
-      const isCorrect = (selectedIndex === quiz.correctIndex);
-
-      if (isCorrect) {
-        alert(isZh ? "回答正確！" : "Correct!");
-      } else {
+        const title = isZh ? "🌍 環保知識問答" : "🌍 Green Quiz";
+        const selectedIndex = await showModal(title, questionText, buttons);
+        
+        // 紀錄數據
+        player.stats.totalQuestions++;
+        
         const correctText = optionsToUse[quiz.correctIndex];
-        const correctAnswer = `${letterMap[quiz.correctIndex]}. ${correctText}`;
-        alert(
-          isZh
-            ? `回答錯誤！\n\n正確答案是: ${correctAnswer}`
-            : `Wrong answer!\n\nCorrect: ${correctAnswer}`
-        );
-      }
-      return isCorrect;
+        const correctAnswerLabel = `${letterMap[quiz.correctIndex]}. ${correctText}`;
+        const playerAnswerLabel = `${letterMap[selectedIndex]}. ${optionsToUse[selectedIndex]}`;
+
+        const isCorrect = (selectedIndex === quiz.correctIndex);
+
+        if (isCorrect) {
+          player.stats.correctCount++;
+          alert(isZh ? "✅ 回答正確！" : "✅ Correct!");
+        } else {
+          // 記錄錯題
+          player.stats.mistakes.push({
+            q: questionText,
+            yourAns: playerAnswerLabel,
+            correctAns: correctAnswerLabel
+          });
+          
+          alert(
+            isZh
+              ? `❌ 回答錯誤！\n\n正確答案是: ${correctAnswerLabel}\n(已加入錯題本)`
+              : `❌ Wrong answer!\n\nCorrect: ${correctAnswerLabel}\n(Added to review list)`
+          );
+        }
+        return isCorrect;
       }
 
-
-      // 監獄回合
       async function handleJailTurn(player) {
         logInfo(
           currentLang === 'zh'
@@ -2283,7 +2184,6 @@
             : `You (Player ${player.id + 1}) are in EIA Review...`
         );
         if (player.money >= JAIL_FEE) {
-
           const title = currentLang === 'zh' ? "⛓ 環評審查" : "⛓ EIA Review";
           const msgZh = `你要支付 $${JAIL_FEE} 的罰款來離開「環評審查」嗎？\n(回答問題才能成功支付)`;
           const msgEn = `Pay $${JAIL_FEE} fine to leave EIA?\n(You must answer a question correctly)`;
@@ -2292,56 +2192,31 @@
             title,
             currentLang === 'zh' ? msgZh : msgEn,
             currentLang === 'zh'
-              ? [
-                  { text: `支付 $${JAIL_FEE}`, value: 'pay', cssClass: 'primary' },
-                  { text: "繼續留下", value: 'stay' }
-                ]
-              : [
-                  { text: `Pay $${JAIL_FEE}`, value: 'pay', cssClass: 'primary' },
-                  { text: "Stay", value: 'stay' }
-                ]
+              ? [{ text: `支付 $${JAIL_FEE}`, value: 'pay', cssClass: 'primary' }, { text: "繼續留下", value: 'stay' }]
+              : [{ text: `Pay $${JAIL_FEE}`, value: 'pay', cssClass: 'primary' }, { text: "Stay", value: 'stay' }]
           );
 
           if (decision === 'pay') {
-            logInfo(
-              currentLang === 'zh'
-                ? "請先回答一個環保問題，才能支付罰款！"
-                : "Answer a quiz question before paying the fine!"
-            );
-            const isCorrect = await askQuiz();
+            logInfo(currentLang === 'zh' ? "請先回答一個環保問題，才能支付罰款！" : "Answer a quiz question before paying the fine!");
+            // 傳入 player
+            const isCorrect = await askQuiz(player);
 
             if (isCorrect) {
-              logInfo(
-                currentLang === 'zh'
-                  ? `回答正確！你成功支付了 $${JAIL_FEE} 罰款。`
-                  : `Correct! You paid $${JAIL_FEE} fine.`
-              );
+              logInfo(currentLang === 'zh' ? `回答正確！你成功支付了 $${JAIL_FEE} 罰款。` : `Correct! You paid $${JAIL_FEE} fine.`);
               player.money -= JAIL_FEE;
               player.isInJail = false;
               updateUI();
               nextTurn();
             } else {
-              logInfo(
-                currentLang === 'zh'
-                  ? "回答錯誤！你必須在環評中心再待一回合。"
-                  : "Wrong! You must stay in EIA one more turn."
-              );
+              logInfo(currentLang === 'zh' ? "回答錯誤！你必須在環評中心再待一回合。" : "Wrong! You must stay in EIA one more turn.");
               nextTurn();
             }
           } else {
-            logInfo(
-              currentLang === 'zh'
-                ? "你決定繼續留在環評中心。"
-                : "You chose to stay in EIA."
-            );
+            logInfo(currentLang === 'zh' ? "你決定繼續留在環評中心。" : "You chose to stay in EIA.");
             nextTurn();
           }
         } else {
-          logInfo(
-            currentLang === 'zh'
-              ? `你錢不夠 ($${player.money})，無法支付 $${JAIL_FEE} 的罰款。`
-              : `Not enough money ($${player.money}) to pay $${JAIL_FEE} fine.`
-          );
+          logInfo(currentLang === 'zh' ? `你錢不夠，無法支付罰款。` : `Not enough money.`);
           nextTurn();
         }
       }
@@ -2349,20 +2224,12 @@
       function applyCarbonEffect(player, carbonEffect) {
         if (carbonEffect > 0) {
           player.carbon += carbonEffect;
-          logInfo(
-            currentLang === 'zh'
-              ? `碳排放增加 +${carbonEffect} CO₂。`
-              : `Carbon emission +${carbonEffect} CO₂.`
-          );
+          logInfo(currentLang === 'zh' ? `碳排放增加 +${carbonEffect} CO₂。` : `Carbon emission +${carbonEffect} CO₂.`);
         } else if (carbonEffect < 0) {
           const oldCarbon = player.carbon;
           player.carbon = Math.max(0, player.carbon + carbonEffect);
           const reduction = oldCarbon - player.carbon;
-          logInfo(
-            currentLang === 'zh'
-              ? `環保行動！碳排放抵銷 -${reduction} CO₂。`
-              : `Green action! Carbon reduced by -${reduction} CO₂.`
-          );
+          logInfo(currentLang === 'zh' ? `環保行動！碳排放抵銷 -${reduction} CO₂。` : `Green action! Carbon reduced by -${reduction} CO₂.`);
         }
       }
 
@@ -2370,32 +2237,20 @@
         if (cell.type === 'go' && isPassingGo) {
           player.money += cell.moneyEffect;
           applyCarbonEffect(player, cell.carbonEffect);
-          logInfo(
-            currentLang === 'zh'
-              ? `領取薪水 $${cell.moneyEffect}。`
-              : `Collected salary $${cell.moneyEffect}.`
-          );
+          logInfo(currentLang === 'zh' ? `領取薪水 $${cell.moneyEffect}。` : `Collected salary $${cell.moneyEffect}.`);
           updateUI();
           return;
         }
 
         if (!isPassingGo) {
-          logInfo(
-            currentLang === 'zh'
-              ? `你踩到了 [${cell.name}]。`
-              : `You landed on [${cell.nameEn || cell.name}].`
-          );
+          logInfo(currentLang === 'zh' ? `你踩到了 [${cell.name}]。` : `You landed on [${cell.nameEn || cell.name}].`);
         }
 
         switch (cell.type) {
           case 'go':
             player.money += cell.moneyEffect;
             applyCarbonEffect(player, cell.carbonEffect);
-            logInfo(
-              currentLang === 'zh'
-                ? `你剛好停在起點！領取薪水 $${cell.moneyEffect}。`
-                : `You landed on Start! Gain $${cell.moneyEffect}.`
-            );
+            logInfo(currentLang === 'zh' ? `你剛好停在起點！領取薪水 $${cell.moneyEffect}。` : `You landed on Start! Gain $${cell.moneyEffect}.`);
             break;
           case 'property':
           case 'nature':
@@ -2403,37 +2258,17 @@
             break;
           case 'tax':
             player.money += cell.moneyEffect;
-            logInfo(
-              currentLang === 'zh'
-                ? `你必須支付 $${Math.abs(cell.moneyEffect)} 的稅金！`
-                : `You need to pay $${Math.abs(cell.moneyEffect)} tax!`
-            );
+            logInfo(currentLang === 'zh' ? `你必須支付 $${Math.abs(cell.moneyEffect)} 的稅金！` : `You need to pay $${Math.abs(cell.moneyEffect)} tax!`);
             break;
           case 'jail':
-            logInfo(
-              player.isInJail
-                ? (currentLang === 'zh'
-                    ? "你正在「環評審查」中。"
-                    : "You are in EIA Review.")
-                : (currentLang === 'zh'
-                    ? "你來「環評審查」中心... 只是來訪。"
-                    : "You visit the EIA center... just visiting.")
-            );
+            logInfo(player.isInJail ? (currentLang === 'zh' ? "你正在「環評審查」中。" : "You are in EIA Review.") : (currentLang === 'zh' ? "你來「環評審查」中心... 只是來訪。" : "You visit the EIA center... just visiting."));
             break;
           case 'free':
-            logInfo(
-              currentLang === 'zh'
-                ? "你停在「碳匯中心」，這是唯一能主動減少碳排的地方！"
-                : "You are at the Carbon Sink Center, a place to actively reduce CO₂!"
-            );
+            logInfo(currentLang === 'zh' ? "你停在「碳匯中心」，這是唯一能主動減少碳排的地方！" : "You are at the Carbon Sink Center, a place to actively reduce CO₂!");
             applyCarbonEffect(player, -20);
             break;
           case 'goToJail':
-            logInfo(
-              currentLang === 'zh'
-                ? "糟糕！發生重大污染事件！你必須立即前往「環評審查」！"
-                : "Oops! Major pollution event! Go directly to EIA Review!"
-            );
+            logInfo(currentLang === 'zh' ? "糟糕！發生重大污染事件！你必須立即前往「環評審查」！" : "Oops! Major pollution event! Go directly to EIA Review!");
             player.position = JAIL_POSITION;
             player.isInJail = true;
             movePlayerToken(player.id, player.position);
@@ -2442,32 +2277,19 @@
             const luck = Math.random();
             if (luck > 0.6) {
               player.money += 50;
-              logInfo(
-                currentLang === 'zh'
-                  ? "機會：獲得政府綠能補助 $50！"
-                  : "Chance: You received $50 green subsidy!"
-              );
+              logInfo(currentLang === 'zh' ? "機會：獲得政府綠能補助 $50！" : "Chance: You received $50 green subsidy!");
             } else if (luck > 0.3) {
-              logInfo(
-                currentLang === 'zh'
-                  ? "機會：你參加了植樹活動！抵銷 -20 CO₂。"
-                  : "Chance: You joined a tree planting event! -20 CO₂."
-              );
+              logInfo(currentLang === 'zh' ? "機會：你參加了植樹活動！抵銷 -20 CO₂。" : "Chance: You joined a tree planting event! -20 CO₂.");
               applyCarbonEffect(player, -20);
             } else {
               player.carbon += 15;
-              logInfo(
-                currentLang === 'zh'
-                  ? "機會：你的工廠發生意外，碳排 +15 CO₂！"
-                  : "Chance: Factory accident, +15 CO₂!"
-              );
+              logInfo(currentLang === 'zh' ? "機會：你的工廠發生意外，碳排 +15 CO₂！" : "Chance: Factory accident, +15 CO₂!");
             }
             break;
         }
         updateUI();
       }
 
-      // 購買地產
       async function handlePropertyLanding(player, cell) {
         const ownerId = properties[cell.id];
         const cellNameZh = cell.name;
@@ -2475,114 +2297,51 @@
 
         if (ownerId === undefined) {
           if (player.money >= cell.cost) {
-
-            logInfo(
-              currentLang === 'zh'
-                ? `你必須先回答一個環保問題，才能獲得購買 [${cellNameZh}] 的資格！`
-                : `Answer a green quiz to get the right to buy [${cellNameEn}].`
-            );
-            const isCorrect = await askQuiz();
+            logInfo(currentLang === 'zh' ? `你必須先回答一個環保問題，才能獲得購買 [${cellNameZh}] 的資格！` : `Answer a green quiz to get the right to buy [${cellNameEn}].`);
+            // 傳入 player
+            const isCorrect = await askQuiz(player);
 
             if (isCorrect) {
-              logInfo(
-                currentLang === 'zh'
-                  ? "回答正確！你獲得了購買權。"
-                  : "Correct! You may buy this property."
-              );
+              logInfo(currentLang === 'zh' ? "回答正確！你獲得了購買權。" : "Correct! You may buy this property.");
+              const message = (currentLang === 'zh' ? `[${cellNameZh}] (無主地)\n\n` : `[${cellNameEn}] (Unowned)\n\n`) +
+                              (currentLang === 'zh' ? `購買價格：$${cell.cost}\n建置碳排：+${cell.carbonEffect} CO₂\n基礎租金：$${cell.rent}\n\n你要購買嗎？` : `Price: $${cell.cost}\nCarbon: +${cell.carbonEffect} CO₂\nBase rent: $${cell.rent}\n\nBuy this property?`);
 
-              const message =
-                (currentLang === 'zh'
-                  ? `[${cellNameZh}] (無主地)\n\n`
-                  : `[${cellNameEn}] (Unowned)\n\n`) +
-                (currentLang === 'zh'
-                  ? `購買價格：$${cell.cost}\n建置碳排：+${cell.carbonEffect} CO₂\n基礎租金：$${cell.rent}\n\n你要購買嗎？`
-                  : `Price: $${cell.cost}\nCarbon: +${cell.carbonEffect} CO₂\nBase rent: $${cell.rent}\n\nBuy this property?`);
+              const buttons = currentLang === 'zh'
+                  ? [{ text: `購買 ($${cell.cost})`, value: 'buy', cssClass: 'primary' }, { text: "放棄", value: 'pass' }]
+                  : [{ text: `Buy ($${cell.cost})`, value: 'buy', cssClass: 'primary' }, { text: "Skip", value: 'pass' }];
 
-              const buttons =
-                currentLang === 'zh'
-                  ? [
-                      { text: `購買 ($${cell.cost})`, value: 'buy', cssClass: 'primary' },
-                      { text: "放棄", value: 'pass' }
-                    ]
-                  : [
-                      { text: `Buy ($${cell.cost})`, value: 'buy', cssClass: 'primary' },
-                      { text: "Skip", value: 'pass' }
-                    ];
-
-              const decision = await showModal(
-                currentLang === 'zh' ? "🏠 購買地產？" : "🏠 Buy Property?",
-                message,
-                buttons
-              );
+              const decision = await showModal(currentLang === 'zh' ? "🏠 購買地產？" : "🏠 Buy Property?", message, buttons);
 
               if (decision === 'buy') {
                 player.money -= cell.cost;
                 applyCarbonEffect(player, cell.carbonEffect);
                 properties[cell.id] = player.id;
-
                 document.getElementById(`cell-${cell.id}`).classList.add('owner-' + player.id);
-
-                logInfo(
-                  currentLang === 'zh'
-                    ? `你成功購買了 [${cellNameZh}]！`
-                    : `You bought [${cellNameEn}]!`
-                );
+                logInfo(currentLang === 'zh' ? `你成功購買了 [${cellNameZh}]！` : `You bought [${cellNameEn}]!`);
               } else {
-                logInfo(
-                  currentLang === 'zh'
-                    ? `你決定暫不購買 [${cellNameZh}]。`
-                    : `You decided not to buy [${cellNameEn}].`
-                );
+                logInfo(currentLang === 'zh' ? `你決定暫不購買 [${cellNameZh}]。` : `You decided not to buy [${cellNameEn}].`);
               }
             } else {
-              logInfo(
-                currentLang === 'zh'
-                  ? `回答錯誤！你失去了這次購買 [${cellNameZh}] 的機會。`
-                  : `Wrong answer! You lost the chance to buy [${cellNameEn}].`
-              );
+              logInfo(currentLang === 'zh' ? `回答錯誤！你失去了這次購買 [${cellNameZh}] 的機會。` : `Wrong answer! You lost the chance to buy [${cellNameEn}].`);
             }
           } else {
-            logInfo(
-              currentLang === 'zh'
-                ? `你想購買 [${cellNameZh}]，但你的金錢 ($${player.money}) 不足 $${cell.cost}。`
-                : `You want to buy [${cellNameEn}], but you only have $${player.money} (need $${cell.cost}).`
-            );
+            logInfo(currentLang === 'zh' ? `你想購買 [${cellNameZh}]，但你的金錢 ($${player.money}) 不足 $${cell.cost}。` : `You want to buy [${cellNameEn}], but you only have $${player.money}.`);
           }
         } else if (ownerId === player.id) {
-          logInfo(
-            currentLang === 'zh'
-              ? `你踩到了自己的地產 [${cellNameZh}]。`
-              : `You landed on your own property [${cellNameEn}].`
-          );
+          logInfo(currentLang === 'zh' ? `你踩到了自己的地產 [${cellNameZh}]。` : `You landed on your own property [${cellNameEn}].`);
         } else {
           const owner = players[ownerId];
           let rent = cell.rent;
           if (cell.group === 'public') {
             rent = calculatePublicRent(owner.id);
-            logInfo(
-              currentLang === 'zh'
-                ? `[${cellNameZh}] 是公共事業。`
-                : `[${cellNameEn}] is a public utility.`
-            );
+            logInfo(currentLang === 'zh' ? `[${cellNameZh}] 是公共事業。` : `[${cellNameEn}] is a public utility.`);
           }
-          logInfo(
-            currentLang === 'zh'
-              ? `你踩到了 玩家 ${owner.id + 1} 的地！`
-              : `You landed on Player ${owner.id + 1}'s property!`
-          );
-          logInfo(
-            currentLang === 'zh'
-              ? `你必須支付 $${rent} 的租金。`
-              : `You must pay $${rent} in rent.`
-          );
+          logInfo(currentLang === 'zh' ? `你踩到了 玩家 ${owner.id + 1} 的地！` : `You landed on Player ${owner.id + 1}'s property!`);
+          logInfo(currentLang === 'zh' ? `你必須支付 $${rent} 的租金。` : `You must pay $${rent} in rent.`);
           player.money -= rent;
           owner.money += rent;
           updateUI();
-          logInfo(
-            currentLang === 'zh'
-              ? `玩家 ${owner.id + 1} 獲得了 $${rent}。`
-              : `Player ${owner.id + 1} received $${rent}.`
-          );
+          logInfo(currentLang === 'zh' ? `玩家 ${owner.id + 1} 獲得了 $${rent}。` : `Player ${owner.id + 1} received $${rent}.`);
         }
       }
 
@@ -2593,40 +2352,21 @@
         });
         const rentLevels = [0, 25, 50, 100, 200, 300, 400];
         const rent = rentLevels[count];
-        logInfo(
-          currentLang === 'zh'
-            ? `地主擁有 ${count} 處公共事業，租金為 $${rent}。`
-            : `Owner has ${count} public utilities, rent is $${rent}.`
-        );
         return rent;
       }
 
+      // === 修改後的遊戲狀態檢查 (自動跳出報告) ===
       function checkGameStatus(player) {
+        const isZh = (currentLang === 'zh');
         if (player.money < 0) {
-          alert(
-            currentLang === 'zh'
-              ? `遊戲結束！\n\n玩家 ${player.id + 1} 因為金錢小於 $0 而破產了！`
-              : `Game Over!\n\nPlayer ${player.id + 1} has gone bankrupt (money < 0).`
-          );
-          logInfo(
-            currentLang === 'zh'
-              ? `遊戲結束！玩家 ${player.id + 1} 破產了。`
-              : `Game Over! Player ${player.id + 1} is bankrupt.`
-          );
+          alert(isZh ? `遊戲結束！\n\n玩家 ${player.id + 1} 破產了！\n接下來請查看學習成效報告。` : `Game Over!\n\nPlayer ${player.id + 1} is bankrupt.\nChecking learning report...`);
+          showLearningReport(); // 自動顯示報告
           rollButton.disabled = true;
           return false;
         }
         if (player.carbon >= MAX_CARBON) {
-          alert(
-            currentLang === 'zh'
-              ? `遊戲結束！\n\n玩家 ${player.id + 1} 的碳排放達到了 ${player.carbon}，超過 ${MAX_CARBON} 上限！`
-              : `Game Over!\n\nPlayer ${player.id + 1}'s carbon emission reached ${player.carbon}, exceeding ${MAX_CARBON}.`
-          );
-          logInfo(
-            currentLang === 'zh'
-              ? `遊戲結束！玩家 ${player.id + 1} 碳排爆表。`
-              : `Game Over! Player ${player.id + 1}'s carbon exceeds the limit.`
-          );
+          alert(isZh ? `遊戲結束！\n\n玩家 ${player.id + 1} 碳排超標！\n接下來請查看學習成效報告。` : `Game Over!\n\nPlayer ${player.id + 1} high carbon.\nChecking learning report...`);
+          showLearningReport(); // 自動顯示報告
           rollButton.disabled = true;
           return false;
         }
@@ -2637,62 +2377,120 @@
         infoBox.innerHTML = message + "<br>" + infoBox.innerHTML;
       }
 
-      // --- 4. 遊戲初始化 ---
+      // === 新增：顯示學習成效報告的函式 (修正：不顯示 CSS 變數) ===
+      function showLearningReport() {
+        const isZh = (currentLang === 'zh');
+        let reportHtml = "";
+
+        players.forEach(p => {
+          const total = p.stats.totalQuestions;
+          const correct = p.stats.correctCount;
+          const rate = total === 0 ? 0 : Math.round((correct / total) * 100);
+          
+          reportHtml += `<div style="text-align:left; border-bottom:1px solid #ccc; padding-bottom:10px; margin-bottom:10px;">`;
+          // 修改處：使用 display:inline-block 的 span 來顯示顏色方塊，而非印出 var(...)
+          reportHtml += `<h4>
+            <span style="display:inline-block;width:15px;height:15px;background-color:${p.tokenColor};margin-right:8px;vertical-align:middle;border:1px solid #ccc;"></span>
+            ${isZh ? '玩家' : 'Player'} ${p.id + 1}
+          </h4>`;
+          reportHtml += `<p><b>${isZh ? '正確率' : 'Accuracy'}: ${rate}%</b> (${correct} / ${total})</p>`;
+          
+          if (p.stats.mistakes.length > 0) {
+            reportHtml += `<p style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">${isZh ? '錯題回顧 (Mistakes):' : 'Mistakes Review:'}</p>`;
+            reportHtml += `<ul style="font-size: 12px; padding-left: 20px; color: #333;">`;
+            p.stats.mistakes.forEach((m, idx) => {
+              reportHtml += `<li style="margin-bottom:5px;">`;
+              reportHtml += `Q: ${m.q}<br>`;
+              reportHtml += `<span style="color:red;">❌ ${isZh?'誤答':'Your'}: ${m.yourAns}</span><br>`;
+              reportHtml += `<span style="color:green;">✅ ${isZh?'正解':'Correct'}: ${m.correctAns}</span>`;
+              reportHtml += `</li>`;
+            });
+            reportHtml += `</ul>`;
+          } else if (total > 0) {
+            reportHtml += `<p style="color:green;">${isZh ? '🎉 全對！太棒了！' : '🎉 Perfect score!'}</p>`;
+          } else {
+            reportHtml += `<p style="color:#666;">${isZh ? '(尚未回答問題)' : '(No questions answered yet)'}</p>`;
+          }
+          reportHtml += `</div>`;
+        });
+
+        modalTitle.textContent = isZh ? "📊 學習成效報告" : "📊 Learning Report";
+        modalMessage.innerHTML = `<div style="max-height: 400px; overflow-y: auto;">${reportHtml}</div>`;
+        modalButtons.innerHTML = '';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'modal-btn primary';
+        closeBtn.textContent = isZh ? "關閉" : "Close";
+        closeBtn.onclick = () => {
+          modalOverlay.classList.add('modal-hidden');
+          modal.classList.add('modal-hidden');
+        };
+        modalButtons.appendChild(closeBtn);
+
+        modalOverlay.classList.remove('modal-hidden');
+        modal.classList.remove('modal-hidden');
+      }
+
       async function initGame() {
-      // 1. 建立玩家與棋子
-      for (let i = 0; i < NUM_PLAYERS; i++) {
-        players.push({
-          id: i,
-          money: 1500,
-          carbon: 0,
-          position: 0,
-          isInJail: false,
-          tokenColor: playerColors[i % playerColors.length]
-        });
-        const playerToken = document.createElement('div');
-        playerToken.id = `player-${i}`;
-        playerToken.className = 'player';
-        playerToken.style.backgroundColor = players[i].tokenColor;
-        board.appendChild(playerToken);
-        movePlayerToken(i, 0);
-      }
+        // === 新增：遊戲開始前先洗牌 ===
+        shuffleQuestionDeck(); 
 
-      currentPlayerIndex = 0;
-
-      // 2. 綁定按鈕
-      rollButton.addEventListener('click', rollDice);
-
-      const langBtn = document.getElementById('lang-toggle');
-      if (langBtn) {
-        langBtn.addEventListener('click', () => {
-          const nextLang = (currentLang === 'zh') ? 'en' : 'zh';
-          applyLanguage(nextLang);
-        });
-      }
-      
-      // 3. 預設語言
-      applyLanguage('zh');
-
-      // 4. 一開始彈出規則說明（重點：這裡才可以 await）
-      await showGameIntro();
-
-      // 5. 顯示起始訊息
-      logInfo("歡迎來到碳權大富翁：永續行動力！\n玩家 1 (藍色) 請擲骰子。");
-      updateUI();
-      }
-        const restartButton = document.getElementById('restart-button');
-        if (restartButton) {
-          restartButton.addEventListener('click', () => {
-            // 最簡單、最穩定的重新開始方式：重新載入整個頁面
-            location.reload();
+        for (let i = 0; i < NUM_PLAYERS; i++) {
+          players.push({
+            id: i,
+            money: 1000,
+            carbon: 0,
+            position: 0,
+            isInJail: false,
+            tokenColor: playerColors[i % playerColors.length],
+            // === 新增：學習統計數據 ===
+            stats: {
+                totalQuestions: 0,
+                correctCount: 0,
+                mistakes: []
+            }
           });
+          const playerToken = document.createElement('div');
+          playerToken.id = `player-${i}`;
+          playerToken.className = 'player';
+          playerToken.style.backgroundColor = players[i].tokenColor;
+          board.appendChild(playerToken);
+          movePlayerToken(i, 0);
         }
 
+        currentPlayerIndex = 0;
+
+        rollButton.addEventListener('click', rollDice);
+
+        const langBtn = document.getElementById('lang-toggle');
+        if (langBtn) {
+          langBtn.addEventListener('click', () => {
+            const nextLang = (currentLang === 'zh') ? 'en' : 'zh';
+            applyLanguage(nextLang);
+          });
+        }
+        
+        // 綁定學習報告按鈕
+        const reportBtn = document.getElementById('report-button');
+        if (reportBtn) {
+            reportBtn.addEventListener('click', showLearningReport);
+        }
+
+        applyLanguage('zh');
+        await showGameIntro();
+        logInfo("歡迎來到碳權大富翁：永續行動力！\n玩家 1 (藍色) 請擲骰子。");
+        updateUI();
+      }
+
+      const restartButton = document.getElementById('restart-button');
+      if (restartButton) {
+        restartButton.addEventListener('click', () => {
+          location.reload();
+        });
+      }
 
       initGame();
     });
 </script>
-
-
 </body>
 </html>
