@@ -1021,8 +1021,8 @@
             document.getElementById('finalScore').textContent = `${finalRpet}`;
             
             // Calculate accuracy
-            const accuracy = Math.round((correctCount / questions.length) * 100);
-            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
+            const currentAccuracy = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('finalAccuracy').textContent = `${currentAccuracy}%`;
 
             // Post-test Comparison Logic
             const preAccuracy = localStorage.getItem('preTestAccuracy');
